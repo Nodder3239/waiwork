@@ -1,0 +1,350 @@
+{
+	"PROJECT_BASE": {
+		"PROJECT_ID": "PROJECT_HANA",
+		"JQUERY": "jquery-2.1.4",
+		"BOOTSTRAP": "bootstrap-5.3.0"
+	},
+	"INFO": [
+		{
+			"LIBRARY_ID": "LIB_0000000015",
+			"LIBRARY_NAME": "jqGrid_jn",
+			"LIBRARY_DESC": "",
+			"LIBRARY_TYPE_ID": "03",
+			"AUTO_LOAD_YN": "N",
+			"USE_COMP": [
+				{
+					"COMP_NAME": "jqGrid",
+					"BASE_TAG": "table",
+					"USE_IFRAME": "N",
+					"OPTIONS": {
+						"datatype": "local",
+						"viewrecords": true,
+						"caption": "Manipulating Array Data",
+						"data": [
+							{
+								"id": "1",
+								"invdate": "2010-05-24",
+								"name": "test",
+								"note": "note",
+								"amount": "300.00",
+								"tax": "10.00",
+								"total": "2111.00"
+							},
+							{
+								"id": "2",
+								"invdate": "2010-05-25",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "3",
+								"invdate": "2007-09-01",
+								"name": "test3",
+								"note": "note3",
+								"amount": "300.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "4",
+								"invdate": "2007-10-04",
+								"name": "test",
+								"note": "note",
+								"amount": "300.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "5",
+								"invdate": "2007-10-05",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "6",
+								"invdate": "2007-09-06",
+								"name": "test3",
+								"note": "note3",
+								"amount": "300.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "7",
+								"invdate": "2007-10-04",
+								"name": "test",
+								"note": "note",
+								"amount": "300.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "8",
+								"invdate": "2007-10-03",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "21.00",
+								"total": "320.00"
+							},
+							{
+								"id": "9",
+								"invdate": "2007-09-01",
+								"name": "test3",
+								"note": "note3",
+								"amount": "400.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "11",
+								"invdate": "2007-10-01",
+								"name": "test",
+								"note": "note",
+								"amount": "200.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "12",
+								"invdate": "2007-10-02",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "13",
+								"invdate": "2007-09-01",
+								"name": "test3",
+								"note": "note3",
+								"amount": "400.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "14",
+								"invdate": "2007-10-04",
+								"name": "test",
+								"note": "note",
+								"amount": "200.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "15",
+								"invdate": "2007-10-05",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "16",
+								"invdate": "2007-09-06",
+								"name": "test3",
+								"note": "note3",
+								"amount": "400.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "17",
+								"invdate": "2007-10-04",
+								"name": "test",
+								"note": "note",
+								"amount": "200.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "18",
+								"invdate": "2007-10-03",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "19",
+								"invdate": "2007-09-01",
+								"name": "test3",
+								"note": "note3",
+								"amount": "400.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "21",
+								"invdate": "2007-10-01",
+								"name": "test",
+								"note": "note",
+								"amount": "200.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "22",
+								"invdate": "2007-10-02",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "23",
+								"invdate": "2007-09-01",
+								"name": "test3",
+								"note": "note3",
+								"amount": "400.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "24",
+								"invdate": "2007-10-04",
+								"name": "test",
+								"note": "note",
+								"amount": "200.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "25",
+								"invdate": "2007-10-05",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "26",
+								"invdate": "2007-09-06",
+								"name": "test3",
+								"note": "note3",
+								"amount": "400.00",
+								"tax": "30.00",
+								"total": "430.00"
+							},
+							{
+								"id": "27",
+								"invdate": "2007-10-04",
+								"name": "test",
+								"note": "note",
+								"amount": "200.00",
+								"tax": "10.00",
+								"total": "210.00"
+							},
+							{
+								"id": "28",
+								"invdate": "2007-10-03",
+								"name": "test2",
+								"note": "note2",
+								"amount": "300.00",
+								"tax": "20.00",
+								"total": "320.00"
+							},
+							{
+								"id": "29",
+								"invdate": "2007-09-01",
+								"name": "test3",
+								"note": "note3",
+								"amount": "400.00",
+								"tax": "30.00",
+								"total": "430.00"
+							}
+						],
+						"colNames": [
+							"Inv No",
+							"Date",
+							"Client",
+							"Amount",
+							"Tax",
+							"Total",
+							"Notes"
+						],
+						"colModel": [
+							{
+								"name": "id",
+								"index": "id",
+								"width": 60,
+								"sorttype": "int"
+							},
+							{
+								"name": "invdate",
+								"index": "invdate",
+								"width": 90,
+								"sorttype": "date",
+								"formatter": "date"
+							},
+							{
+								"name": "name",
+								"index": "name",
+								"width": 100
+							},
+							{
+								"name": "amount",
+								"index": "amount",
+								"width": 80,
+								"align": "right",
+								"sorttype": "float",
+								"formatter": "number"
+							},
+							{
+								"name": "tax",
+								"index": "tax",
+								"width": 80,
+								"align": "right",
+								"sorttype": "float"
+							},
+							{
+								"name": "total",
+								"index": "total",
+								"width": 80,
+								"align": "right",
+								"sorttype": "float"
+							},
+							{
+								"name": "note",
+								"index": "note",
+								"width": 150,
+								"sortable": false
+							}
+						]
+					}
+				}
+			],
+			"FILE": [
+				{
+					"FILE_ID": "0000002568",
+					"FILE_NAME": "ui.jqgrid.css",
+					"FILE_SIZE": 18604,
+					"IMPORT_YN": "Y"
+				},
+				{
+					"FILE_ID": "0000002569",
+					"FILE_NAME": "jquery.jqGrid.min.js",
+					"FILE_SIZE": 396826,
+					"IMPORT_YN": "Y"
+				},
+				{
+					"FILE_ID": "0000002570",
+					"FILE_NAME": "grid.locale-en.js",
+					"FILE_SIZE": 4391,
+					"IMPORT_YN": "Y"
+				}
+			]
+		}
+	]
+}

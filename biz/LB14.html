@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="/biz/dt/commonDT.js"></script>
+</head>
+<body onload="fInitProc()">
+    <actman id="AMan" style="left: 8px; top: 8px;">
+        <!--  Insert  -->
+        <action name="ActEntry">
+        </action>
+        <action name="ActExecute">
+        </action>
+        <!--  Clear  -->
+        <action name="ActCancelJob">
+        </action>
+    </actman>
+    <div class="topbarDiv" style="left: 24px; width: 1228px; top: 24px; height: 65px; background-color: rgb(231, 244, 190); position: absolute;">
+        <label class="searchTop" lang="Product" style="position: absolute; width: 70px; height: 24px; left: 7px; top: 5px;">
+      Product
+      <input class="" fldname="" dsoname="" height="0" maxlength="13" size="20" tabindex="1" type="text" width="10" id="txtFICM26_PRD_CD" style="position: absolute; width: 100px; left: 74px; top: 0px; height: 24px;">
+            <input onclick="fPfSelect_in('S')" src="/biz/images/detail.gif" type="image" id="btnPFSel_S" class="" style="position: absolute; width: 24px; height: 24px; left: 178px; top: 0px;">
+            <input class="" fldname="" dsoname="" height="0" maxlength="13" tabindex="-1" size="20" type="text" width="10" "="" readonly id="txtFICM26_PRD_NM" style="position: absolute; width: 150px; left: 206px; top: 0px; height: 24px;">
+        </label>
+        <label class="searchTop" style="position: absolute; width: 70px; height: 24px; left: 472px; top: 5px;">
+      Limit Amt
+      <edit id="txtFICM26_LMT_AMT" type="CURRENCY" value="0.00" tabindex="2" maxlength="14" style="position: absolute; width: 130px; left: 74px; top: 0px; height: 24px;"></edit>
+        </label>
+        <label class="searchTop" lang="BaseDate" style="position: absolute; width: 96px; height: 24px; left: 760px; top: 4px;">
+      Base Date
+      <dateedit id="dtpSTR_DT_IN" tabindex="3" manalerttext="Effective Date" style="position: absolute; width: 114px; height: 24px; left: 99px; top: 0px;"></dateedit>
+        </label>
+        <label class="searchTop" lang="Status" style="position: absolute; width: 104px; height: 23px; left: 752px; top: 32px;">
+      Status
+      <codecombo id="cbbFICM26_APV_ST_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 95px; height: 100%;" labelWidth="95px" url="/jsondb/F700.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" tabindex="4" onLoadError="cbbFICM26_APV_ST_CD.Value = '';" style="position: absolute; width: 145px; height: 24px; left: 106px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <input onclick="fSelect();" src="" tabindex="-1" type="button" onmouseout="" onmouseover="" id="btnInquiry" class="greenBtn" value="Inquiry" style="position: absolute; width: 104px; height: 24px; left: 1112px; top: 4px;">
+    </div>
+    <div class="infoIngray" style="left: 24px; height: 350px; top: 104px; width: 1228px;">
+        <grid id="grid1" dsoName="CMO2600.prmDsoOut" oncelldblclick="fGridDblClick()" style="top: 24px; left: 24px; width: 1184px; height: 310px; border: 1px solid rgb(234, 234, 234); position: absolute;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":false
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"group":[]
+              ,"columns" : [
+                {"text":"Mode","field":"FOCM26_TRX_CD","alignment":"center","width":67,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Product Code","field":"FOCM26_PRD_CD","alignment":"center","width":115,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Product Name","field":"FOCM26_PRD_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProductName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Status","field":"FOCM26_STS_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Status","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"From Date","field":"FOCM26_APCL_STR_DT","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"FromDate","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"To Date","field":"FOCM26_APCL_END_DT","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ToDate","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Currency","field":"FOCM26_CCY","alignment":"center","width":114,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Currency","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Start Amt"
+                  ,"field":"FOCM26_APCL_STR_AMT"
+                  ,"alignment":"center"
+                  ,"width":100
+                  ,"editable":"false"
+                  ,"focusing":"false"
+                  ,"displayformat":",0.00"
+                  ,"style":"custSty1"
+                  ,"type":"column"
+                  ,"height":20
+                  ,"visible":true
+                  ,"sortable":true
+                  ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                }
+                ,{"text":"End Amt"
+                  ,"field":"FOCM26_APCL_END_AMT"
+                  ,"alignment":"center"
+                  ,"width":100
+                  ,"editable":"false"
+                  ,"focusing":"false"
+                  ,"displayformat":",0.00"
+                  ,"style":"custSty1"
+                  ,"type":"column"
+                  ,"height":20
+                  ,"visible":true
+                  ,"sortable":true
+                  ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                }
+                ,{"text":"Tenor Start","field":"FOCM26_TENOR_STR_VLU","alignment":"center","width":111,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Tenor End","field":"FOCM26_TENOR_END_VLU","alignment":"center","width":105,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Tenor Increase","field":"FOCM26_TENOR_ICRS_VLU","alignment":"center","width":111,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Tenor Increase Code","field":"FOCM26_TENOR_ICRS_CD","alignment":"center","width":166,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Tenor Unit","field":"FOCM26_TENOR_UNIT_CD","alignment":"center","width":124,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Install Start","field":"FOCM26_INSTALL_STR_VLU","alignment":"center","width":121,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Install End","field":"FOCM26_INSTALL_END_VLU","alignment":"center","width":115,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Install Increase","field":"FOCM26_INSTALL_ICRS_VLU","alignment":"center","width":140,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Install Unit","field":"FOCM26_INSTALL_UNIT_CD","alignment":"center","width":107,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Reg Date","field":"FOCM26_REG_DT","alignment":"center","width":113,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"RegDate","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Reg Time","field":"FOCM26_REG_TM","alignment":"center","width":107,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Reg Emp No","field":"FOCM26_REG_EMP_NO","alignment":"center","width":104,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Upd Date","field":"FOCM26_UPD_DT","alignment":"center","width":125,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Upd Time","field":"FOCM26_UPD_TM","alignment":"center","width":105,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                ,{"text":"Upd Emp No","field":"FOCM26_UPD_EMP_NO","alignment":"center","width":89,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+              ,"conditionalstyle":[]
+            }
+        </grid>
+    </div>
+    <div id="grid_div_2" class="infoIngray" style="position: absolute; top: 472px; left: 24px; width: 1228px; height: 150px;">
+        <label class="search" lang="Product" style="position: absolute; width: 90px; height: 24px; left: 77px; top: 5px;">
+      Product
+      <input class="" fldname="" dsoname="" height="0" maxlength="13" size="20" tabindex="3" type="text" width="10" id="txtPRD_CD_IN" style="position: absolute; width: 100px; left: 94px; top: 0px; height: 24px;">
+            <input onclick="fPfSelect_in('I')" src="/biz/images/detail.gif" type="image" id="btnPFSel_I" style="position: absolute; width: 24px; height: 24px; left: 198px; top: 0px;">
+            <input class="" fldname="" dsoname="" height="0" maxlength="13" tabindex="-1" size="20" type="text" width="10" "="" readonly id="txtPRD_NM_IN" style="position: absolute; width: 145px; left: 226px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 120px; height: 24px; left: 47px; top: 33px;">
+      Application Amount
+      <edit id="edit1" type="CURRENCY" value="0.00" tabindex="4" title="Amount" maxlength="14" style="position: absolute; width: 125px; left: 124px; top: 0px; height: 24px;"></edit>
+            <label class="" style="position: absolute; width: 10px; height: 24px; left: 253px; top: 1px;">
+        ~
+      </label>
+            <edit id="edit2" type="CURRENCY" value="0.00" tabindex="5" title="Amount" maxlength="14" style="position: absolute; width: 125px; left: 267px; top: 0px; height: 24px;"></edit>
+        </label>
+        <label class="search" style="position: absolute; width: 168px; height: 24px; left: 559px; top: 32px;">
+      Tenor Increase Code
+      <input type="text" mask="" dsoname="" fldname="" tabindex="6" class="" id="txtTNR_INC_CD" style="position: absolute; width: 75px; left: 172px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 982px; top: 32px;">
+      Exception Y/N
+      <codecombo id="codecombo1" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 80px; height: 100%;" labelWidth="80px" url="/jsondb/F23.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" tabindex="7" onLoadError="cbbEXCEP_YN = '';" style="position: absolute; width: 130px; height: 24px; left: 94px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 77px; top: 61px;">
+      Tenor Start
+      <input type="text" dsoname="" fldname="" class="" tabindex="8" mask="" id="txtTNR_STR" style="position: absolute; width: 75px; height: 24px; left: 94px; top: -1px;">
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 25px; left: 250px; top: 60px;">
+      Tenor End
+      <input type="text" dsoname="" fldname="" class="" tabindex="9" mask="" id="txtTNR_END" style="position: absolute; width: 75px; left: 94px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 637px; top: 60px;">
+      Tenor Increase
+      <input type="text" dsoname="" fldname="" class="" tabindex="10" mask="" id="txtTNR_INC" style="position: absolute; width: 75px; left: 94px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 982px; top: 60px;">
+      Tenor Unit
+      <codecombo id="codecombo2" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 80px; height: 100%;" labelWidth="80px" url="/jsondb/F279.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" tabindex="11" onLoadError="cbbTENOR_UNIT.value = '';" style="position: absolute; width: 130px; height: 24px; left: 94px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 77px; top: 89px;">
+      Install Start
+      <input type="text" dsoname="" fldname="" class="" tabindex="12" mask="" id="txtINST_STR" style="position: absolute; width: 75px; left: 94px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 250px; top: 89px;">
+      Install End
+      <input type="text" dsoname="" fldname="" class="" tabindex="13" mask="" id="txtINST_END" style="position: absolute; width: 75px; left: 94px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 637px; top: 88px;">
+      Install Increase
+      <input type="text" dsoname="" fldname="" class="" tabindex="14" mask="" id="txtINST_INC" style="position: absolute; width: 75px; left: 94px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 90px; height: 24px; left: 982px; top: 88px;">
+      Install Unit
+      <codecombo id="codecombo3" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 80px; height: 100%;" labelWidth="80px" url="/jsondb/F279.json" cbDisplayTextField="false" panelWidth="150px" panelHeight="100px" dropdownkeycode="145" tabindex="15" onLoadError="cbbINST_UNIT.value = '';" style="position: absolute; width: 130px; height: 24px; left: 94px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":108}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" tabindex="-1" style="position: absolute; width: 168px; height: 24px; left: -1px; top: 117px;">
+      New Applicated Start Date
+      <dateedit id="dateedit1" manalerttext="Effective Start Date" style="position: absolute; width: 100px; height: 24px; left: 172px; top: 2px;"></dateedit>
+            <dateedit id="dateedit2" manalerttext="Effective Start Date" style="position: absolute; width: 100px; height: 24px; left: 172px; top: 0px;"></dateedit>
+        </label>
+        <input onclick="fOnGrid('I');" src="" tabindex="-1" type="button" onmouseout="" onmouseover="" id="btnAdd" class="greenBtn" value="┿ Add " style="position: absolute; width: 104px; height: 24px; left: 886px; top: 4px;">
+        <input onclick="fOnGrid('U');" src="" tabindex="-1" type="button" onmouseout="" onmouseover="" id="btnModify" class="greenBtn" value="Modify" style="position: absolute; width: 104px; height: 24px; left: 994px; top: 4px;">
+        <input onclick="fOnGrid('D');" src="" tabindex="-1" type="button" onmouseout="" onmouseover="" id="btnDelete" class="greenBtn" value="― Delete " style="position: absolute; width: 104px; height: 24px; left: 1102px; top: 4px;">
+    </div>
+</body>
+</html>

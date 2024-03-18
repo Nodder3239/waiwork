@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction List</title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+</head>
+<body onload="fInitProc()">
+    <tabControl id="tabControl1" index="0" onTabChange="tabOnChange( event )" style="position: absolute; left: 24px; top: 24px; width: 1228px; height: 648px;">
+        <tabPage id="tabPage1" title="Buy Detail" style="width: 100%; height: 100%; display: block;">
+            <div class="tabDiv" id="divTab1" style="left: -1px; width: 1224px; position: relative; top: 25px; height: 552px;">
+                <grid id="gridBase" dsoName="BDO0900.prmDSOOutListBuyRel" style="font-size: 8pt; color: rgb(48, 48, 48); position: absolute; top: 88px; left: 24px; width: 1184px; height: 464px;">
+                    "options" : {
+                      "editable":false
+                      ,"columnHeight":20
+                      ,"cellHeight":20
+                      ,"fixColumn":0
+                      ,"aggregate":""
+                      ,"appendmode":false
+                      ,"autohiddencols":false
+                      ,"autofit":false
+                      ,"contextmenu":true
+                      ,"indicator":{"show":false,"width":30}
+                      ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                      ,"group":[]
+                      ,"columns" : [
+                        {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Dt"
+                          ,"field":"FOBD09_TRSC_DT"
+                          ,"alignment":"center"
+                          ,"width":80
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Process Date","field":"FOBD09_TRSC_DATE","alignment":"center","width":113,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProcessDate","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":200,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":108,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Requested Price"
+                          ,"field":"FOBD09_CUST_REQ_PRICE"
+                          ,"alignment":"center"
+                          ,"width":133
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Broker Price"
+                          ,"field":"FOBD09_BROKER_PRICE"
+                          ,"alignment":"center"
+                          ,"width":90
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Customer Price"
+                          ,"field":"FOBD09_CUST_PRICE"
+                          ,"alignment":"center"
+                          ,"width":147
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Face Value"
+                          ,"field":"FOBD09_TRSC_FACE_VAL_AMT"
+                          ,"alignment":"center"
+                          ,"width":100
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Capital Gain"
+                          ,"field":"FOBD09_CAPT_GAIN"
+                          ,"alignment":"center"
+                          ,"width":0
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Capital Gain Tax"
+                          ,"field":"FOBD09_CAPT_GAIN_TAX"
+                          ,"alignment":"center"
+                          ,"width":0
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Accrued Interest"
+                          ,"field":"FOBD09_ACCR_INT"
+                          ,"alignment":"center"
+                          ,"width":147
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Accrued Interest Tax"
+                          ,"field":"FOBD09_ACCR_INT_TAX"
+                          ,"alignment":"center"
+                          ,"width":0
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Principal Amount"
+                          ,"field":"FOBD09_BOND_PRIN_AMT"
+                          ,"alignment":"center"
+                          ,"width":120
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Settlement Amount"
+                          ,"field":"FOBD09_BOND_SETL_AMT"
+                          ,"alignment":"center"
+                          ,"width":153
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Paymant Schedule Dt"
+                          ,"field":"FOBD09_PAY_SCHE_DT"
+                          ,"alignment":"center"
+                          ,"width":177
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Paymant Schedule Date","field":"FOBD09_PAY_SCHE_DATE","alignment":"center","width":185,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Settled Schedule Dt"
+                          ,"field":"FOBD09_SETL_SCHE_DT"
+                          ,"alignment":"center"
+                          ,"width":168
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Settled Schedule Date","field":"FOBD09_SETL_SCHE_DATE","alignment":"center","width":178,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Settled Dt"
+                          ,"field":"FOBD09_BUY_SETL_DT"
+                          ,"alignment":"center"
+                          ,"width":80
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Settled Date","field":"FOBD09_BUY_SETL_DATE","alignment":"center","width":128,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Ctp","field":"FOBD09_THR_MGNT_NO","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"YTM","field":"FOBD09_YTM","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":102,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":134,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                      ]
+                      ,"style":{}
+                      ,"effect":{"columnHighlight":true}
+                      ,"size":{"vertScrollWidth":19}
+                      ,"footer":{"show":true,"height":24}
+                      ,"conditionalstyle":[]
+                    }
+                </grid>
+                <div class="topbarIngreen" style="width: 1181px; height: 66px; left: 24px; top: -2px; position: absolute;">
+                    <label class="registTop" lang="InquiryDate" style="position: absolute; width: 90px; height: 24px; left: 5px; top: 5px;">
+              Inquiry Date
+            </label>
+                    <dateedit id="dtpBASC_DT1_1" class="default" tabindex="2" title="Apply start date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 99px; top: 5px;"></dateedit>
+                    <label class="regist" style="position: absolute; width: 10px; height: 24px; left: 203px; top: 5px;">
+              ~
+            </label>
+                    <dateedit id="dtpBASC_DT1_2" class="default" tabindex="2" title="Apply end date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 217px; top: 5px;"></dateedit>
+                    <label class="registTop" style="position: absolute; width: 90px; height: 24px; left: 472px; top: 5px;">
+              Product Code
+            </label>
+                    <codecombo id="cbbCOM_ACTCD_AC_CD" dsoName="prmQryInDso" fldName="COM_ACTCD_AC_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 210px; height: 100%;" labelWidth="210px" cbDisplayTextField="false" class="search" panelWidth="310px" panelHeight="125px" dropdownkeycode="145" tabindex="110" style="position: absolute; width: 330px; height: 24px; left: 568px; top: 5px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":61.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":247.2}],
+                        "data":[]
+                    </codecombo>
+                    <label class="registTop" lang="Branch" style="position: absolute; width: 90px; height: 24px; left: 5px; top: 33px;">
+              Branch
+            </label>
+                    <codecombo id="cbbMNG_BR" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 180px; height: 100%;" labelWidth="180px" url="/jsondb/F181.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 250px; height: 24px; left: 99px; top: 33px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                    <label class="registTop" style="position: absolute; width: 90px; height: 24px; left: 472px; top: 33px;">
+              Cancel Y/N
+            </label>
+                    <codecombo id="cbbCAN_YN" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 100px; height: 100%;" labelWidth="100px" url="/jsondb/F23.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 568px; top: 33px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                    <input type="button" name="imgSearch" height="21" hspace="0" size="1" src="" onmouseout="" onmouseover="" vspace="0" width="90" onclick="fOnClickBuy()" tabindex="-1" value="Search" class="greenBtn" id="imgSEARCH" style="left: 1064px; width: 104px; position: absolute; top: 33px; height: 24px;">
+                </div>
+            </div>
+        </tabPage>
+        <tabPage id="tabPage2" title="Sell Detail" style="width: 100%; height: 100%; display: none;">
+            <div class="tabDiv" id="divTab2" style="left: -1px; width: 1216px; position: relative; top: 25px; height: 546px;">
+                <grid id="gridBase2" dsoName="BDO0900.prmDSOOutListSellRel" style="font-size: 8pt; color: rgb(48, 48, 48); position: absolute; top: 88px; left: 24px; width: 1184px; height: 464px;">
+                    "options" : {
+                      "editable":false
+                      ,"columnHeight":20
+                      ,"cellHeight":20
+                      ,"fixColumn":0
+                      ,"aggregate":""
+                      ,"appendmode":false
+                      ,"autohiddencols":false
+                      ,"autofit":false
+                      ,"contextmenu":true
+                      ,"indicator":{"show":false,"width":30}
+                      ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                      ,"group":[]
+                      ,"columns" : [
+                        {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Dt"
+                          ,"field":"FOBD09_TRSC_DT"
+                          ,"alignment":"center"
+                          ,"width":80
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Process Date","field":"FOBD09_TRSC_DATE","alignment":"center","width":118,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProcessDate","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":114,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":200,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":111,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Requested Price"
+                          ,"field":"FOBD09_CUST_REQ_PRICE"
+                          ,"alignment":"center"
+                          ,"width":136
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Broker Price"
+                          ,"field":"FOBD09_BROKER_PRICE"
+                          ,"alignment":"center"
+                          ,"width":111
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Customer Price"
+                          ,"field":"FOBD09_CUST_PRICE"
+                          ,"alignment":"center"
+                          ,"width":121
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Face Value"
+                          ,"field":"FOBD09_TRSC_FACE_VAL_AMT"
+                          ,"alignment":"center"
+                          ,"width":100
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Capital Gain"
+                          ,"field":"FOBD09_CAPT_GAIN"
+                          ,"alignment":"center"
+                          ,"width":120
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Capital Gain Tax"
+                          ,"field":"FOBD09_CAPT_GAIN_TAX"
+                          ,"alignment":"center"
+                          ,"width":120
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Accrued Interest"
+                          ,"field":"FOBD09_ACCR_INT"
+                          ,"alignment":"center"
+                          ,"width":120
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Accrued Interest Tax"
+                          ,"field":"FOBD09_ACCR_INT_TAX"
+                          ,"alignment":"center"
+                          ,"width":157
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Principal Amount"
+                          ,"field":"FOBD09_BOND_PRIN_AMT"
+                          ,"alignment":"center"
+                          ,"width":120
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Settlement Amount"
+                          ,"field":"FOBD09_BOND_SETL_AMT"
+                          ,"alignment":"center"
+                          ,"width":162
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Settled schedule Dt"
+                          ,"field":"FOBD09_SETL_SCHE_DT"
+                          ,"alignment":"center"
+                          ,"width":168
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Settled Dt"
+                          ,"field":"FOBD09_SELL_SETL_DT"
+                          ,"alignment":"center"
+                          ,"width":80
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Settled schedule Date","field":"FOBD09_SETL_SCHE_DATE","alignment":"center","width":166,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Settled Date","field":"FOBD09_SELL_SETL_DATE","alignment":"center","width":111,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Ctp","field":"FOBD09_THR_MGNT_NO","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"YTM","field":"FOBD09_YTM","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":88,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":122,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                      ]
+                      ,"style":{}
+                      ,"effect":{"columnHighlight":true}
+                      ,"size":{"vertScrollWidth":19}
+                      ,"footer":{"show":true,"height":24}
+                      ,"conditionalstyle":[]
+                    }
+                </grid>
+                <div class="topbarIngreen" style="width: 1181px; height: 66px; left: 24px; top: -2px; display: block; position: absolute;">
+                    <label class="registTop" lang="InquiryDate" style="position: absolute; width: 90px; height: 24px; left: 5px; top: 5px;">
+              Inquiry Date
+            </label>
+                    <dateedit id="dtpBASC_DT2_1" class="default" tabindex="2" title="Apply start date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 99px; top: 5px;"></dateedit>
+                    <label class="regist" style="position: absolute; width: 10px; height: 24px; left: 203px; top: 5px;">
+              ~
+            </label>
+                    <dateedit id="dtpBASC_DT2_2" class="default" tabindex="2" title="Apply end date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 217px; top: 5px;"></dateedit>
+                    <label class="registTop" lang="Branch" style="position: absolute; width: 70px; height: 24px; left: 25px; top: 33px;">
+              Branch
+            </label>
+                    <codecombo id="cbbMNG_BR2" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 180px; height: 100%;" labelWidth="180px" url="/jsondb/F181.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 250px; height: 24px; left: 99px; top: 33px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                    <label class="registTop" style="position: absolute; width: 90px; height: 24px; left: 576px; top: 33px;">
+              Cancel Y/N
+            </label>
+                    <codecombo id="cbbCAN_YN2" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 100px; height: 100%;" labelWidth="100px" url="/jsondb/F23.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 672px; top: 33px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                    <input type="button" name="imgSearch" height="21" hspace="0" size="1" src="" onmouseout="" onmouseover="" vspace="0" width="90" onclick="fOnClickSell()" tabindex="-1" id="imgSEARCH2" class="greenBtn" value="Search" style="left: 1064px; width: 104px; position: absolute; top: 33px; height: 24px;">
+                </div>
+            </div>
+        </tabPage>
+        <tabPage id="tabPage3" title="IPO Detail" style="width: 100%; height: 100%; display: none;">
+            <div class="tabDiv" id="divTab3" style="left: -1px; width: 1224px; position: relative; top: 25px; height: 546px;">
+                <div class="topbarIngreen" style="width: 1181px; height: 66px; left: 24px; top: -2px; position: absolute;">
+                    <label class="registTop" lang="InquiryDate" style="position: absolute; width: 90px; height: 24px; left: 5px; top: 5px;">
+              Inquiry Date
+            </label>
+                    <dateedit id="dtpBASC_DT3_1" class="default" tabindex="2" title="Apply start date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 99px; top: 5px;"></dateedit>
+                    <label class="regist" style="position: absolute; width: 10px; height: 24px; left: 203px; top: 5px;">
+              ~
+            </label>
+                    <dateedit id="dtpBASC_DT3_2" class="default" tabindex="2" title="Apply end date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 217px; top: 5px;"></dateedit>
+                    <label class="registTop" lang="Branch" style="position: absolute; width: 70px; height: 24px; left: 25px; top: 33px;">
+              Branch
+            </label>
+                    <codecombo id="cbbMNG_BR3" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 180px; height: 100%;" labelWidth="180px" url="/jsondb/F181.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 250px; height: 24px; left: 99px; top: 33px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                    <label class="registTop" style="position: absolute; width: 90px; height: 24px; left: 496px; top: 32px;">
+              Cancel Y/N
+            </label>
+                    <codecombo id="cbbCAN_YN3" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 100px; height: 100%;" labelWidth="100px" url="/jsondb/F23.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 592px; top: 32px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                    <input type="button" name="imgSearch" height="21" hspace="0" size="1" src="" onmouseout="" onmouseover="" vspace="0" width="90" onclick="fOnClickIPO()" tabindex="-1" id="imgSEARCH3" value="Search" class="greenBtn" style="position: absolute; width: 104px; height: 24px; left: 956px; top: 32px;">
+                    <input name="imgPrint" height="21" hspace="0" size="1" src="" onmouseout="" onmouseover="" type="button" vspace="0" width="90" onclick="fPrint()" id="imgPRINT" value="Print" class="greenBtn" style="position: absolute; width: 104px; height: 24px; left: 1064px; top: 32px;">
+                </div>
+                <grid id="gridBase3" dsoName="BDO0900.prmDSOOutListBuyRel" style="font-size: 8pt; color: rgb(48, 48, 48); position: absolute; top: 88px; left: 24px; width: 1184px; height: 464px;">
+                    "options" : {
+                      "editable":false
+                      ,"columnHeight":20
+                      ,"cellHeight":20
+                      ,"fixColumn":0
+                      ,"aggregate":""
+                      ,"appendmode":false
+                      ,"autohiddencols":false
+                      ,"autofit":false
+                      ,"contextmenu":true
+                      ,"indicator":{"show":false,"width":30}
+                      ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                      ,"group":[]
+                      ,"columns" : [
+                        {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Dt"
+                          ,"field":"FOBD09_TRSC_DT"
+                          ,"alignment":"center"
+                          ,"width":80
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":"!99-99-9999;0;_"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"MaskEdit","alignment":"center","url":"","displayformat":"!99-99-9999;0;_"}
+                        }
+                        ,{"text":"Process Date","field":"FOBD09_TRSC_DATE","alignment":"center","width":128,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProcessDate","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":103,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":200,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":134,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Requested Price"
+                          ,"field":"FOBD09_CUST_REQ_PRICE"
+                          ,"alignment":"center"
+                          ,"width":147
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Applied Fee Rate"
+                          ,"field":"FOBD09_APPLIED_FEE_RATE"
+                          ,"alignment":"center"
+                          ,"width":150
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Face Value Amount"
+                          ,"field":"FOBD09_TRSC_FACE_VAL_AMT"
+                          ,"alignment":"center"
+                          ,"width":160
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Offer Amount"
+                          ,"field":"FOBD09_OFFER_AMT"
+                          ,"alignment":"center"
+                          ,"width":147
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Fee Amount"
+                          ,"field":"FOBD09_FEE_AMOUNT"
+                          ,"alignment":"center"
+                          ,"width":90
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"lang":"FeeAmount"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Settlement Amount"
+                          ,"field":"FOBD09_BOND_SETL_AMT"
+                          ,"alignment":"center"
+                          ,"width":176
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Bid Schedule Date","field":"FOBD09_BID_SCHE_DT","alignment":"center","width":168,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Offer Schedule Date","field":"FOBD09_OFFER_SCHE_DT","alignment":"center","width":180,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Offer Date","field":"FOBD09_OFFER_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":106,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":133,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                      ]
+                      ,"style":{}
+                      ,"effect":{"columnHighlight":true}
+                      ,"size":{"vertScrollWidth":19}
+                      ,"footer":{"show":true,"height":24}
+                      ,"conditionalstyle":[]
+                    }
+                </grid>
+            </div>
+        </tabPage>
+        <tabPage id="tabPage4" title="Coupon, Maturity Detail" style="width: 100%; height: 100%; display: none;">
+            <div class="tabDiv" id="divTab4" style="left: -1px; width: 1208px; position: relative; top: 25px; height: 586px;">
+                <div class="topbarIngreen" style="width: 1181px; height: 66px; left: 24px; top: -2px; position: absolute;">
+                    <label class="registTop" lang="InquiryDate" style="position: absolute; width: 90px; height: 24px; left: 5px; top: 5px;">
+              Inquiry Date
+            </label>
+                    <dateedit id="dtpBASC_DT4_1" class="default" tabindex="2" title="Apply start date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 99px; top: 5px;"></dateedit>
+                    <label class="regist" style="position: absolute; width: 10px; height: 24px; left: 203px; top: 5px;">
+              ~
+            </label>
+                    <dateedit id="dtpBASC_DT4_2" class="default" tabindex="2" title="Apply end date" dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 217px; top: 5px;"></dateedit>
+                    <input type="button" name="imgSearch" height="21" hspace="0" size="1" src="" onmouseout="" onmouseover="" vspace="0" width="90" onclick="fOnClickCoupon()" tabindex="-1" id="imgSEARCH4" value="Search" class="greenBtn" style="position: absolute; width: 104px; height: 24px; left: 1064px; top: 32px;">
+                    <label class="registTop" lang="Branch" style="position: absolute; width: 70px; height: 24px; left: 25px; top: 33px;">
+              Branch
+            </label>
+                    <codecombo id="cbbMNG_BR4" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 180px; height: 100%;" labelWidth="180px" url="/jsondb/F181.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 250px; height: 24px; left: 99px; top: 33px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                    <label class="registTop" style="position: absolute; width: 90px; height: 24px; left: 520px; top: 32px;">
+              Cancel Y/N
+            </label>
+                    <codecombo id="cbbCAN_YN4" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 100px; height: 100%;" labelWidth="100px" url="/jsondb/F23.json" cbDisplayTextField="false" panelWidth="250px" panelHeight="110px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 616px; top: 32px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                        "data":[]
+                    </codecombo>
+                </div>
+                <grid id="gridBase4" dsoName="BDO0900.prmDSOOutListBuyRel" style="font-size: 8pt; color: rgb(48, 48, 48); position: absolute; top: 88px; left: 24px; width: 1184px; height: 464px;">
+                    "options" : {
+                      "editable":false
+                      ,"columnHeight":20
+                      ,"cellHeight":20
+                      ,"fixColumn":0
+                      ,"aggregate":""
+                      ,"appendmode":false
+                      ,"autohiddencols":false
+                      ,"autofit":false
+                      ,"contextmenu":true
+                      ,"indicator":{"show":false,"width":30}
+                      ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                      ,"group":[]
+                      ,"columns" : [
+                        {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Dt","field":"FOBD09_TRSC_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":103,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":170,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":141,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Face Value Balance"
+                          ,"field":"FOBD09_BOND_FACE_VAL_BAL"
+                          ,"alignment":"center"
+                          ,"width":162
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Payment Amount"
+                          ,"field":"FOBD09_BOND_SETL_AMT"
+                          ,"alignment":"center"
+                          ,"width":140
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Tax Amount"
+                          ,"field":"FOBD09_TAX_AMT"
+                          ,"alignment":"center"
+                          ,"width":100
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Payment Net Amount"
+                          ,"field":"FOBD09_BOND_SETL_NET_AMT"
+                          ,"alignment":"center"
+                          ,"width":160
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Estimated Accured Interest"
+                          ,"field":"FOBD09_ACCR_INT"
+                          ,"alignment":"center"
+                          ,"width":200
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Estimated Tax Amount"
+                          ,"field":"FOBD09_CAPT_GAIN_TAX"
+                          ,"alignment":"center"
+                          ,"width":193
+                          ,"editable":"false"
+                          ,"focusing":"false"
+                          ,"displayformat":",0.00"
+                          ,"style":"custSty1"
+                          ,"type":"column"
+                          ,"height":20
+                          ,"visible":true
+                          ,"sortable":true
+                          ,"editor":{"type":"CalcEdit","alignment":"right","url":"","displayformat":",0.00"}
+                        }
+                        ,{"text":"Paymant Schedule Date","field":"FOBD09_PAY_SCHE_DT","alignment":"center","width":177,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Paymant Date","field":"FOBD09_PAY_DT","alignment":"center","width":132,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Trading Date","field":"FOBD09_TRADE_DT","alignment":"center","width":121,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Due Date","field":"FOBD09_DUE_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"DueDate","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":82,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":104,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                        ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                      ]
+                      ,"style":{}
+                      ,"effect":{"columnHighlight":true}
+                      ,"size":{"vertScrollWidth":19}
+                      ,"footer":{"show":true,"height":24}
+                      ,"conditionalstyle":[]
+                    }
+                </grid>
+            </div>
+        </tabPage>
+    </tabControl>
+</body>
+</html>

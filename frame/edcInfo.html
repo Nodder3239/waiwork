@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko" style="width: 510px; height: 410px;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDC Information</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="/wai/default.css">
+    <link rel="stylesheet" href="/css/Base.css">
+    <link rel="stylesheet" href="./css/edcInfo.css">
+    <script type="text/javascript">
+        let dateObj  = null;
+        let baseDate = "";
+        let frTime   = "";
+        let toTime   = "";
+        let baseOPNO = "";
+        let AcctNo   = "";
+        let baseCnt  = 0;
+        let selTerm  = 0;
+        let totTerm  = 0;
+        let liveTerm = 0;
+        let isCardExist = false;
+
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                baseOPNO = window.dialogArguments.Args[0];
+                AcctNo   = window.dialogArguments.Args[1];
+                console.log("baseOPNO :", baseOPNO);
+                console.log("AcctNo   :", AcctNo);
+
+                if (baseOPNO.length == 0) {
+                    ShowInfoDialog('Need Operator Number', function() { self.close(); });
+                } else {
+                    fisExistCheck(function(){
+                        fCheck(function(bChk) {
+                            if (!bChk) {
+                                ShowInfoDialog('Need Connected EDC ID[CG14]', function() { self.close(); });
+                                return;
+                            }
+
+                            fGetOption(function(bChk) {
+                                if (!bChk) {
+                                    ShowInfoDialog('Option information error..', function() { self.close(); });
+                                    return;
+                                }
+
+                                fSetTimer();
+                                fGetTicket();
+                            });
+                        });
+                    });
+                }
+            }
+        }
+
+        function fisExistCheck(callback) {
+            // TEST ----------------------------------------------------------------------------------------------------
+            // let inputData = {"dvCd": "74", "param1":"110620900000112"};
+            // // accNo 110620900000112 110920800004512
+            // let outputData = {
+            //     "output74" : {
+            //         "totCnt": 1,
+            //         "grid01": [
+            //             {"refNo": "DEB1106209000314", "medNo": "6064200161001634", "medTypeCd": "01", "medCd": "0001", "cixNo": "0000012498", "custNm": "KARTIKA DEWI", "mngBr": "1106",
+            //             "acctNo": "110620900000112", "acctType": "SA", "sts": "00", "pinOffset": "436273", "ccyCd": "IDR", "pinRegDt": "2009-09-25 00:00:00.000", "pinChgDt": "",
+            //             "strDt": "2009-09-25 00:00:00.000", "endDt": "2025-12-31 00:00:00.000", "lstHisNo": "120", "instantCd": "1", "pinFail": "0", "gradeCd": "0000", "remark": "",
+            //             "regBrNo": "1106", "regEmpNo": "2205001", "regDt": "2009-09-25 00:00:00.000", "regTm": "12:00:00", "updEmpNo": "B1106U1", "updDt": "2019-07-01 00:00:00.000", "updTm": "07:10:38",
+            //             "feeProcCd": "", "prodRefNo": "", "apprEmpNo": "", "excAuthType": "1"
+            //         }]
+            //     }
+            // };
+            // console.log('TEST output74 --> ', outputData);
+            // if (outputData.output74.grid01.length > 0) {
+            //     isCardExist = true;
+            // } else {
+            //     isCardExist = false;
+            // }
+            // if (callback) callback();
+
+            // TOBE ---------------------------------------------------------------------------------------------------- 요청중
+            let inputData = {"dvCd": "74", "param1":AcctNo};
+            callService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, function (outputData) { // Success
+                console.log('output74 --> ', outputData.output74);
+                if (outputData.output74.grid01.length > 0) {
+                    isCardExist = true;
+                }
+                else {
+                    isCardExist = false;
+                }
+                if (callback) callback();
+            });
+        }
+
+        function fCheck(callback) {
+            // var tSQL;
+            // tSQL = "select TRM_ID from acom_sys_hdware where op_no = '" + baseOPNO + "'";
+            // wasSQLDSO.SQL = tSQL;
+            // if (wasSQLDSO.recordset.recordcount == 1){
+            //     return true;
+            // }
+            // else {
+            //     return false;
+            // }
+
+            // TEST ----------------------------------------------------------------------------------------------------
+            // let outputData = {"output75": {"totCnt": 1, "grid01": [{"trmId": "0002709"}]}};
+            // let outputData = {"output75": {"totCnt": 1, "grid01": [{
+            //     "ipAddr": "192.168.111.13",
+            //     "brNo": "1115",
+            //     "hdType": "001",
+            //     "trmId": "TST00034",
+            //     "opNo": "0002709",
+            //     "regBrNo": "0888",
+            //     "regEmpNo": "0000849",
+            //     "regDt": "2014/12/05",
+            //     "regTm": "14:20:38",
+            //     "updEmpNo": "0002709",
+            //     "updDt": "2019/07/19",
+            //     "updTm": "10:50:50"
+            // }]}};
+            // if (outputData.output75.grid01.length == 1) {
+            //     return true;
+            // }
+            // else {
+            //     return false;
+            // }
+
+            // TOBE ----------------------------------------------------------------------------------------------------
+            let inputData = {"dvCd": "75", "param1":"0002709"};
+            // let inputData = {"dvCd": "75", "param1":baseOPNO};
+            callService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, function (outputData) { // Success
+                console.log('output75 --> ', outputData.output75);
+                let bRtn = false;
+                if (outputData.output75.grid01.length == 1) {
+                    bRtn = true;
+                }
+                if (callback) callback(bRtn);
+            });
+        }
+
+        function fGetOption(callback) {
+            selTerm  = 0;
+            totTerm  = 0;
+            liveTerm = 0;
+
+            // TEST ----------------------------------------------------------------------------------------------------
+            // let opt_inputData = {"dvCd": "76"};
+            // let opt_outputData = {"output76": {"totCnt": 3, "grid01": [{"code": "001", "codeNm":"1"},{"code": "002", "codeNm":"45"},{"code": "003", "codeNm":"45"},]}};
+            // let opt_outputGrdData = opt_outputData.output76.grid01;
+            // if (opt_outputGrdData.length > 0) {
+            //     for (var i=0; i<opt_outputGrdData.length; i++) {
+            //         if (opt_outputGrdData[i].code == "001") {
+            //             selTerm = parseInt(opt_outputGrdData[i].codeNm);
+            //         }
+            //         else if(opt_outputGrdData[i].code == "002") {
+            //             totTerm = parseInt(opt_outputGrdData[i].codeNm);
+            //         }
+            //         else if(opt_outputGrdData[i].code == "003") {
+            //             liveTerm = parseInt(opt_outputGrdData[i].codeNm);
+            //         }
+            //     }
+            // }
+            // let bRtn = true;
+            // if ((selTerm * totTerm * liveTerm) < 1) {
+            //     bRtn = false;
+            //     if (callback) callback(bRtn);
+            //     return;
+            // }
+            //
+            // /* Date */
+            // baseDate = '2022-09-30';
+            // frTime   = '16:18:20';
+            // toTime   = '16:19:05';
+            // if (callback) callback(bRtn);
+
+
+            // TOBE ----------------------------------------------------------------------------------------------------
+            /* Option */
+            let opt_inputData = {"dvCd": "76"};
+            callService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', opt_inputData, function (outputData) {
+                console.log('output76 --> ', outputData.output76);
+                let opt_outputGrdData = outputData.output76.grid01;
+                if (opt_outputGrdData.length > 0) {
+                    for (var i=0; i<opt_outputGrdData.length; i++) {
+                        if (opt_outputGrdData[i].code == "001") {
+                            selTerm = parseInt(opt_outputGrdData[i].codeNm);
+                        }
+                        else if(opt_outputGrdData[i].code == "002") {
+                            totTerm = parseInt(opt_outputGrdData[i].codeNm);
+                        }
+                        else if(opt_outputGrdData[i].code == "003") {
+                            liveTerm = parseInt(opt_outputGrdData[i].codeNm);
+                        }
+                    }
+                    let bRtn = true;
+                    if ((selTerm * totTerm * liveTerm) < 1) {
+                        bRtn = false;
+                        if (callback) callback(bRtn);
+                        return;
+                    }
+
+                    /* Date */
+                    // let date_inputData = {"dvCd": "77", "param1": "45"};
+                    let date_inputData = {"dvCd": "77", "param1": liveTerm.toString()};
+                    callService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', date_inputData, function (outputData) {
+                        // console.log('output77 --> ', outputData.output77, typeof outputData.output77);
+                        let date_outputGrdData = outputData.output77;
+                        if (typeof date_outputGrdData == 'object') {
+                            dateObj = date_outputGrdData;
+                            baseDate = date_outputGrdData.baseDate;
+                            frTime   = date_outputGrdData.frTime;
+                            toTime   = date_outputGrdData.toTime;
+                            bRtn = true;
+                        } else {
+                            bRtn = false;
+                        }
+                        if (callback) callback(bRtn);
+                    });
+                }
+            });
+        }
+
+        function fSetTimer() {
+            lblLoading.innerText = "Loading EDC information.. (" + baseCnt + "/" + totTerm + ")";
+            if (isCardExist) {
+                fntCardExist.innerText = "";
+            }
+            else {
+                fntCardExist.innerText = "Card not exist..";
+            }
+
+            if (baseCnt < totTerm) {
+                baseCnt++;
+                window.setTimeout("fSetTimer()", 1000);
+            }
+        }
+
+        function fGetTicket() {
+            if (baseCnt >= totTerm) {
+                ShowInfoDialog('Timeover..!!', function() { self.close(); });
+            } else {
+                window.setTimeout("fProcGetTicket()", selTerm*1000);
+            }
+        }
+
+        function fProcGetTicket() {
+            // let inputData = {"dvCd": "78", "param1": "0000430", "param2":"2023/10/05", "param3":"15:19:24", "param4":"15:20:09"};
+            // let outputData = {"output78": {"totCnt": 1, "grid01": [{"ticketNo": "", "acctNo":"240121300270812", "cixNo":"00", "custEnm":"BUDI FIQR", "refNo":"DEB0888216061975", "hisNo":"1418", "trmId":"02102000"}]}};
+            // if (outputData.output78.grid01.length > 0) {
+            //     baseCnt = totTerm;
+            // }
+            // else {
+            //     fGetTicket();
+            // }
+
+            // TOBE ----------------------------------------------------------------------------------------------------
+            let inputData = {"dvCd": "78", "param1": baseOPNO, "param2": baseDate, "param3": frTime, "param4": toTime};
+            callService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, function (outputData) {
+                console.log('output78 --> ', outputData.output78);
+                if (outputData.output78.grid01.length > 0) {
+                    grd.setData(outputData.output78.grid01);
+                    baseCnt = totTerm;
+                }
+                else {
+                    fGetTicket();
+                }
+            });
+        }
+
+        function fSetResult() {
+            if (grd.getSelection().length == 0) return;
+            var rArg = new Array(5);
+            rArg[0]  = "Y";
+            rArg[1]  = grd.getValue("ref_no");
+            rArg[2]  = grd.getValue("his_no");
+            rArg[3]  = grd.getValue("ticket_no");
+            rArg[4]  = grd.getValue("trm_id");
+
+            // TODO : 요청중
+            let inputData = {"dvCd": "79", "param1": rArg[4], "param2": rArg[3], "param3": rArg[1], "param4": rArg[2]};
+            callService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, function (outputData) {
+                console.log('output79 --> ', outputData.output79);
+                window.returnValue = rArg;
+                self.close();
+            });
+        }
+
+
+        function fbtnConfirm_onClick() {
+            if (dateObj == null) {
+                fSetResult();
+            }
+        }
+
+        function fbtnCancel_onClick() {
+            self.close();
+        }
+
+    </script>
+</head>
+<body>
+    <div id="container">
+        <div style="margin-left: 15px;">
+            <label id="lblLoading" style="cursor:default;font-weight: bold;"></label>
+            <label id="fntCardExist" style="cursor:default;font-weight: bold;color:red;margin-left: 10px;"></label>
+        </div>
+        <div id="gridbox" style="left: 16px; top: 10px; width: 488px; height: 260px;">
+            <grid id="grd" style="width: 480px; height: 252px; border: 1px solid rgb(175, 197, 197); position: absolute; left: 24px; top: 40px;">
+                "options" : {
+                  "editable":false
+                  ,"columnHeight":20
+                  ,"cellHeight":20
+                  ,"fixColumn":0
+                  ,"conditionalstyle":""
+                  ,"aggregate":""
+                  ,"appendmode":false
+                  ,"autohiddencols":false
+                  ,"autofit":true
+                  ,"contextmenu":true
+                  ,"indicator":{"show":false,"width":30}
+                  ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                  ,"group":[]
+                  ,"columns" : [
+                    {"text":"Ticket","field":"ticket_no","alignment":"center","width":80,"editor":{"type":"text","alignment":"center"},"type":"column","height":20,"editable":false,"visible":true,"sortable":true}
+                    ,{"text":"Account","field":"acct_no","alignment":"center","width":120,"editor":{"type":"text","alignment":"left"},"type":"column","height":20,"editable":false,"visible":true,"sortable":true}
+                    ,{"text":"Customer","field":"cust_enm","alignment":"center","width":120,"editor":{"type":"text","alignment":"center"},"type":"column","height":20,"editable":false,"visible":true,"sortable":true}
+                  ]
+                  ,"style":{}
+                  ,"effect":{"columnHighlight":true}
+                  ,"size":{"vertScrollWidth":19}
+                  ,"footer":{"show":true,"height":24}
+                },"data":[]
+            </grid>
+        </div>
+
+        <div id="btn" style="position: absolute; left: 282px; top: 300px; width: 224px; height: 28px;">
+            <button id="btnConfirm" class="confirm" onclick="fbtnConfirm_onClick()" style="width: 104px; height: 24px;">Confirm</button>
+            <button id="btnCancel" class="cancel" onclick="fbtnCancel_onClick()" style="width: 104px; height: 24px;">Cancel</button>
+        </div>
+    </div>
+</body>
+</html>

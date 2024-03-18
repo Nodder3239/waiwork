@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Log Registration</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="/wai/default.css">
+    <link rel="stylesheet" href="/css/Base.css">
+    <link rel="stylesheet" href="css/registErrorLog.css" />
+    <script type="text/javascript">
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                const objArg = window.dialogArguments.Args;
+                globId.value = objArg.globId;
+                userId.value = objArg.userId;
+                referenceId.focus();
+            }
+        }
+
+        function fConfirm() {
+            const inputData = {
+                globId: globId.value,
+                userId: userId.value,
+                referenceId: referenceId.value
+            };
+
+            callBasicServiceAsync('/HANABANK/V1/COM/CM/COMCMO9995A.SVC', inputData)
+                .then(() => {
+                    showInfoDialog('Log registered successfully.', function() {
+                        window.returnValue = true;
+                        window.close();
+                    });
+                }).catch(() => {
+                    window.returnValue = false;
+                    window.close();
+                });
+        }
+
+        function fCancel() {
+            window.close();
+        }
+    </script>
+</head>
+<body>
+    <h1> <img src="./images/information.png" alt="#"> <span>Error Log Registration</span></h1>
+    <div id="container">
+        <div class="input-box">
+            <div class="box">
+                <p style="min-width: 80px;">Global ID</p>
+                <input type="text" id="globId" readonly>
+            </div>
+            <div class="box">
+                <p style="min-width: 80px;">User ID</p>
+                <input type="text" id="userId" readonly>
+            </div>
+            <div class="box">
+                <p style="min-width: 80px;">Reference ID</p>
+                <input type="text" id="referenceId" maxlength="100" onkeydown="if (event.keyCode == 13) { fConfirm(); }">
+            </div>
+        </div>
+    </div>
+    <div id="btn">
+        <button class="confirm" onclick="fConfirm()">Confirm</button>
+        <button class="cancel" onclick="fCancel()">Cancel</button>
+    </div>
+</body>
+</html> 

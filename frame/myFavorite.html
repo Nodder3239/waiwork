@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Favorite</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="/wai/default.css">
+    <link rel="stylesheet" href="/css/Base.css">
+    <link rel="stylesheet" href="./css/MyFav.css">
+    <script type="text/javascript">
+        var retArr = new Array(2);
+        retArr[0] = "";
+        retArr[1] = "";
+
+        var mInputData = {
+            opTp: "",
+            userId: "",
+            menuId: "",
+            gwaCode: "",
+            trCode: "",
+            buttonFlg: "",
+        };
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                const SysInfo = LIB().CDO.SysInfo || {};
+                GridReady();
+            }
+        }
+
+        function GridReady() {
+            grdFavorite.clear();
+            let inputData = {"userId" : LIB().CDO.SysInfo.userId};
+            callService('/HANABANK/V1/COM/CM/COMCMO0400I.SVC', inputData, function (outputData) {
+                const mOutputData = outputData.grid01;
+                grdFavorite.setData(mOutputData);
+            });
+        }
+
+        function fAddToMyFavorite() {
+            if (window.dialogArguments.Args.length > 1) {
+                mInputData['opTp'] = "0";
+                mInputData['userId']  = window.dialogArguments.Args[0];
+                mInputData['menuId']  = window.dialogArguments.Args[1];
+                mInputData['gwaCode'] = window.dialogArguments.Args[2];
+                mInputData['trCode']  = window.dialogArguments.Args[3];
+                mInputData['buttonFlg'] = "";
+                callService('/HANABANK/V1/COM/CM/COMCMO0400A.SVC', mInputData, function (res) {
+                    // if (outputData.result == "00") {} // success
+                    grdFavorite.addRow();
+                    grdFavorite.setValue("menuId", mInputData['menuId']);
+                    grdFavorite.setValue("subjCd", mInputData['gwaCode']);
+                    grdFavorite.setValue("trCode", mInputData['trCode']);
+                    grdFavorite.setValue("menuName", window.dialogArguments.Args[4]);
+                });
+            }
+        }
+
+        function fDeleteFromMyFavorite() {
+            var gRowData = grdFavorite.getSelection();
+            if (gRowData) {
+                mInputData['opTp'] = "1";
+                mInputData['userId']  = window.dialogArguments.Args[0];
+                mInputData['menuId']  = gRowData.menuId;
+                mInputData['gwaCode'] = gRowData.subjCd;
+                mInputData['trCode']  = gRowData.trCode;
+                callService('/HANABANK/V1/COM/CM/COMCMO0400A.SVC', mInputData, function (outputData) {
+                    // if (outputData.result == "00") {}
+                    grdFavorite.deleteRow(gRowIdx);
+                });
+            }
+        }
+
+        function ChooseTRCode() {
+            retArr[0] = grdFavorite.getValue('trCode');
+            retArr[1] = grdFavorite.getValue('menuId');
+            window.returnValue = retArr;
+            window.close();
+        }
+    </script>
+</head>
+<body>
+    <input type="hidden" dsoname="prmDSOIn" fldname="FICM04_OP_GB" value="2">
+    <div id="container" style="left: 10px; top: 10px; width: 500px; height: 300px;">
+        <div class="textbox">
+            <div class="box">
+                <button class="add" onclick="fAddToMyFavorite();">Add Current TRX to my Favorite</button>
+                <button class="del" onclick="fDeleteFromMyFavorite();">Delete Selection from my Favorite</button>
+            </div>
+        </div>
+        <div id="gridbox">
+            <grid id="grdFavorite" dsoName="prmDSOOut" onenterkey="ChooseTRCode();" style="width: 100%; height: 100%; border: 0px solid gray;">
+                "options" : {
+                  "editable":false
+                  ,"columnHeight":20
+                  ,"cellHeight":20
+                  ,"fixColumn":0
+                  ,"conditionalstyle":""
+                  ,"aggregate":""
+                  ,"appendmode":false
+                  ,"autohiddencols":false
+                  ,"autofit":true
+                  ,"contextmenu":true
+                  ,"indicator":{"show":false,"width":30}
+                  ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                  ,"group":[]
+                  ,"columns" : [
+                    {"text":"Trx Code","field":"trCode","alignment":"center","width":100,"editor":{"type":"text","alignment":"center"},"type":"column","height":20,"editable":false,"visible":true,"sortable":true}
+                    ,{"text":"Trx Name","field":"menuName","alignment":"center","width":288,"editor":{"type":"text","alignment":"left"},"type":"column","height":20,"editable":false,"visible":true,"sortable":true}
+                    ,{"text":"Menu ID","field":"menuId","alignment":"center","width":288,"editor":{"type":"text","alignment":"center"},"type":"column","height":20,"editable":false,"visible":false,"sortable":true}
+                    ,{"text":"Subject Code","field":"subjCd","alignment":"center","width":288,"editor":{"type":"text","alignment":"center"},"type":"column","height":20,"editable":false,"visible":false,"sortable":true}
+                  ]
+                  ,"style" : {}
+                  ,"effect":{"columnHighlight":true}
+                  ,"size":{"vertScrollWidth":19}
+                  ,"footer":{"show":true,"height":24}
+                }
+            </grid>
+        </div>
+        <div id="close">
+            <button class="btn" onclick="window.close()">Close</button>
+        </div>
+    </div>
+</body>
+</html>

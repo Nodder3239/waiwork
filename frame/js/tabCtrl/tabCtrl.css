@@ -1,0 +1,168 @@
+.main-tab {
+    display: block;
+    height: 36px;
+    width: 100%;
+}
+.main-tab > .nav_container {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overflow-x: overlay;
+    float: left;
+    white-space: nowrap;
+}
+.main-tab > .nav_container > ul.tabs {
+    background-color: #ffffff;
+    display: block;
+    width: auto;
+    min-width: 100%;
+    height: 100%;
+    float: left;
+    border-bottom: 2px solid #008485;
+    padding-left: 0;
+    padding-top: 2px;
+}
+.main-tab > .nav_container > ul:after {
+    content: '';
+    clear: both;
+}
+.main-tab > .nav_container > ul.tabs > li {
+    display: inline-block;
+    position: relative;
+    padding: 4px 10px 4px 12px;
+    cursor: pointer;
+    text-align: center;
+    text-indent: 2px;
+    margin-top: 3px;
+    height: 96%;
+    color: #565656;
+    border-radius: 7px 7px 0 0;
+    border-bottom: 2px solid #008485;
+    background-color: rgba(222, 222, 222, 0.5176470588);
+    font-size: 0.8rem;
+    line-height: 1.9;
+    letter-spacing: 1px;
+    float: unset;
+    overflow: hidden;
+}
+.main-tab > .nav_container > ul.tabs > li:first-of-type {
+    margin-left: 10px;
+}
+.main-tab > .nav_container > ul.tabs > li:last-of-type {
+    margin-right: 40px;
+}
+
+.main-tab > .nav_container > ul.tabs > li > span.menuName {
+    display: inline-block;
+    width: 45px;
+}
+.main-tab > .nav_container > ul.tabs > li > span.lock {
+    display: block;
+    position: absolute;
+    top: 8px;
+    left: 5px;
+    width: 11px;
+    height: 11px;
+    background-image: url(./imgs/locked.png);
+    content: "";
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+/*--------- unlock -------- */
+
+.main-tab > .nav_container > ul.tabs > li > span.unlock {
+    display: block;
+    position: absolute;
+    top: 8px;
+    left: 5px;
+    width: 11px;
+    height: 13px;
+    background-image: url(./imgs/unlock.png);
+    content: "";
+    background-size: 8.5px 11px;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.main-tab > .nav_container > ul.tabs > li.current {
+    position: relative;
+    padding: 5px 20px;
+    background: #f5f7f7;
+    border: 2px solid #008485;
+    border-bottom: 0 !important;
+    color: #161616;
+    font-weight: 600;
+    height: 102%;
+    margin-top: 1px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    line-height: 1.8;
+}
+
+.main-tab > .nav_container > ul.tabs > li.current > span.close {
+    display: block;
+    position: absolute;
+    top: 9px;
+    right: 3px;
+    width: 14px;
+    height: 14px;
+    background-image: url(./imgs/input_close.png);
+    content: "";
+    background-size: 7px 7px;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.main-tab > .nav_container > ul.tabs > li.current > span.lock {
+    display: block;
+    position: absolute;
+    top: 9px;
+    left: 8px;
+    width: 12px;
+    height: 12px;
+    background-image: url(./imgs/locked.png);
+    content: "";
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+/*---------li.current >  unlock -------- */
+.main-tab > .nav_container > ul.tabs > li.current > span.unlock {
+    display: block;
+    position: absolute;
+    top: 9px;
+    left: 8px;
+    width: 13px;
+    height: 13px;
+    background-image: url(./imgs/unlock.png);
+    content: "";
+    background-size: 9px 12px;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.nav_container::-webkit-scrollbar { width: 3px;height: 6px; }
+.nav_container::-webkit-scrollbar-thumb {
+    outline: none;
+    border-radius: 0px;
+    border: 0px solid #656565;
+    box-shadow: inset 0px 0px 0 #9a9a9a;
+    /*background-color: #3d8d703b;*/
+}
+.nav_container::-webkit-scrollbar-track {
+    box-shadow: none;
+    /*background-color: #fff;*/
+    /*border-bottom: 1px solid #a7b5b5;*/
+}
+.nav_container:hover::-webkit-scrollbar-thumb {
+    /*background-color: #0b58a2;*/
+    border: 0px solid #656565;
+    box-shadow: inset 0px 0px 0 rgba(34, 34, 34, 0.438);
+    /*background-color: #3d8d7069;*/
+    background-color: #3d8d703b;
+}

@@ -1,0 +1,1 @@
+var TestServer = 'http://localhost:8080'; // Server domain

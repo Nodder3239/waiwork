@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorite</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="css/Favorite_p.css" />
+</head>
+<script>
+    function onLoadPage(isPopup){
+        txtOrg.value = "";
+        txtNew.value = "";
+        if (isPopup) {
+            // console.log("Args:",window.dialogArguments.Args);
+            let _org_trCd = window.dialogArguments.Args["org_trCd"];
+            let _org_fvNm = window.dialogArguments.Args["org_fvNm"];
+            let _new_trCd = window.dialogArguments.Args["new_trCd"];
+            let _new_fvNm = window.dialogArguments.Args["new_fvNm"];
+            cdOrg.value  = _org_trCd;
+            txtOrg.value = _org_fvNm;
+            cdNew.value  = _new_trCd;
+            txtNew.value = _new_fvNm;
+        }
+    }
+
+    function saveFavorite() {
+        var strInput = new Array(1);
+        // strInput[0] = window.dialogArguments.Args['org_scrnId']; // menuId
+        strInput[0] = txtNew.value; // fvrtNm
+        window.returnValue = strInput;
+        window.close();
+    }
+
+</script>
+<body style="overflow: hidden;">
+    <div id="container">
+        <div class="input-box">
+            <input type="text" class="fir code" id="cdOrg" readonly>
+            <input type="text" class="fir name" id="txtOrg" readonly>
+            <!-- <span class="text-clear"></span> -->
+            <input type="text" class="fir code" id="cdNew" readonly>
+            <input type="text" class="sec name" id="txtNew" spellcheck="false" autofocus>
+            <span class="clear"></span>
+        </div>
+        <div id="btn">
+            <button class="execute" onclick="saveFavorite();">Execute</button>
+            <button class="exit" onclick="window.close();">Exit</button>
+        </div>
+    </div>
+</body>
+</html>

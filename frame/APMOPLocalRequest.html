@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html style="width: 620px; height: 200px;">
+<head>
+    <meta charset="UTF-8">
+    <title>APMO Request Approval to manager</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <link href="./css/APM.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript">
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                Initialize();
+            }
+        }
+
+        function OVRDInfo(ovrd_msg, ovrd_gb, ovrd_cc, ovrd_detail_array) {
+            this.ovrd_msg = ovrd_msg;
+            this.ovrd_gb = ovrd_gb;
+            this.ovrd_cc = ovrd_cc.toString();
+            this.ovrd_detail_array = ovrd_detail_array;
+        }
+        
+        function Initialize() {
+            const MgrList = getMainCommData('OvrdInfo')?.mngrList ?? [];
+
+            const mgrData = MgrList.map(elem => {
+                return {
+                    mgr_id: elem.userId ?? '', // FMGRINFO_MNID
+                    mgr_nm: elem.userNm ?? '', // FMGRINFO_MNNM
+                    mgr_ip: elem.ipAdr ?? ''   // FMGRINFO_MNIP
+                };
+            });
+
+            cmbMGRID.setData(mgrData);
+
+            if (mgrData.length > 0) {
+                cmbMGRID.setSelectIndex(0);
+            }
+
+            /*
+            const OvrdInfo = getBizCommData('OvrdInfo');
+            const ovrdData = OvrdInfo.ovrdItm.map(elem => {
+                return {
+                    code: elem.ovrdCd,
+                    nm: elem.ovrdNm
+                };
+            });
+
+            grdMGRInfo.setData(ovrdData);
+            */
+        }
+
+        function fApprovalClick() {
+            const curMgrInfo = cmbMGRID.getSelected();
+            if (!curMgrInfo) {
+                showInfoDialog('Please select a manager.');
+                return;
+            }
+
+            if (txtPassword.value == '') {
+                ShowInfoDialog("Please input password..");
+                return;
+            }
+
+            const SysInfo = getMainCommData('SysInfo');
+            SysInfo.mnNo = curMgrInfo.mgr_id;
+            setMainCommData('SysInfo', SysInfo);
+            
+            $.ajax({
+                type: 'POST',
+                url: `${LIB().serverUrl}/LOGIN.SVC`,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    input: {
+                        userId: btoa(getMainCommData('SysInfo').userId),
+                        password: btoa(txtPassword.value)
+                    },
+                    SysInfo: {
+                        brNo: '',
+                        userId: getMainCommData('SysInfo').userId,
+                        trscDt: '',
+                        lnkIndvCanYn: '',
+                        scrnMsgPrnYn: '',
+                        sysLnggCd: '',
+                        dtFrmt: '',
+                        orgScrnId: ''
+                    },
+                    EtcInfo: {
+                        passwdLock: '0',
+                        loginDvCd: '1', // 로그인
+                        opDvCd: '2'  // 책임자 정보
+                    }
+                }),
+                success: function() {
+                    window.returnValue = true;
+                    window.close();
+                },
+                error: function(xhr) {
+                    try {
+                        //console.log(`${xhr.status} ${xhr.statusText}`);
+                        if (xhr.status == 401) {
+                            const passwdLock = xhr.responseJSON?.output?.failCount;
+                            if (passwdLock == "L") {
+                                throw new Error("Use suspended through password input mistake.");
+                            } else if (passwdLock == "I") {
+                                throw new Error("Service call failed.\n0\nInvalid User.");
+                            } else if (passwdLock >= 1) {
+                                throw new Error("Service call failed.\n0\nPASSWD|Invalid Password!");
+                            }
+                        } else {
+                            throw new Error(`${xhr.status} ${xhr.statusText}`);
+                        }
+                    } catch (e) {
+                        var errors = e.message.split("\n");
+                        if (errors.length == 3)
+                            if (errors[2].substr(0, 7) == "PASSWD|") {
+                                RetryPasswd++;
+                                if (RetryPasswd >= 3) {
+                                    fRejectClick();
+                                } else {
+                                    ShowErrorDialog("Invalid Password", "/Library.html", 0);
+                                }
+                            }
+                            else
+                            ShowErrorDialog(e.message, "/Library.html", 0);
+                        else
+                            ShowErrorDialog(e.message, "/Library.html", 0);
+                    }
+                }
+            });
+        }
+
+        function fRejectClick() {
+            window.returnValue = false;
+            window.close();
+        }
+    </script>
+</head>
+<body>
+    <div id="container" style="left: 0px; top: 0px; width: 620px; height: 200px;">
+        <div id="div1" style="position: absolute; left: 13px; top: 8px; width: 600px; height: 40px;">
+            <div id="topTxt" style="left: -30px; top: 0px; width: 408px; height: 18px;">Please input manager's id and manager's password.</div>
+        </div>
+        <div id="div2" class="topbarDiv" style="position: absolute; left: 13px; top: 56px; width: 600px; height: 40px;">
+            <label id="label1" class="registTop" style="position: absolute; left: 32px; top: 6px; width: 80px; height: 24px;">Manager</label>
+            <codecombo id="cmbMGRID" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" idField="mgr_id" textField="mgr_nm" panelWidth="360px" style="position: absolute; left: 120px; top: 6px; width: 160px; height: 24px;">
+                "columns":[{"field":"mgr_id","title":"ID","sortable":true,"align":"center","width":50},{"field":"mgr_nm","title":"Name","sortable":true,"align":"center","width":100},{"field":"mgr_ip","title":"IP","sortable":true,"align":"center","width":80}],
+                "data":[]
+            </codecombo>
+            <label class="registTop" id="label2" style="position: absolute; left: 312px; top: 6px; width: 80px; height: 24px;">Password</label>
+            <input id="txtPassword" type="password" maxlength="8" style="position: absolute; left: 400px; top: 6px; width: 150px; height: 24px;">
+        </div>
+        <div id="btn" style="position: absolute; left: 389px; top: 152px; width: 224px; height: 28px;">
+            <button class="confirm" onclick="fApprovalClick();" id="btnOK" style="width: 104px; height: 24px;">OK</button>
+            <button class="cancel" onclick="fRejectClick();" id="btnCancel" style="width: 104px; height: 24px;">Cancel</button>
+        </div>
+    </div>
+</body>
+</html>

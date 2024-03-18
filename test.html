@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <grid id="grid1" style="position: absolute; left: 24px; top: 52px; width: 1228px; height: 728px;">
+        "options" : {
+          "editable":false
+          ,"columnHeight":20
+          ,"cellHeight":20
+          ,"fixColumn":0
+          ,"aggregate":""
+          ,"appendmode":false
+          ,"autohiddencols":false
+          ,"autofit":false
+          ,"contextmenu":true
+          ,"indicator":{"show":false,"width":30}
+          ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+          ,"group":[]
+          ,"columns" : [
+            {"text":"Title","alignment":"center","width":223,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"title"}
+            ,{"text":"Authors","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"authors"}
+            ,{"text":"ISBN","alignment":"center","width":186,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"isbn"}
+            ,{"text":"Datetime","alignment":"center","width":227,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","style":"","filter":"","field":"datetime","editor":{"type":"date","equalBlank":"","dateOrder":"yyyymmdd","alignment":"left","dateSeparator":"-"}}
+            ,{"text":"Price","alignment":"center","width":204,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"currency","equalBlank":"","roundType":"round","alignment":"left","digits":"0"},"style":"","filter":"","field":"price"}
+            ,{"text":"Publisher","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"publisher"}
+          ]
+          ,"style":{}
+          ,"effect":{"columnHighlight":true}
+          ,"size":{"vertScrollWidth":19}
+          ,"footer":{"show":true,"height":24}
+          ,"conditionalstyle":[]
+        }
+    </grid>
+    <button id="button1" onclick="button1Click(event);" class="" style="position: absolute; left: 1148px; top: 24px; width: 104px; height: 24px;">Search</button>
+    <select id="select1" options="" style="position: absolute; left: 24px; top: 24px; width: 104px; height: 24px;">
+        <option value="title" label="Title" selected="selected"></option>
+        <option value="isbn" label="ISBN"></option>
+        <option value="publisher" label="Publisher"></option>
+    </select>
+    <input id="input1" style="position: absolute; left: 132px; top: 24px; width: 104px; height: 24px;">
+</body>
+</html>

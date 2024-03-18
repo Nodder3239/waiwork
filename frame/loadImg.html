@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HANA IMAGE</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="/wai/default.css">
+    <link rel="stylesheet" href="/css/Base.css">
+    <script type="text/javascript">
+        function LoadImg() {
+            var img_filenm = window.dialogArguments.Args[0];    
+            var img_url    = window.dialogArguments.Args[1];    
+            if (img_filenm && img_url) {
+                var HTM = "<DIV align='center'>" 
+                    + "<IMG src='"+img_url+img_filenm+"'>"
+                    + "</DIV>"
+                        
+                window.document.write(HTM);
+            }
+        }
+    </script>
+</head>
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" scroll="no" onLoad="LoadImg();">
+</body>
+</html>

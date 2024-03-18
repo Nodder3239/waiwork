@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html style="width: 1132px; height: 660px;">
+<head>
+    <meta charset="UTF-8">
+    <title>Request of Manager Approval list</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <link href="/frame/css/APM.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript">
+        let MGRReqData = [];
+        let RetryPasswd = 0;
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                setMGRReqData();
+                grdMGRReqList.setData(MGRReqData);
+                if (MGRReqData.length > 0) {
+                    grdMGRReqList.selectRow(MGRReqData.length - 1);
+                    RecordChange();
+                }
+            }
+        }
+        function setMGRReqData() {
+            MGRReqData = (APM().MGRMessages ?? []).map((MGRMsg, index) => {
+                return {
+                    IDX: index,
+                    UPMU_ID: MGRMsg.screenNum,
+                    REF_NO: MGRMsg.refNum,
+                    REQ_OP: MGRMsg.srcOp,
+                    REQ_IP: MGRMsg.srcIp,
+                    OVRD_GB: MGRMsg.contents?.ovrd_gb,
+                    OVRD_CC: MGRMsg.contents?.ovrd_cc,
+                    DETAIL: MGRMsg.contents?.ovrd_detail_array ?? [],
+                    STREAM: MGRMsg.Stream
+                };
+            });
+        }
+        function RecordChange() {
+            const selIdx = grdMGRReqList.getSelectIndex();
+            const MGRReqInfo = MGRReqData[selIdx];
+            // txtOVGB.value = selRow.OVRD_GB;
+            // txtOVCC.value = selRow.OVRD_CC;
+            InsertDetailRecord();
+            const imgStream = MGRReqInfo.STREAM;
+            if (imgStream) {
+                imgSCR.src = URL.createObjectURL(new Blob([imgStream.buffer], { type: 'image/png' }));
+            }
+        }
+        function InsertDetailRecord() {
+            const selIdx = grdMGRReqList.getSelectIndex();
+            const MGRReqInfo = MGRReqData[selIdx];
+            const MGRReqDetailData = (MGRReqInfo.DETAIL ?? []).map(elem => {
+                return {
+                    CODE: elem.ovrdCd,
+                    REM: elem.ovrdNm
+                };
+            });
+            grdMGRInfo.setData(MGRReqDetailData);
+        }
+        function updateMGRData() {
+            const selRow = grdMGRReqList.getSelection();
+            const tarIdx = selRow ? selRow.IDX : -1;
+            const tarMsg = tarIdx >= 0 ? APM().MGRMessages[tarIdx] : null;
+            setMGRReqData();
+            if (MGRReqData.length > 0) {
+                if (tarMsg) {
+                    grdMGRReqList.selectRow(tarIdx);
+                    RecordChange();
+                } else {
+                    grdMGRReqList.selectRow(MGRReqData.length - 1);
+                    RecordChange();
+                }
+            } else {
+                grdMGRInfo.clear();
+                imgSCR.src = '';
+            }
+            /*
+            setMGRReqData();
+            const selRow = grdMGRReqList.getSelection();
+            const tarKey = selRow ? selRow.KEY : null;
+            const tarIdx = tarKey ? MGRReqData.findIndex(elem => elem.KEY == tarKey) : -1;
+            grdMGRReqList.setData(MGRReqData);
+            if (MGRReqData.length > 0) {
+                if (tarIdx >= 0) {
+                    grdMGRReqList.selectRow(tarIdx);
+                    RecordChange();
+                } else {
+                    grdMGRReqList.selectRow(MGRReqData.length - 1);
+                    RecordChange();
+                }
+            } else {
+                grdMGRInfo.clear();
+                imgSCR.src = '';
+            }
+            */
+        }
+        /*
+        function AddMGRDataRow(MGRMsg) {
+            const MGRReqInfo = {
+                KEY: MGRMsg.srcIp + MGRMsg.srcOp,
+                UPMU_ID: MGRMsg.screenNum,
+                REF_NO: MGRMsg.refNum,
+                REQ_OP: MGRMsg.srcOp,
+                REQ_IP: MGRMsg.srcIp,
+                OVRD_GB: MGRMsg.contents?.ovrd_gb,
+                OVRD_CC: MGRMsg.contents?.ovrd_cc,
+                DETAIL: MGRMsg.contents?.ovrd_detail_array ?? [],
+                STREAM: MGRMsg.Stream
+            };
+            MGRReqData.push(MGRReqInfo);
+            grdMGRReqList.appendData([MGRReqInfo]);
+        }
+        function RemoveMGRDataRow(Index) {
+            // var DelNode = grdMGRReqList.XMLData.firstChild.childNodes(Index);
+            // if (DelNode != null) {
+            //     if (grdMGRReqList.RecordSet.RecordCount == 1){
+            //         //while (grdMGRInfo.XMLData.firstChild.childNodes.length > 0)
+            //         //   grdMGRInfo.XMLData.firstChild.removeChild(
+            //         //      grdMGRInfo.XMLData.firstChild.childNodes(0));
+            //         grdMGRInfo.XMLData.loadXML('');
+            //         grdMGRReqList.XMLData.loadXML('');
+            //         //grdMGRReqList.XMLData.firstChild.removeChild(DelNode);
+            //         RecCnt = 0;
+            //     }
+            //     else{
+            //         //while (grdMGRInfo.XMLData.firstChild.childNodes.length > 0)
+            //         //   grdMGRInfo.XMLData.firstChild.removeChild(
+            //         //      grdMGRInfo.XMLData.firstChild.childNodes(0));
+            //         grdMGRInfo.XMLData.loadXML('');
+            //         grdMGRReqList.XMLData.firstChild.removeChild(DelNode);
+            //         RecCnt--;
+            //     }
+            // }
+        }
+        */
+        function fApprovalClick() {
+            const reqCnt = grdMGRReqList.recordCount();
+            const reqInfo = grdMGRReqList.getSelection();
+            if (reqCnt == 0 || !reqInfo) {
+                ShowInfoDialog("There are no contents to approv..");
+                return;
+            }
+            if (txtPassword.value == '') {
+                ShowInfoDialog("Please input password..");
+                return;
+            }
+            $.ajax({
+                type: 'POST',
+                url: `${LIB().serverUrl}/LOGIN.SVC`,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    input: {
+                        userId: btoa(getMainCommData('SysInfo').userId),
+                        password: btoa(txtPassword.value)
+                    },
+                    SysInfo: {
+                        brNo: '',
+                        userId: getMainCommData('SysInfo').userId,
+                        trscDt: '',
+                        lnkIndvCanYn: '',
+                        scrnMsgPrnYn: '',
+                        sysLnggCd: '',
+                        dtFrmt: '',
+                        orgScrnId: ''
+                    },
+                    EtcInfo: {
+                        passwdLock: '0',
+                        loginDvCd: '1', // 로그인
+                        opDvCd: '2'  // 책임자 정보
+                    }
+                }),
+                success: function() {
+                    // Approval
+                    APM().SendMGRRespYMessage(reqInfo.REQ_IP,
+                                            reqInfo.REQ_OP,
+                                            getMainCommData('EtcInfo').thid,   // GET_COMM_DATA("FXFIG_COM", "FXFIG_THID"),   // OP IP
+                                            getMainCommData('SysInfo').userId, // GET_COMM_DATA("FXFIG_COM", "FXFIG_OPNO"),   // OP ID
+                                            reqInfo.UPMU_ID,
+                                            reqInfo.REF_NO);
+                    // Delete Information
+                    APM().RemoveMGRDataRow(APM().MGRMessages[reqInfo.IDX]);
+                    // Close
+                    if (APM().MGRMessages.length == 0) {
+                        window.close();
+                    }
+                },
+                error: function(xhr) {
+                    try {
+                        //console.log(`${xhr.status} ${xhr.statusText}`);
+                        if (xhr.status == 401) {
+                            const passwdLock = xhr.responseJSON?.output?.failCount;
+                            if (passwdLock == "L") {
+                                throw new Error("Use suspended through password input mistake.");
+                            } else if (passwdLock == "I") {
+                                throw new Error("Service call failed.\n0\nInvalid User.");
+                            } else if (passwdLock >= 1) {
+                                throw new Error("Service call failed.\n0\nPASSWD|Invalid Password!");
+                            }
+                        } else {
+                            throw new Error(`${xhr.status} ${xhr.statusText}`);
+                        }
+                    } catch (e) {
+                        var errors = e.message.split("\n");
+                        if (errors.length == 3)
+                            if (errors[2].substr(0, 7) == "PASSWD|") {
+                                RetryPasswd++;
+                                if (RetryPasswd >= 3) {
+                                    fRejectClick();
+                                } else {
+                                    ShowErrorDialog("Invalid Password", "/Library.html", 0);
+                                }
+                            }
+                            else
+                            ShowErrorDialog(e.message, "/Library.html", 0);
+                        else
+                            ShowErrorDialog(e.message, "/Library.html", 0);
+                    }
+                }
+            });
+        }
+        function fRejectClick() {
+            const reqCnt = grdMGRReqList.recordCount();
+            const reqInfo = grdMGRReqList.getSelection();
+            if (reqCnt == 0 || !reqInfo) {
+                ShowInfoDialog("There are no contents to reject..");
+                return;
+            }
+            // Reject
+            APM().SendMGRRespNMessage(reqInfo.REQ_IP,
+                                      reqInfo.REQ_OP,
+                                      getMainCommData('EtcInfo').thid,   // GET_COMM_DATA("FXFIG_COM", "FXFIG_THID"),   // OP IP
+                                      getMainCommData('SysInfo').userId, // GET_COMM_DATA("FXFIG_COM", "FXFIG_OPNO"),   // OP ID
+                                      reqInfo.UPMU_ID,
+                                      reqInfo.REF_NO);
+            // Delete Information
+            APM().RemoveMGRDataRow(APM().MGRMessages[reqInfo.IDX]);
+            // Close
+            if (APM().MGRMessages.length == 0) {
+                window.close();
+            }
+        }
+        function onBeforeClose() {
+            APM().MGRListWnd = {};
+        }
+    </script>
+</head>
+<body>
+    <div id="container" style="border: 12px solid rgb(250, 118, 118);">
+        <grid id="grdMGRReqList" onrecordchange="RecordChange();" style="position: absolute; left: 16px; top: 16px; width: 708px; height: 133px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":true
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"group":[]
+              ,"columns" : [
+                {"text":"Request Transaction Code","alignment":"center","width":170,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"center","equalBlank":""},"style":"","filter":"","field":"UPMU_ID"}
+                ,{"text":"Request User","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"REQ_OP"}
+                ,{"text":"Request IP","alignment":"center","width":100,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"REQ_IP"}
+                ,{"text":"Request Type","alignment":"center","width":140,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"OVRD_GB"}
+                ,{"text":"Request count","alignment":"center","width":110,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"center","equalBlank":""},"style":"","filter":"","field":"OVRD_CC"}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+              ,"conditionalstyle":[]
+            }
+        </grid>
+        <grid id="grdMGRInfo" anchor="LeftRight" style="position: absolute; left: 728px; right: 16px; top: 16px; height: 133px; width: 388px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":true
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"group":[]
+              ,"columns" : [
+                {"text":"Code","alignment":"center","width":60,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"center","equalBlank":""},"style":"","filter":"","field":"CODE"}
+                ,{"text":"Content","alignment":"center","width":300,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"REM"}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+              ,"conditionalstyle":[]
+            }
+        </grid>
+        <div style="position: absolute; left: 16px; top: 154px; right: 16px; bottom: 60px; overflow: auto; border-width: 1px; border-style: solid; border-color: rgb(211, 211, 211); background-color: rgb(255, 255, 255);">
+            <img id="imgSCR" style="position: absolute; top: 0px; left: 0px;">
+        </div>
+        <div class="infoIngray" id="divPassword" style="position: absolute; left: 16px; right: 16px; bottom: 18px; width: auto; height: 36px;">
+            <input id="txtPassword" type="password" onkeydown="if (event.keyCode == 13) { fApprovalClick(); }" placeholder="Input password" style="position: absolute; left: 8px; top: 5px; width: 288px; height: 24px;">
+            <input id="ApprovalBtn" class="greenBtn" value="Approval" type="button" onclick="fApprovalClick();" style="position: absolute; left: 300px; top: 5px; width: 104px; height: 24px;">
+            <input id="RejectionBtn" value="Rejection" type="button" class="redBtn" onclick="fRejectClick();" style="position: absolute; right: 10px; top: 5px; width: 104px; height: 24px;">
+        </div>
+    </div>
+</body>
+</html>

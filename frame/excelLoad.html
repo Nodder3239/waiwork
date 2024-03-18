@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html style="width: 450px; height: 222px;">
+<head>
+    <meta charset="UTF-8">
+    <title>Excel Down Load Management</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="/biz/cg/commonCG.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <script>
+        /* Gobal */                                               
+        var gBizDate = LIB().Util.DateToLocal(getMainCommData('SysInfo').procBascDt, "YYYY/MM/DD", "S");
+        var gBrNo    = getMainCommData('SysInfo').acBrNo;
+        var gOpNo    = getMainCommData('SysInfo').userId;
+
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                fInitProc();
+                fDialogInit();
+            }
+        }
+
+        /*Document Initialize */
+        function fInitProc() {
+            window.returnValue = false;
+        }
+
+        /*Document PopUp Load */
+        function fDialogInit() {
+            mskIB_IL.value = gBizDate;
+            mskOP_NO.value = gOpNo;
+            mskBR_NO.value = gBrNo;
+
+            if (window.dialogArguments.Args[0] != "") {
+                DSO['CGO9901.prmInInq'].fields("menuId").value = window.dialogArguments.Args[0];
+            }
+
+            mskREMARK.focus();
+        }
+
+        function fOnClick(event) {
+            var eventObj = event.srcElement;
+
+            if (eventObj.id == "btnConfirm") {
+
+                const inputData = {
+                    "menuId" : DSO['CGO9901.prmInInq'].fields("menuId").value,
+                    "remark" : DSO['CGO9901.prmInInq'].fields("remark").value, 
+                    "mngNo"  : DSO['CGO9901.prmInInq'].fields("mngNo").value
+                }
+
+                callService(gServiceUrl + 'COMCGO9901' +  gRegCode, inputData, function(output) {
+                    window.returnValue = true;
+                    window.close();
+                });
+
+            } else if (eventObj.id == "btnCancel") {
+                window.close();
+
+            }
+        }
+
+        function fOnKeyPress(event) {
+            event.keyCode = String.fromCharCode(event.keyCode).toUpperCase().charCodeAt(0);
+        }
+    </script>
+</head>
+<body>
+    <div class="popsbarDiv" style="left: 24px; top: 24px; position: absolute; width: 400px; height: 172px;">
+        <label class="searchTop" lang="Date" style="position: absolute; width: 80px; height: 24px; left: 0px; top: 16px;">
+        Date
+        <input class="readonly" height="0" maxlength="10" size="1" type="text" width="0" readonly id="mskIB_IL" style="position: absolute; width: 100px; left: 84px; top: 0px; height: 24px;">
+        </label>
+        <label class="searchTop" lang="OpNo" style="position: absolute; width: 80px; height: 24px; left: 188px; top: 16px;">
+        Op No
+        <input class="readonly" height="0" maxlength="7" size="1" type="text" width="0" readonly id="mskOP_NO" style="position: absolute; width: 100px; left: 84px; top: 0px; height: 24px;">
+        </label>
+        <label class="searchTop" lang="BrNo" style="position: absolute; width: 80px; height: 24px; left: 0px; top: 44px;">
+        Br No
+        <input class="readonly" height="0" maxlength="4" size="1" type="text" width="0" readonly id="mskBR_NO" style="position: absolute; width: 100px; left: 84px; top: 0px; height: 24px;">
+        </label>
+        <label class="searchTop" lang="TrxCode" style="position: absolute; width: 80px; height: 24px; left: 188px; top: 44px;">
+        Trx Code
+        <input class="readonly" height="0" maxlength="4" size="1" type="text" width="0" readonly fldname="menuId" dsoname="CGO9901.prmInInq" id="mskMENU_ID" style="position: absolute; width: 100px; left: 84px; top: 0px; height: 24px;">
+        </label>
+        <label class="searchTop" lang="MngNo" style="position: absolute; width: 80px; height: 24px; left: 0px; top: 72px;">
+        Mng No
+        <input height="0" maxlength="7" size="1" type="text" width="0" fldname="mngNo" dsoname="CGO9901.prmInInq" onkeypress="fOnKeyPress(event)" id="mskMNG_NO" style="position: absolute; width: 100px; left: 84px; top: 0px; height: 24px;">
+        </label>
+        <label class="searchTop" lang="Remark" style="position: absolute; width: 80px; height: 24px; left: 0px; top: 100px;">
+        Remark
+        <input height="0" maxlength="200" size="1" type="text" width="0" fldname="remark" dsoname="CGO9901.prmInInq" onkeypress="fOnKeyPress(event)" id="mskREMARK" style="position: absolute; width: 280px; left: 84px; top: 0px; height: 24px;">
+        </label>
+        <input class="greenBtn" onclick="fOnClick(event);" type="button" id="btnConfirm" value="Confirm" style="position: absolute; width: 104px; height: 24px; left: 104px; top: 136px;">
+        <input class="greenBtn" onclick="fOnClick(event);" type="button" id="btnCancel" value="Cancel" style="position: absolute; width: 104px; height: 24px; left: 210px; top: 136px;">
+    </div>
+</body>
+</html>

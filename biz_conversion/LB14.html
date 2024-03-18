@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html style="width: 906px; height: 604px;">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/css/Base_old.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="/biz/dt/commonDT.js"></script>
+    <script type="text/javascript">
+    // Dynamic-SQL Components generate
+    var wasSQLDSO = new $wai.classes.DSQLService(); //{"transcode":"COMMON"}
+    var wasSQLDSOdt = new $wai.classes.DSQLService(); //{"transcode":"COMMON"}
+    </script>
+    <script type="text/javascript">
+    /*20220912_Joel - Add Variable for Scheduling [S]*/
+    var instObj = {};
+    var gTargetSeq = 0;
+    gBizDate = LIB().Util.DateToLocal(GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL"), "YYYY/MM/DD", "S");
+    var gSQLStmt   = '';
+    var gRec       = '';
+    /*20220912_Joel [E]*/
+    /*--------------------------------------*/
+    /*               ActionManager          */
+    /*--------------------------------------*/
+    function ActionOnActive()
+    {
+        parent.ActionLsnr.ActionManager = AMan;
+    }
+    /*--------------------------------------*/
+    /*                 Main                 */
+    /*--------------------------------------*/
+    function actExecute(actid)
+    {
+        switch(actid)
+        {
+            case 1 : // Entry
+                     break;
+            case 2 : // Cancel
+                     break;
+            case 5 : // Account Inquiry
+                     break;
+            case 6 : // Execute
+                     fExecute();
+                     break;
+            case 7 : // Clear
+                     fInitClear();
+                     if (parent.OPStatus == 0)
+                     {
+                     }
+                     else
+                     {
+                     }
+                     break;
+            default : //
+                     ShowInfoDialog('Execution type error. Select left execution mode button again.');
+                     break;
+        }
+    }
+    /*--------------------------------------*/
+    /* Initaillize                          */
+    /*--------------------------------------*/
+    function fInitProc()
+    {
+        if (window.dialogArguments) return;
+        prmDsoIn.recordset.addNew();
+        fInitClear();
+        LIB().InitCB(cbbFICM26_APV_ST_CD);
+        LIB().InitCB(cbbTENOR_UNIT);
+        LIB().InitCB(cbbINST_UNIT);
+        LIB().InitCB(cbbEXCEP_YN);
+        cbbFICM26_APV_ST_CD.value = "01";
+    }
+    function fDtls_Cd()
+    {
+        fClear_grid("1");
+    }
+    /*--------------------------------------*/
+    /* Clear Grid                           */
+    /*--------------------------------------*/
+    function fClear_grid(chk_gb)
+    {
+        if(chk_gb == "1")
+        {
+            grdDataGrid.setRecordset(null);
+            prmDsoOut.clear();
+        }
+        txtPRD_CD_IN.value   = "";
+        cedSTR_AMT.value     = "";
+        cedEND_AMT.value     = "";
+        txtTNR_INC_CD.value  = "";
+        txtTNR_STR.value     = "";
+        txtTNR_END.value     = "";
+        txtTNR_INC.value     = "";
+        cbbTENOR_UNIT.value  = "";
+        txtINST_STR.value    = "";
+        txtINST_END.value    = "";
+        txtINST_INC.value    = "";
+        cbbINST_UNIT.value   = "";
+        dtpAPCL_STR_DT.value = "";
+        cbbEXCEP_YN.value    = "";
+        if(txtPRD_CD_IN.value == null || txtPRD_CD_IN.value == "")
+        {
+            txtPRD_NM_IN.value = "";
+        }
+    }
+    /******************************************************/
+    /* Initailize page                                    */
+    /******************************************************/
+    function fInitClear()
+    {
+        grdDataGrid.setRecordset(null);
+        prmDsoOut.clear();
+        txtFICM26_PRD_CD.value = "";
+        txtFICM26_PRD_NM.value = "";
+        txtFICM26_LMT_AMT.value = "";
+        txtPRD_CD_IN.value   = "";
+        txtPRD_NM_IN.value   = "";
+        cedSTR_AMT.value     = "";
+        cedEND_AMT.value     = "";
+        txtTNR_INC_CD.value  = "";
+        txtTNR_STR.value     = "";
+        txtTNR_END.value     = "";
+        txtTNR_INC.value     = "";
+        cbbTENOR_UNIT.value  = "";
+        txtINST_STR.value    = "";
+        txtINST_END.value    = "";
+        txtINST_INC.value    = "";
+        cbbINST_UNIT.value   = "";
+        cbbEXCEP_YN.value    = "";
+        dtpAPCL_STR_DT.value = "";
+        dtpSTR_DT_IN.value = LIB().Util.DateToLocal(gBizDate, "MM/DD/YYYY", "S");
+        cbbFICM26_APV_ST_CD.value = "01";
+    }
+    function fSearchInit ()
+    {
+        gCountIndex = 1;
+    }
+    /*20220912_Joel - Add Zero for Time [S]*/
+    function addZero(i) {
+      if (i < 10) {i = "0" + i}
+      return i;
+    }
+    /*20220912_Joel [E]*/
+    /*20220912_Joel - Add Validation Input Check Data [S]*/
+    function fChkData()
+    {
+        var minwan_end_dt = "";
+        var minwan2 = ""
+        var gridstrdt = LIB().Util.DateToLocal(prmDsoOut.recordset.fields("FOCM26_APCL_STR_DT").value, "YYYY/MM/DD", "S");
+        var gridenddt = LIB().Util.DateToLocal(prmDsoOut.recordset.fields("FOCM26_APCL_END_DT").value, "YYYY/MM/DD", "S");
+        var inputdt = LIB().Util.DateToLocal(dtpAPCL_STR_DT.value, "MM/DD/YYYY", "S");
+        gSQLStmt = "";
+        gSQLStmt += "SELECT TO_CHAR(to_date('"+dtpAPCL_STR_DT.value+"','MM/DD/YYYY')-1, 'YYYY/MM/DD') as MINWAN, TO_CHAR(to_date('"+dtpAPCL_STR_DT.value+"','MM/DD/YYYY')-1, 'MM/DD/YYYY') as MINWANTU FROM DUAL";
+        wasSQLDSOdt.sql = gSQLStmt;
+        gRec = '';
+        gRec = wasSQLDSOdt.recordset;
+        minwan_end_dt = gRec.fields("MINWAN").value;
+        minwan2 = gRec.fields("MINWANTU").value;
+        if(inputdt > gBizDate && inputdt > gridstrdt)
+        {
+            prmDsoOut.recordset.fields("FOCM26_APCL_END_DT").value = minwan_end_dt;
+            prmDsoOut.recordset.fields("FOCM26_TRX_CD").value      = "U";
+            prmDsoOut.recordset.update();
+            prmDsoOut.recordset.addNew();
+            prmDsoOut.recordset.fields("FOCM26_TRX_CD").value      = "I";
+            prmDsoOut.recordset.update();
+            return true;
+        }
+        else if(inputdt == gridstrdt || (gridstrdt < gBizDate && inputdt == gBizDate))
+        {
+            prmDsoOut.recordset.fields("FOCM26_TRX_CD").value      = "U";
+            prmDsoOut.recordset.update();
+            return true;
+        }
+        else if(inputdt >= gBizDate && inputdt < gridstrdt)
+        {
+            gSQLStmt = '';
+            gSQLStmt = gSQLStmt + " SELECT COUNT(*) AS CNT                                                                     ";
+            gSQLStmt = gSQLStmt + " FROM ADST_LNB_TENOR_MTRX                                                                   ";
+            gSQLStmt = gSQLStmt + " WHERE PRD_CD = '"+  txtPRD_CD_IN.value + "'                                                ";
+            gSQLStmt = gSQLStmt + "   AND to_date('"+dtpAPCL_STR_DT.value+"','MM/DD/YYYY') BETWEEN APCL_STR_DT AND APCL_END_DT ";
+            gSQLStmt = gSQLStmt + "   AND ( " + cedSTR_AMT.value + " BETWEEN APCL_STR_AMT AND APCL_END_AMT                     ";
+            gSQLStmt = gSQLStmt + "     OR  " + cedEND_AMT.value + " BETWEEN APCL_STR_AMT AND APCL_END_AMT )                   ";
+            gSQLStmt = gSQLStmt + "   AND ( " + txtTNR_STR.value + " BETWEEN TENOR_STR_VLU AND TENOR_END_VLU                   ";
+            gSQLStmt = gSQLStmt + "     OR  " + txtTNR_END.value + " BETWEEN TENOR_STR_VLU AND TENOR_END_VLU )                 ";
+            gSQLStmt = gSQLStmt + "   AND APV_ST_CD = '01'                                                                     ";
+            wasSQLDSO.sql = gSQLStmt;
+            gRec = '';
+            gRec = wasSQLDSO.recordset;
+            var val = gRec.fields("CNT").value;
+            if(val > 0)
+            {
+                ShowInfoDialog('Duplicated. Data Exist');
+                return false;
+            }
+            prmDsoOut.recordset.fields("FOCM26_TRX_CD").value      = "U";
+            prmDsoOut.recordset.update();
+            return true;
+        }
+        else if(gridstrdt > gridenddt)
+        {
+            ShowInfoDialog('Cannot Set Start Date Greater Than End Date.');
+            fSelect();
+            return false;
+        }
+        else if(gridstrdt > minwan2)
+        {
+            ShowInfoDialog('Cannot Set End Date Earlier Than Start Date.');
+            fSelect();
+            return false;
+        }
+        else
+        {
+            ShowInfoDialog('False Input.');
+            fSelect();
+            return false;
+        }
+    }
+    /*20220912_Joel [E]*/
+    /******************************************************/
+    /*fExecute Button Cilck                               */
+    /******************************************************/
+    function fExecute()
+    {
+        var op_no    = "";
+        var sBizDate = "";
+        var sBizTime = "";
+        var curDate  = "";
+        var apcl_str_dt = "";
+        var h = "";
+        var m = "";
+        var s = "";
+        curDate = new Date();
+        h = addZero(curDate.getHours());
+        m = addZero(curDate.getMinutes());
+        s = addZero(curDate.getSeconds());
+        op_no    = GET_COMM_DATA("FXFIG_COM","FXFIG_OPNO", 0);
+        sBizTime = h + ":" + m + ":" + s;
+        gSQLStmt = "";
+        gSQLStmt += "SELECT TO_CHAR(to_date('"+gBizDate+"','MM/DD/YYYY'), 'YYYY/MM/DD') as cgBizDate FROM DUAL";
+        wasSQLDSOdt.sql = gSQLStmt;
+        gRec = '';
+        gRec = wasSQLDSOdt.recordset;
+        sBizDate = gRec.fields("cgBizDate").value;
+        prmDsoOut.recordset.moveFirst();
+        prmDsoIn1.clear();
+        prmDsoIn2.clear();
+        /** set prmDsoIn1 **/
+        prmDsoIn1.recordset.addNew();
+        prmDsoIn1.recordset.fields("FICM26_PROC_GB").value = "2";
+        prmDsoIn1.recordset.update();
+        for(var i = 0; i < prmDsoOut.recordset.recordCount; i++)
+        {
+            prmDsoIn2.recordset.addNew();
+            /** set prmDsoIn2 **/
+            prmDsoIn2.recordset.fields("FICM26_TRX_CD").value           = prmDsoOut.recordset.fields("FOCM26_TRX_CD").value;
+            prmDsoIn2.recordset.fields("FICM26_APCL_STR_AMT").value     = prmDsoOut.recordset.fields("FOCM26_APCL_STR_AMT").value;
+            prmDsoIn2.recordset.fields("FICM26_APCL_END_AMT").value     = prmDsoOut.recordset.fields("FOCM26_APCL_END_AMT").value;
+            prmDsoIn2.recordset.fields("FICM26_PRD_CD").value           = prmDsoOut.recordset.fields("FOCM26_PRD_CD").value;
+            prmDsoIn2.recordset.fields("FICM26_APV_ST_CD").value        = prmDsoOut.recordset.fields("FOCM26_APV_ST_CD").value;
+            prmDsoIn2.recordset.fields("FICM26_TENOR_STR_VLU").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_STR_VLU").value;
+            prmDsoIn2.recordset.fields("FICM26_TENOR_END_VLU").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_END_VLU").value;
+            prmDsoIn2.recordset.fields("FICM26_TENOR_ICRS_VLU").value   = prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_VLU").value;
+            prmDsoIn2.recordset.fields("FICM26_TENOR_ICRS_CD").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_CD").value;
+            prmDsoIn2.recordset.fields("FICM26_TENOR_UNIT_CD").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_UNIT_CD").value;
+            prmDsoIn2.recordset.fields("FICM26_INSTALL_STR_VLU").value  = prmDsoOut.recordset.fields("FOCM26_INSTALL_STR_VLU").value;
+            prmDsoIn2.recordset.fields("FICM26_INSTALL_END_VLU").value  = prmDsoOut.recordset.fields("FOCM26_INSTALL_END_VLU").value;
+            prmDsoIn2.recordset.fields("FICM26_INSTALL_ICRS_VLU").value = prmDsoOut.recordset.fields("FOCM26_INSTALL_ICRS_VLU").value;
+            prmDsoIn2.recordset.fields("FICM26_INSTALL_UNIT_CD").value  = prmDsoOut.recordset.fields("FOCM26_INSTALL_UNIT_CD").value;
+            prmDsoIn2.recordset.fields("FICM26_APCL_STR_DT").value      = prmDsoOut.recordset.fields("FOCM26_APCL_STR_DT").value;
+            prmDsoIn2.recordset.fields("FICM26_APCL_END_DT").value      = prmDsoOut.recordset.fields("FOCM26_APCL_END_DT").value;
+            prmDsoIn2.recordset.fields("FICM26_EXCEPTION_YN").value     = prmDsoOut.recordset.fields("FOCM26_EXCEPTION_YN").value;
+            if( prmDsoIn2.recordset.fields("FICM26_TRX_CD").value != "I")
+            {
+                prmDsoIn2.recordset.fields("FICM26_BF_APCL_STR_AMT").value     = prmDsoOut.recordset.fields("FOCM26_BF_APCL_STR_AMT").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_APCL_END_AMT").value     = prmDsoOut.recordset.fields("FOCM26_BF_APCL_END_AMT").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_PRD_CD").value           = prmDsoOut.recordset.fields("FOCM26_BF_PRD_CD").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_TENOR_STR_VLU").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_STR_VLU").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_TENOR_END_VLU").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_END_VLU").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_TENOR_ICRS_VLU").value   = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_ICRS_VLU").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_TENOR_ICRS_CD").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_ICRS_CD").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_TENOR_UNIT_CD").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_UNIT_CD").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_INSTALL_STR_VLU").value  = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_STR_VLU").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_INSTALL_END_VLU").value  = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_END_VLU").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_INSTALL_ICRS_VLU").value = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_ICRS_VLU").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_INSTALL_UNIT_CD").value  = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_UNIT_CD").value;
+                prmDsoIn2.recordset.fields("FICM26_BF_END_DT").value           = prmDsoOut.recordset.fields("FOCM26_BF_END_DT").value;
+            }
+            prmDsoIn2.recordset.fields("FICM26_REG_EMP_NO").value       = op_no;
+            prmDsoIn2.recordset.fields("FICM26_REG_DT").value           = sBizDate;
+            prmDsoIn2.recordset.fields("FICM26_REG_TM").value           = sBizTime;
+            prmDsoIn2.recordset.update();
+            prmDsoOut.recordset.moveNext();
+        }
+        ivkSvc.call();
+        /*fSelect();*/
+   }
+    /*--------------------------------------*/
+    /*             Product Search           */
+    /*--------------------------------------*/
+    function fPfSelect_in( type )
+    {
+        var DArg  = new DArgument();         //Argument
+        DArg.Args = new Array(1);            //Argument
+        //DArg.Args[0]  = "01";
+        var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 500px; dialogWidth: 910px;";
+        var Result = window.showModalDialog(LIB().GetTransURL('pf/PF0011.html'), DArg, strWinSts);
+        if(Result != null) {
+            if( type == 'S' )
+            {
+                txtFICM26_PRD_CD.value = Result[1];
+                txtFICM26_PRD_NM.value = Result[2];
+            }
+            else
+            {
+                txtPRD_CD_IN.value = Result[1];
+                txtPRD_NM_IN.value = Result[2];
+            }
+        }
+    }
+    /*--------------------------------------*/
+    /*             DoubleClick              */
+    /*--------------------------------------*/
+    function fGridDblClick()
+    {
+        /*
+        txtGRP_NO.value      = prmDsoOut.recordset.fields("FOCM26_GROUP_NO").value;
+        txtGRD_NO.value      = prmDsoOut.recordset.fields("FOCM26_GRADE_NO").value;
+        */
+        gSQLStmt = "";
+        gSQLStmt += "SELECT TO_CHAR(to_date('"+prmDsoOut.recordset.fields("FOCM26_APCL_STR_DT").value+"','YYYY/MM/DD'), 'MM/DD/YYYY') as d_apcl_str_dt FROM DUAL";
+        wasSQLDSOdt.sql = gSQLStmt;
+        gRec = '';
+        gRec = wasSQLDSOdt.recordset;
+        apcl_str_dt = gRec.fields("d_apcl_str_dt").value;
+        cedSTR_AMT.value     = prmDsoOut.recordset.fields("FOCM26_APCL_STR_AMT").value;
+        cedEND_AMT.value     = prmDsoOut.recordset.fields("FOCM26_APCL_END_AMT").value;
+        txtPRD_CD_IN.value   = prmDsoOut.recordset.fields("FOCM26_PRD_CD").value;
+        txtPRD_NM_IN.value   = prmDsoOut.recordset.fields("FOCM26_PRD_NM").value;
+        txtTNR_STR.value     = prmDsoOut.recordset.fields("FOCM26_TENOR_STR_VLU").value;
+        txtTNR_END.value     = prmDsoOut.recordset.fields("FOCM26_TENOR_END_VLU").value;
+        txtTNR_INC.value     = prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_VLU").value;
+        txtTNR_INC_CD.value  = prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_CD").value;
+        cbbTENOR_UNIT.value  = prmDsoOut.recordset.fields("FOCM26_TENOR_UNIT_CD").value;
+        txtINST_STR.value    = prmDsoOut.recordset.fields("FOCM26_INSTALL_STR_VLU").value;
+        txtINST_END.value    = prmDsoOut.recordset.fields("FOCM26_INSTALL_END_VLU").value;
+        txtINST_INC.value    = prmDsoOut.recordset.fields("FOCM26_INSTALL_ICRS_VLU").value;
+        cbbINST_UNIT.value   = prmDsoOut.recordset.fields("FOCM26_INSTALL_UNIT_CD").value;
+        dtpAPCL_STR_DT.value = apcl_str_dt;
+        cbbEXCEP_YN.value    = prmDsoOut.recordset.fields("FOCM26_EXCEPTION_YN").value;
+        instObj.instStr  = txtINST_STR.value ;
+        instObj.instEnd  = txtINST_END.value ;
+        instObj.instInc  = txtINST_INC.value ;
+        instObj.instUnit = cbbINST_UNIT.value;
+        gTargetSeq = 1;
+    }
+    /*20220912_Joel - Add function for Checking Input Data [S]*/
+    function fChkInput(gb)
+    {
+        if(txtTNR_STR.value     == ""
+        || txtTNR_END.value     == ""
+        || txtTNR_INC.value     == ""
+        || txtTNR_INC_CD.value  == ""
+        || cbbTENOR_UNIT.value  == ""
+        || txtINST_STR.value    == ""
+        || txtINST_END.value    == ""
+        || txtINST_INC.value    == ""
+        || cbbINST_UNIT.value   == ""
+        || cedSTR_AMT.value     == ""
+        || cedEND_AMT.value     == ""
+        || cbbEXCEP_YN.value    == "")
+        {
+            if(gb == "I")
+            {
+                ShowInfoDialog("Input the data.");
+            }
+            else
+            {
+                ShowInfoDialog("Choose the data.");
+            }
+            return false;
+        }
+        if(txtTNR_INC_CD.value != "+" && txtTNR_INC_CD.value != "*")
+        {
+            ShowInfoDialog("Set Tenor Increase Code as '+' or '*' ");
+            return false;
+        }
+        if(gb == 'U' || gb == 'I')
+        {
+            if( gBizDate > dtpAPCL_STR_DT.value )
+            {
+                ShowInfoDialog('Can Not Set Date Earlier Than Today : '+ gBizDate);
+                dtpAPCL_STR_DT.value = gBizDate;
+                return false;
+            }
+            if(gb == 'U' && gTargetSeq == 0)
+            {
+                ShowInfoDialog("Select Row First Before Update");
+                return false;
+            }
+        }
+        else if (gb == 'D')
+        {
+            gSQLStmt = "";
+            gSQLStmt += "SELECT TO_CHAR(to_date('"+prmDsoOut.recordset.fields("FOCM26_BF_STR_DT").value+"','YYYY/MM/DD'), 'MM/DD/YYYY') as bf_apcl_str_dt, TO_CHAR(to_date('"+gBizDate+"','MM/DD/YYYY'), 'YYYY/MM/DD') as cgBizDate FROM DUAL";
+            wasSQLDSOdt.sql = gSQLStmt;
+            gRec = '';
+            gRec = wasSQLDSOdt.recordset;
+            var cgBizDate = gRec.fields("cgBizDate").value;
+            var bf_str_dt = gRec.fields("bf_apcl_str_dt").value;
+            if(gTargetSeq == 0)
+            {
+                ShowInfoDialog("Select Row First Before Update");
+                return false;
+            }
+            if(prmDsoOut.recordset.fields("FOCM26_BF_END_DT").value == '9999/12/31')
+            {
+                ;
+            }
+            else
+            {
+                if(prmDsoOut.recordset.fields("FOCM26_BF_END_DT").value < cgBizDate)
+                {
+                    ;
+                }
+                else
+                {
+                    gSQLStmt = '';
+                    gSQLStmt = gSQLStmt + " SELECT COUNT(*) AS CNT                                                                                  ";
+                    gSQLStmt = gSQLStmt + " FROM ADST_LNB_TENOR_MTRX                                                                                ";
+                    gSQLStmt = gSQLStmt + " WHERE PRD_CD = '"+  txtPRD_CD_IN.value + "'                                                             ";
+                    gSQLStmt = gSQLStmt + "   AND APCL_STR_AMT = "+cedSTR_AMT.value                                                                  ;
+                    gSQLStmt = gSQLStmt + "   AND APCL_END_AMT = "+cedEND_AMT.value                                                                  ;
+                    gSQLStmt = gSQLStmt + "   AND APCL_STR_DT = TO_DATE('"+prmDsoOut.recordset.fields("FOCM26_BF_END_DT").value+"', 'YYYY/MM/DD')+1 ";
+                    gSQLStmt = gSQLStmt + "   AND APV_ST_CD = '01'                                                                                  ";
+                    wasSQLDSO.sql = gSQLStmt;
+                    gRec = '';
+                    gRec = wasSQLDSO.recordset;
+                    var val = gRec.fields("CNT").value;
+                    if(val > 0)
+                    {
+                        ShowInfoDialog('Delete the future data first');
+                        return false;
+                    }
+                }
+            }
+            if( dtpAPCL_STR_DT.value < gBizDate )
+            {
+                if(dtpAPCL_STR_DT.value == bf_str_dt)
+                {
+                    return true;
+                }
+                else
+                {
+                    ShowInfoDialog('Use Start Date if u want to delete it directly');
+                    return false;
+                }
+            }
+            return true;
+        }
+        else
+        {
+            ShowInfoDialog('Wrong Operation');
+            return false;
+        }
+        if(gb == 'I')
+        {
+            gSQLStmt = '';
+            gSQLStmt = gSQLStmt + " SELECT COUNT(*) AS CNT                                                     ";
+            gSQLStmt = gSQLStmt + " FROM ADST_LNB_TENOR_MTRX                                                   ";
+            gSQLStmt = gSQLStmt + " WHERE PRD_CD = '"+  txtPRD_CD_IN.value + "'                                ";
+            gSQLStmt = gSQLStmt + "   AND APCL_END_DT = TO_DATE('9999/12/31', 'YYYY/MM/DD')                    ";
+            gSQLStmt = gSQLStmt + "   AND ( " + cedSTR_AMT.value + " BETWEEN APCL_STR_AMT AND APCL_END_AMT     ";
+            gSQLStmt = gSQLStmt + "     OR  " + cedEND_AMT.value + " BETWEEN APCL_STR_AMT AND APCL_END_AMT )   ";
+            gSQLStmt = gSQLStmt + "   AND ( " + txtTNR_STR.value + " BETWEEN TENOR_STR_VLU AND TENOR_END_VLU   ";
+            gSQLStmt = gSQLStmt + "     OR  " + txtTNR_END.value + " BETWEEN TENOR_STR_VLU AND TENOR_END_VLU ) ";
+            gSQLStmt = gSQLStmt + "   AND APV_ST_CD = '01'                                                     ";
+            wasSQLDSO.sql = gSQLStmt;
+            gRec = '';
+            gRec = wasSQLDSO.recordset;
+            var val = gRec.fields("CNT").value;
+            if(val > 0)
+            {
+                ShowInfoDialog('Duplicated. Data Exist');
+                return false;
+            }
+        }
+        return true;
+    }
+    /*20220912_Joel [E]*/
+    /*********************************************************/
+    /* Button Click                                          */
+    /*********************************************************/
+    function fOnGrid(trx_cd)
+    {
+        var trx_sts    = "";
+        var trx_sts_nm = "";
+        var ccy        = "";
+        var chkInp = fChkInput(trx_cd); /*20220912_Joel - Check data Input Null or Not Null*/
+        if(!chkInp)
+        {
+            return;
+        }
+        if(trx_cd == "I")
+        {
+            prmDsoOut.recordset.addNew();
+            trx_sts    = "01";
+            trx_sts_nm = "APPROVAL";
+            ccy        = "IDR";
+            prmDsoOut.recordset.fields("FOCM26_TRX_CD").value = trx_cd;
+        }
+        else
+        if(trx_cd == "U")
+        {
+            var ChkData = fChkData(); /*20220912_Joel - Check data date for Updating*/
+            if(!ChkData)
+            {
+                return;
+            }
+            trx_cd     = "";
+            trx_sts    = "08";
+            trx_sts_nm = "APPROVAL";
+            ccy        = prmDsoOut.recordset.fields("FOCM26_CCY").value;
+        }
+        else
+        {
+            trx_sts    = "08";
+            trx_sts_nm = "RELEASE";
+            ccy        = prmDsoOut.recordset.fields("FOCM26_CCY").value;
+            prmDsoOut.recordset.fields("FOCM26_TRX_CD").value = trx_cd;
+            /*dtpAPCL_STR_DT.value = gBizDate;*/
+        }
+        fInstInfoChk();
+        gSQLStmt = "";
+        gSQLStmt += "SELECT TO_CHAR(to_date('"+dtpAPCL_STR_DT.value+"','MM/DD/YYYY'), 'YYYY/MM/DD') as e_apcl_str_dt FROM DUAL";
+        wasSQLDSOdt.sql = gSQLStmt;
+        gRec = '';
+        gRec = wasSQLDSOdt.recordset;
+        apcl_str_dt = gRec.fields("e_apcl_str_dt").value;
+        prmDsoOut.recordset.fields("FOCM26_CCY").value              = ccy;
+        prmDsoOut.recordset.fields("FOCM26_APCL_STR_AMT").value     = cedSTR_AMT.value;
+        prmDsoOut.recordset.fields("FOCM26_APCL_END_AMT").value     = cedEND_AMT.value;
+        prmDsoOut.recordset.fields("FOCM26_PRD_CD").value           = txtPRD_CD_IN.value;
+        prmDsoOut.recordset.fields("FOCM26_PRD_NM").value           = txtPRD_NM_IN.value;
+        prmDsoOut.recordset.fields("FOCM26_STS_NM").value           = trx_sts_nm;
+        prmDsoOut.recordset.fields("FOCM26_APV_ST_CD").value        = trx_sts;
+        prmDsoOut.recordset.fields("FOCM26_TENOR_STR_VLU").value    = txtTNR_STR.value;
+        prmDsoOut.recordset.fields("FOCM26_TENOR_END_VLU").value    = txtTNR_END.value;
+        prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_VLU").value   = txtTNR_INC.value;
+        prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_CD").value    = txtTNR_INC_CD.value;
+        prmDsoOut.recordset.fields("FOCM26_TENOR_UNIT_CD").value    = cbbTENOR_UNIT.value;
+        prmDsoOut.recordset.fields("FOCM26_INSTALL_STR_VLU").value  = txtINST_STR.value;
+        prmDsoOut.recordset.fields("FOCM26_INSTALL_END_VLU").value  = txtINST_END.value;
+        prmDsoOut.recordset.fields("FOCM26_INSTALL_ICRS_VLU").value = txtINST_INC.value;
+        prmDsoOut.recordset.fields("FOCM26_INSTALL_UNIT_CD").value  = cbbINST_UNIT.value;
+        /*20220912_Joel - Determine input dtpAPCL_STR_DT for apcl_str_dt or apcl_end_dt [S]*/
+        if(trx_cd == "D")
+        {
+            prmDsoOut.recordset.fields("FOCM26_APCL_END_DT").value      = apcl_str_dt;
+        }
+        else
+        {
+            prmDsoOut.recordset.fields("FOCM26_APCL_STR_DT").value      = apcl_str_dt;
+        }
+        /*20220912_Joel [E]*/
+        prmDsoOut.recordset.fields("FOCM26_EXCEPTION_YN").value     = cbbEXCEP_YN.value;
+        prmDsoOut.recordset.update();
+        fchg_dso();
+    }
+    function fInstInfoChk()
+    {
+        if(
+              instObj.instStr  !=  txtINST_STR.value
+           || instObj.instEnd  !=  txtINST_END.value
+           || instObj.instInc  !=  txtINST_INC.value
+           || instObj.instUnit !=  cbbINST_UNIT.value
+        )
+        {
+            LIB().ShowInfoDialog(" CAUTION: Installment Information is changed. Request to IT Department to change product information.");
+        }
+    }
+    /*********************************************************/
+    /* Inquiry                                               */
+    /*********************************************************/
+    function fSelect()
+    {
+        fClear_grid("1");
+        gTargetSeq = 0;
+        prmDsoIn.clear();
+        prmDsoIn.recordset.addNew();
+        prmDsoIn.recordset.fields("FICM26_PROC_GB").value        = "1";
+        prmDsoIn.recordset.fields("FICM26_INQ_PRD_CD").value     = txtFICM26_PRD_CD.value;
+        prmDsoIn.recordset.fields("FICM26_INQ_LIMIT_AMT").value  = txtFICM26_LMT_AMT.value;
+        prmDsoIn.recordset.fields("FICM26_BASE_DT").value        = dtpSTR_DT_IN.value;
+        prmDsoIn.recordset.fields("FICM26_APV_ST_CD").value      = cbbFICM26_APV_ST_CD.value;
+        prmDsoIn.recordset.update();
+        ivkQuery.call();
+    }
+    /*********************************************************/
+    /* Inquiry  result                                       */
+    /*********************************************************/
+    function finqResult()
+    {
+        if(prmDsoOut.recordset.recordCount == 0)
+        {
+            ShowInfoDialog ("No Data Found");
+        }
+        else
+        {
+            grdDataGrid.setRecordset(prmDsoOut.recordset);
+            grdDataGrid.syncToDSO();
+        }
+    }
+    /*********************************************************/
+    /* Change DOS                                            */
+    /*********************************************************/
+    function fchg_dso()
+    {
+        prmDsoOut.recordset.moveFirst();
+        for(var i = 0; i < prmDsoOut.recordset.recordCount; i++)
+        {
+            prmDsoOut2.recordset.addNew();
+            prmDsoOut2.recordset.fields("FOCM26_TRX_CD").value           = prmDsoOut.recordset.fields("FOCM26_TRX_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_CCY").value              = prmDsoOut.recordset.fields("FOCM26_CCY").value;
+            prmDsoOut2.recordset.fields("FOCM26_PRD_CD").value           = prmDsoOut.recordset.fields("FOCM26_PRD_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_PRD_NM").value           = prmDsoOut.recordset.fields("FOCM26_PRD_NM").value;
+            prmDsoOut2.recordset.fields("FOCM26_STS_NM").value           = prmDsoOut.recordset.fields("FOCM26_STS_NM").value;
+            prmDsoOut2.recordset.fields("FOCM26_APV_ST_CD").value        = prmDsoOut.recordset.fields("FOCM26_APV_ST_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_APCL_STR_AMT").value     = prmDsoOut.recordset.fields("FOCM26_APCL_STR_AMT").value;
+            prmDsoOut2.recordset.fields("FOCM26_APCL_END_AMT").value     = prmDsoOut.recordset.fields("FOCM26_APCL_END_AMT").value;
+            prmDsoOut2.recordset.fields("FOCM26_TENOR_STR_VLU").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_STR_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_TENOR_END_VLU").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_END_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_TENOR_ICRS_VLU").value   = prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_TENOR_ICRS_CD").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_TENOR_UNIT_CD").value    = prmDsoOut.recordset.fields("FOCM26_TENOR_UNIT_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_INSTALL_STR_VLU").value  = prmDsoOut.recordset.fields("FOCM26_INSTALL_STR_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_INSTALL_END_VLU").value  = prmDsoOut.recordset.fields("FOCM26_INSTALL_END_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_INSTALL_ICRS_VLU").value = prmDsoOut.recordset.fields("FOCM26_INSTALL_ICRS_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_INSTALL_UNIT_CD").value  = prmDsoOut.recordset.fields("FOCM26_INSTALL_UNIT_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_REG_DT").value           = prmDsoOut.recordset.fields("FOCM26_REG_DT").value;
+            prmDsoOut2.recordset.fields("FOCM26_REG_TM").value           = prmDsoOut.recordset.fields("FOCM26_REG_TM").value;
+            prmDsoOut2.recordset.fields("FOCM26_REG_EMP_NO").value       = prmDsoOut.recordset.fields("FOCM26_REG_EMP_NO").value;
+            prmDsoOut2.recordset.fields("FOCM26_UPD_DT").value           = prmDsoOut.recordset.fields("FOCM26_UPD_DT").value;
+            prmDsoOut2.recordset.fields("FOCM26_UPD_TM").value           = prmDsoOut.recordset.fields("FOCM26_UPD_TM").value;
+            prmDsoOut2.recordset.fields("FOCM26_UPD_EMP_NO").value       = prmDsoOut.recordset.fields("FOCM26_UPD_EMP_NO").value;
+            prmDsoOut2.recordset.fields("FOCM26_APCL_STR_DT").value      = prmDsoOut.recordset.fields("FOCM26_APCL_STR_DT").value;
+            prmDsoOut2.recordset.fields("FOCM26_APCL_END_DT").value      = prmDsoOut.recordset.fields("FOCM26_APCL_END_DT").value;
+            prmDsoOut2.recordset.fields("FOCM26_EXCEPTION_YN").value     = prmDsoOut.recordset.fields("FOCM26_EXCEPTION_YN").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_PRD_CD").value           = prmDsoOut.recordset.fields("FOCM26_BF_PRD_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_APCL_STR_AMT").value     = prmDsoOut.recordset.fields("FOCM26_BF_APCL_STR_AMT").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_APCL_END_AMT").value     = prmDsoOut.recordset.fields("FOCM26_BF_APCL_END_AMT").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_STR_VLU").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_STR_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_END_VLU").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_END_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_ICRS_VLU").value   = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_ICRS_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_ICRS_CD").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_ICRS_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_UNIT_CD").value    = prmDsoOut.recordset.fields("FOCM26_BF_TENOR_UNIT_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_STR_VLU").value  = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_STR_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_END_VLU").value  = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_END_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_ICRS_VLU").value = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_ICRS_VLU").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_UNIT_CD").value  = prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_UNIT_CD").value;
+            prmDsoOut2.recordset.fields("FOCM26_BF_END_DT").value           = prmDsoOut.recordset.fields("FOCM26_BF_END_DT").value;
+            prmDsoOut2.recordset.update();
+            prmDsoOut.recordset.moveNext();
+        }
+        prmDsoOut.clear();
+        prmDsoOut2.recordset.moveFirst();
+        for(var i = 0; i < prmDsoOut2.recordset.recordCount; i++)
+        {
+            prmDsoOut.recordset.addNew();
+            prmDsoOut.recordset.fields("FOCM26_TRX_CD").value           = prmDsoOut2.recordset.fields("FOCM26_TRX_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_CCY").value              = prmDsoOut2.recordset.fields("FOCM26_CCY").value;
+            prmDsoOut.recordset.fields("FOCM26_PRD_CD").value           = prmDsoOut2.recordset.fields("FOCM26_PRD_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_PRD_NM").value           = prmDsoOut2.recordset.fields("FOCM26_PRD_NM").value;
+            prmDsoOut.recordset.fields("FOCM26_STS_NM").value           = prmDsoOut2.recordset.fields("FOCM26_STS_NM").value;
+            prmDsoOut.recordset.fields("FOCM26_APV_ST_CD").value        = prmDsoOut2.recordset.fields("FOCM26_APV_ST_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_APCL_STR_AMT").value     = prmDsoOut2.recordset.fields("FOCM26_APCL_STR_AMT").value;
+            prmDsoOut.recordset.fields("FOCM26_APCL_END_AMT").value     = prmDsoOut2.recordset.fields("FOCM26_APCL_END_AMT").value;
+            prmDsoOut.recordset.fields("FOCM26_TENOR_STR_VLU").value    = prmDsoOut2.recordset.fields("FOCM26_TENOR_STR_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_TENOR_END_VLU").value    = prmDsoOut2.recordset.fields("FOCM26_TENOR_END_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_VLU").value   = prmDsoOut2.recordset.fields("FOCM26_TENOR_ICRS_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_TENOR_ICRS_CD").value    = prmDsoOut2.recordset.fields("FOCM26_TENOR_ICRS_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_TENOR_UNIT_CD").value    = prmDsoOut2.recordset.fields("FOCM26_TENOR_UNIT_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_INSTALL_STR_VLU").value  = prmDsoOut2.recordset.fields("FOCM26_INSTALL_STR_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_INSTALL_END_VLU").value  = prmDsoOut2.recordset.fields("FOCM26_INSTALL_END_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_INSTALL_ICRS_VLU").value = prmDsoOut2.recordset.fields("FOCM26_INSTALL_ICRS_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_INSTALL_UNIT_CD").value  = prmDsoOut2.recordset.fields("FOCM26_INSTALL_UNIT_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_REG_DT").value           = prmDsoOut2.recordset.fields("FOCM26_REG_DT").value;
+            prmDsoOut.recordset.fields("FOCM26_REG_TM").value           = prmDsoOut2.recordset.fields("FOCM26_REG_TM").value;
+            prmDsoOut.recordset.fields("FOCM26_REG_EMP_NO").value       = prmDsoOut2.recordset.fields("FOCM26_REG_EMP_NO").value;
+            prmDsoOut.recordset.fields("FOCM26_UPD_DT").value           = prmDsoOut2.recordset.fields("FOCM26_UPD_DT").value;
+            prmDsoOut.recordset.fields("FOCM26_UPD_TM").value           = prmDsoOut2.recordset.fields("FOCM26_UPD_TM").value;
+            prmDsoOut.recordset.fields("FOCM26_UPD_EMP_NO").value       = prmDsoOut2.recordset.fields("FOCM26_UPD_EMP_NO").value;
+            prmDsoOut.recordset.fields("FOCM26_APCL_STR_DT").value      = prmDsoOut2.recordset.fields("FOCM26_APCL_STR_DT").value;
+            prmDsoOut.recordset.fields("FOCM26_APCL_END_DT").value      = prmDsoOut2.recordset.fields("FOCM26_APCL_END_DT").value;
+            prmDsoOut.recordset.fields("FOCM26_EXCEPTION_YN").value     = prmDsoOut2.recordset.fields("FOCM26_EXCEPTION_YN").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_PRD_CD").value           = prmDsoOut2.recordset.fields("FOCM26_BF_PRD_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_APCL_STR_AMT").value     = prmDsoOut2.recordset.fields("FOCM26_BF_APCL_STR_AMT").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_APCL_END_AMT").value     = prmDsoOut2.recordset.fields("FOCM26_BF_APCL_END_AMT").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_TENOR_STR_VLU").value    = prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_STR_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_TENOR_END_VLU").value    = prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_END_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_TENOR_ICRS_VLU").value   = prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_ICRS_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_TENOR_ICRS_CD").value    = prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_ICRS_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_TENOR_UNIT_CD").value    = prmDsoOut2.recordset.fields("FOCM26_BF_TENOR_UNIT_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_STR_VLU").value  = prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_STR_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_END_VLU").value  = prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_END_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_ICRS_VLU").value = prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_ICRS_VLU").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_INSTALL_UNIT_CD").value  = prmDsoOut2.recordset.fields("FOCM26_BF_INSTALL_UNIT_CD").value;
+            prmDsoOut.recordset.fields("FOCM26_BF_END_DT").value           = prmDsoOut2.recordset.fields("FOCM26_BF_END_DT").value;
+            prmDsoOut.recordset.update();
+            prmDsoOut2.recordset.moveNext();
+        }
+        prmDsoOut2.clear();
+        grdDataGrid.setRecordset(prmDsoOut.recordset);
+        grdDataGrid.syncToDSO();
+        fClear_grid("2");
+    }
+    </script>
+</head>
+<body onload="fInitProc()">
+    <!-- Y[wai] : Generated : dataServices -->
+    <dataservices>
+        <dataservice id="ivkQuery" map="/tis/CMO2600.xml" service="CMO2600" dso="prmDsoIn=SCR_INPUT;prmDsoOut=SCR_OUTPUT" onsuccess="finqResult();"></dataservice>
+        <dataservice id="ivkSvc" map="/tis/CMO2600.xml" service="CMO2600" dso="prmDsoIn1=SCR_INPUT;prmDsoIn2=SCR_INPUT2;prmDsoOut2=SCR_OUTPUT"></dataservice>
+    </dataservices>
+    <!-- Y[wai] : Generated : dataServices -->
+    <winman id="WINMAN1" style="display:none;">
+    </winman>
+    <!-- Action Manager -->
+    <actman id="AMan" onactive="ActionOnActive()">
+        <!--  Insert  -->
+        <action name="ActEntry" execute="actExecute(1)">
+        </action>
+        <action name="ActExecute" execute="actExecute(6)">
+        </action>
+        <!--  Clear  -->
+        <action name="ActCancelJob" execute="actExecute(7)">
+        </action>
+    </actman>
+    <div class="topbarDiv" style="left:0px;width:876px;top:17px;height:65px;background-color:#e7f4be;">
+        <label class="search" lang="Product" style="left:5px;width:70px;padding-top:5px;position:absolute;top:9px;height:23px;">
+      Product
+      <input class="" fldname="" dsoname="" height="0" id="txtFICM26_PRD_CD" maxlength="13" size="20" tabindex="1" type="text" width="10" style="left:75px;width:100px;position:absolute;top:2px;">
+            <input id="btnPFSel_S" onclick="fPfSelect_in('S')" src="/biz/images/detail.gif" type="image" style="left:175px;width:21px;position:absolute;top:2px;height:22px;">
+            <input class="" fldname="" dsoname="" height="0" id="txtFICM26_PRD_NM" maxlength="13" tabindex="-1" size="20" type="text" width="10" "="" readonly style="left:195px;width:150px;position:absolute;top:2px;background-color:#eaeaea;">
+        </label>
+        <label class="search" style="left:340px;width:70px;position:absolute;top:15px;height:16px;">
+      Limit Amt
+      <edit id="txtFICM26_LMT_AMT" type="CURRENCY" value="0.00" tabindex="2" maxlength="14" style="left: 82px; width: 130px; position: absolute; top: -3px;"></edit>
+        </label>
+        <label class="search" lang="BaseDate" style="left:530px;width:90px;position:absolute;top:15px;height:16px;">
+      Base Date
+      <dateedit id="dtpSTR_DT_IN" tabindex="3" manalerttext="Effective Date" style="left: 95px; width: 110px; position: absolute; top: -3px; height: 22px;"></dateedit>
+        </label>
+        <label class="search" lang="Status" style="left:514px;width:104px;position:absolute;top:41px;height:16px;">
+      Status
+      <codecombo id="cbbFICM26_APV_ST_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 95px; height: 100%;" labelWidth="95px" url="/jsondb/F700.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" tabindex="4" onLoadError="cbbFICM26_APV_ST_CD.Value = '';" style="left: 110px; width: 145px; position: absolute; top: -3px; height: 20px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <input id="btnInquiry" onclick="fSelect();" src="/biz/images/inquiry.gif" tabindex="-1" type="image" onmouseout="this.src='/biz/images/inquiry.gif'" onmouseover="this.src='/biz/images/inquiryover.gif'" style="left:750px;width:80px;position:absolute;top:12px;height:21px;">
+    </div>
+    <div id="grid_div_1" class="infoDiv" style="display:position;top:87px;left:0px;width:876px;height:210px;">
+        <div class="infoIngray" style="left:0px;height:460px;">
+            <grid id="grdDataGrid" dsoName="CMO2600.prmDsoOut" oncelldblclick="fGridDblClick()" style="top: 0px; left: 0px; width: 874px; height: 310px; border: 1px solid rgb(234, 234, 234); position: absolute;">
+                "options" : {
+                  "fixColumn":0
+                  ,"columns" : [
+                    {"text":"Mode","field":"FOCM26_TRX_CD","alignment":"center","width":40,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Product Code","field":"FOCM26_PRD_CD","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Product Name","field":"FOCM26_PRD_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProductName","style":"custSty1"}
+                    ,{"text":"Status","field":"FOCM26_STS_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Status","style":"custSty1"}
+                    ,{"text":"From Date","field":"FOCM26_APCL_STR_DT","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"FromDate","style":"custSty1"}
+                    ,{"text":"To Date","field":"FOCM26_APCL_END_DT","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ToDate","style":"custSty1"}
+                    ,{"text":"Currency","field":"FOCM26_CCY","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Currency","style":"custSty1"}
+                    ,{"text":"Start Amt","field":"FOCM26_APCL_STR_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+                    ,{"text":"End Amt","field":"FOCM26_APCL_END_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+                    ,{"text":"Tenor Start","field":"FOCM26_TENOR_STR_VLU","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Tenor End","field":"FOCM26_TENOR_END_VLU","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Tenor Increase","field":"FOCM26_TENOR_ICRS_VLU","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Tenor Increase Code","field":"FOCM26_TENOR_ICRS_CD","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Tenor Unit","field":"FOCM26_TENOR_UNIT_CD","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Install Start","field":"FOCM26_INSTALL_STR_VLU","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Install End","field":"FOCM26_INSTALL_END_VLU","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Install Increase","field":"FOCM26_INSTALL_ICRS_VLU","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Install Unit","field":"FOCM26_INSTALL_UNIT_CD","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Reg Date","field":"FOCM26_REG_DT","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"RegDate","style":"custSty1"}
+                    ,{"text":"Reg Time","field":"FOCM26_REG_TM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Reg Emp No","field":"FOCM26_REG_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Upd Date","field":"FOCM26_UPD_DT","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Upd Time","field":"FOCM26_UPD_TM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                    ,{"text":"Upd Emp No","field":"FOCM26_UPD_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                  ]
+                  ,"style":{"custSty1":{"header":{"color":"#289088","font":"normal 8px arial white"}}}
+                }
+            </grid>
+        </div>
+    </div>
+    <div id="grid_div_2" style="display:;position:absolute;top:400px;left:16px;width:876px;height:190px;">
+        <label class="search" lang="Product" style="left:28px;width:90px;padding-top:5px;position:absolute;top:9px;height:20px;">
+      Product
+      <input class="" fldname="" dsoname="" height="0" id="txtPRD_CD_IN" maxlength="13" size="20" tabindex="3" type="text" width="10" style="left:100px;width:100px;position:absolute;top:2px;">
+            <input id="btnPFSel_I" onclick="fPfSelect_in('I')" src="/biz/images/detail.gif" type="image" style="left:202px;width:21px;position:absolute;top:2px;height:22px;">
+            <input class="" fldname="" dsoname="" height="0" id="txtPRD_NM_IN" maxlength="13" tabindex="-1" size="20" type="text" width="10" "="" readonly style="left:225px;width:145px;position:absolute;top:2px;background-color:#eaeaea;">
+        </label>
+        <label class="search" style="left:8px;width:110px;padding-top:5px;position:absolute;top:34px;height:20px;">
+      Application Amount
+      <edit id="cedSTR_AMT" type="CURRENCY" value="0.00" tabindex="4" title="Amount" maxlength="14" style="left: 120px; width: 125px; position: absolute; top: 2px; text-align: right;"></edit>
+            <label class="" style="left:250px;width:5px;position:absolute;top:3px;height:20px;">
+        ~
+      </label>
+            <edit id="cedEND_AMT" type="CURRENCY" value="0.00" tabindex="5" title="Amount" maxlength="14" style="left: 261px; width: 125px; position: absolute; top: 2px; text-align: right;"></edit>
+        </label>
+        <label class="search" style="left:420px;width:120px;padding-top:5px;position:absolute;top:34px;height:20px;">
+      Tenor Increase Code
+      <input type="text" id="txtTNR_INC_CD" mask="" dsoname="" fldname="" tabindex="6" class="" style="left:130px;width:75px;position:absolute;top:2px;text-align:right;text-transform:uppercase;">
+        </label>
+        <label class="search" style="left:620px;width:90px;padding-top:5px;position:absolute;top:34px;height:20px;">
+      Exception Y/N
+      <codecombo id="cbbEXCEP_YN" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 80px; height: 100%;" labelWidth="80px" url="/jsondb/F23.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" tabindex="7" onLoadError="cbbEXCEP_YN = '';" style="left: 100px; width: 130px; position: absolute; top: 2px; height: 20px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="left:28px;width:90px;padding-top:5px;position:absolute;top:58px;height:20px;">
+      Tenor Start
+      <input type="text" id="txtTNR_STR" dsoname="" fldname="" class="" tabindex="8" mask="" style="left:100px;width:75px;position:absolute;top:2px;text-align:right;text-transform:uppercase;">
+        </label>
+        <label class="search" style="left:220px;width:90px;padding-top:5px;position:absolute;top:58px;height:20px;">
+      Tenor End
+      <input type="text" id="txtTNR_END" dsoname="" fldname="" class="" tabindex="9" mask="" style="left:100px;width:75px;position:absolute;top:2px;text-align:right;text-transform:uppercase;">
+        </label>
+        <label class="search" style="left:450px;width:90px;padding-top:5px;position:absolute;top:58px;height:20px;">
+      Tenor Increase
+      <input type="text" id="txtTNR_INC" dsoname="" fldname="" class="" tabindex="10" mask="" style="left:100px;width:75px;position:absolute;top:2px;text-align:right;text-transform:uppercase;">
+        </label>
+        <label class="search" style="left:620px;width:90px;padding-top:5px;position:absolute;top:58px;height:20px;">
+      Tenor Unit
+      <codecombo id="cbbTENOR_UNIT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 80px; height: 100%;" labelWidth="80px" url="/jsondb/F279.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" tabindex="11" onLoadError="cbbTENOR_UNIT.value = '';" style="left: 100px; width: 130px; position: absolute; top: 2px; height: 20px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="left:28px;width:90px;padding-top:5px;position:absolute;top:82px;height:20px;">
+      Install Start
+      <input type="text" id="txtINST_STR" dsoname="" fldname="" class="" tabindex="12" mask="" style="left:100px;width:75px;position:absolute;top:2px;text-align:right;text-transform:uppercase;">
+        </label>
+        <label class="search" style="left:220px;width:90px;padding-top:5px;position:absolute;top:82px;height:20px;">
+      Install End
+      <input type="text" id="txtINST_END" dsoname="" fldname="" class="" tabindex="13" mask="" style="left:100px;width:75px;position:absolute;top:2px;text-align:right;text-transform:uppercase;">
+        </label>
+        <label class="search" style="left:450px;width:90px;padding-top:5px;position:absolute;top:82px;height:20px;">
+      Install Increase
+      <input type="text" id="txtINST_INC" dsoname="" fldname="" class="" tabindex="14" mask="" style="left:100px;width:75px;position:absolute;top:2px;text-align:right;text-transform:uppercase;">
+        </label>
+        <label class="search" style="left:620px;width:90px;padding-top:5px;position:absolute;top:82px;height:20px;">
+      Install Unit
+      <codecombo id="cbbINST_UNIT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 80px; height: 100%;" labelWidth="80px" url="/jsondb/F279.json" cbDisplayTextField="false" panelWidth="150px" panelHeight="100px" dropdownkeycode="145" tabindex="15" onLoadError="cbbINST_UNIT.value = '';" style="left: 100px; width: 130px; position: absolute; top: 2px; height: 20px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":108}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" tabindex="-1" style="left:28px;width:90px;padding-top:5px;position:absolute;top:104px;height:20px;">
+      New Applicated Start Date
+      <dateedit id="dtpAPCL_STR_DT" manalerttext="Effective Start Date" style="left: 99px; width: 100px; position: absolute; top: 3px; height: 20px;"></dateedit>
+            <dateedit id="dtpAPCL_STR_DT_OLD" manalerttext="Effective Start Date" style="left: 100px; width: 100px; position: absolute; top: 0px; height: 20px;"></dateedit>
+        </label>
+        <input id="btnAdd" onclick="fOnGrid('I');" src="/biz/images/add.gif" tabindex="-1" type="image" onmouseout="this.src='/biz/images/add.gif'" onmouseover="this.src='/biz/images/addover.gif'" style="left:600px;width:80px;position:absolute;top:9px;height:21px;">
+        <input id="btnModify" onclick="fOnGrid('U');" src="/biz/images/modify.gif" tabindex="-1" type="image" onmouseout="this.src='/biz/images/modify.gif'" onmouseover="this.src='/biz/images/modifyover.gif'" style="left:685px;width:80px;position:absolute;top:9px;height:21px;">
+        <input id="btnDelete" onclick="fOnGrid('D');" src="/biz/images/delete.gif" tabindex="-1" type="image" onmouseout="this.src='/biz/images/delete.gif'" onmouseover="this.src='/biz/images/deleteover.gif'" style="left:770px;width:80px;position:absolute;top:9px;height:21px;">
+    </div>
+</body>
+</html>

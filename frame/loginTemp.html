@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Hana Bank-LogIn-1</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/tempMenuData.js"></script>
+    <script src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/login.css" />
+    <script type="text/javascript">
+        var LoginAble   = true;
+        var AlreadyProc = false;
+		var LoginITV    = "";
+
+        $(document).ready(function(){
+            /* NH_CODE
+            LoginITV = window.setInterval(InitLogin,100);
+            */
+
+            InitLogin(); // top 로드 완료 후 호출
+        });
+
+        function InitLogin() {
+            // 초기값 셋팅
+            txtUserId.value = getCookie("saveid") ?? '';
+            langCD.selectedIndex = getCookie("langcd") ?? 0;
+            SetInputFocus();
+            //SetSysInfo();
+
+            /*
+            if (top.LIB.LibraryInited !== true) return;
+            window.clearInterval(LoginITV);
+
+            LoginDS = new $wai.classes.dataService('LoginDS',
+                                                    {
+                //serviceUrl  : '/svct/CDService',
+                mapUrl      : '/tis/CMO0100.xml',
+                serviceName : 'CMO0100',
+                dsoNames    : 'loginIn=SCR_INPUT;loginOut=SCR_OUTPUT',
+                onResultError : function(err) {
+                    // ProcLoginError(err.ERR_STR);
+                }
+            });
+
+            LoginDS.initialize();
+
+            MenuDS = new $wai.classes.dataService('MenuDS',
+                                                    {
+                //serviceUrl  : '/svct/CDService',
+                mapUrl      : '/tis/CMO0200.xml',
+                serviceName : 'CMO0200',
+                dsoNames    : 'MenuIn=SCR_INPUT;MenuOut=SCR_OUTPUT_ARR'
+            });
+            MenuDS.initialize();
+
+            top.LIB.info.ipaddr = top.LIB.UtilSvc('ipaddress');
+
+            var RS = loginIn.recordset;
+            RS.clear();
+            RS.addNew();
+            RS.fields('FICM01_OP_GB').value = '1';
+            RS.fields('FICM01_TERM_IP').value = top.LIB.info.ipaddr;
+            RS.fields('FICM01_REJECT_LOGIN').value = 'N'; 
+
+            var MIN = MenuIn.recordset;
+            MIN.clear();
+            MIN.addNew();
+            MIN.fields("FICM02_SEP_ID").value = "0";
+            */
+        }
+
+        function LoginProc() {
+            if (!txtUserId.value) {
+                alert(`Please input user id.`);
+                txtUserId.focus();
+                return;
+            } else if (!txtPassWd.value) {
+                alert(`Please input password.`);
+                txtPassWd.focus();
+                return;
+            }
+
+            if (!LoginAble) {
+                return;
+            }
+            ShowProgress();
+            LoginAble = true;
+            LoginITV  = window.setTimeout("TimeOutLogin()",500);
+        }
+
+        function TimeOutLogin() {
+            try {
+                if ( LoginAble ) {
+                    LoginAble = false;
+                    try {
+                        DoLoginProc();
+                    }
+                    catch(e) {
+                        AlreadyProc = false;
+                        alert(e.message);
+                    }
+                }
+            }
+            catch(e) {
+                console.log('TimeOutLogin Exception',e);
+            }
+        }
+
+        function DoLoginProc() {
+            saveid();
+            langcd();
+
+            let loginData = null;
+            let menuData = null;
+
+            const userId = (txtUserId.value+'').trim().toUpperCase();
+            const passWs = txtPassWd.value;
+
+            showLoadTime('callService : Login', false);
+
+            // 로그인 서비스 (LOGIN.SVC)
+            /*
+            $.ajax({
+                type: "POST",
+                url: `${top.LIB.TestServer}/LOGIN.SVC`,
+                contentType: "application/json",
+                async: false,
+                data: JSON.stringify({
+                    "input": {
+                        "userId": txtUserId.value,
+                        "password": txtPassWd.value
+                    },
+                    "SysInfo": {
+                        "brNo": "", // 1188
+                        "userId": txtUserId.value,
+                        "trscDt": "",
+                        "lnkIndvCanYn": "N",
+                        "scrnMsgPrnYn": "N"
+                    }
+                }),
+                success: function(data){
+                    loginData = data;
+                },
+                error: function(xhr, code, errMsg) {
+                    console.log(errMsg);
+                    ProcLoginError(errMsg.toString());
+                }
+            });
+            */
+
+            showLoadTime('callService : Login', true);
+
+            /*
+            if (loginData == null) {
+                HideProgress();
+                LoginAble = true;
+                return;
+            }
+            */
+
+            /* SysInfo 누락 (FOCM01_PASSWD_LOCK)
+            var oRS = loginOut.recordset;
+            if (oRS.fields("FOCM01_PASSWD_LOCK").value == "1") {
+                RetryPasswd = 0;
+                var err = new Error();
+                err['description'] = "Password is locked (input mistake 5 times).";
+                throw err;
+            }
+            else if (oRS.fields("FOCM01_PASSWD_LOCK").value == "2") {
+                var err = new Error();
+                err['description'] = "Please check your id and password!\r\nPASSWD|";
+                throw err;
+            }
+            else if (oRS.fields("FOCM01_PASSWD_LOCK").value == "3") {
+                var err = new Error();
+                err['description'] = "Please check your id and password!\r\nPASSWD|";
+                throw err;
+            }
+            */
+
+            // 임시 로그인 처리
+            loginData = {
+                "output": {
+                    "userId": "ONEQ005",
+                    "emailId": "-",
+                    "userName": "ONEQ005",
+                    "ledgStCd": "0",
+                    "role": "TESTGRP",
+                    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJPTkVRMDA1IiwiaXAiOiIwOjA6MDowOjA6MDowOjEiLCJzY29wZXMiOlsiVEVTVEdSUCJdLCJpc3MiOiJJTk9BTiIsImlhdCI6MTY5MDE3ODgzOCwiZXhwIjoxNjkwMjk4ODM4fQ.tNJhhtLxoKuYOeBwgC7P1jKPxCtorz1vNEcemhPy-RuYBbYerhL1_yILkpHa0NqvOnI28y_51_JgghwGk7XMdw"
+                },
+                SysInfo: {
+                    "refNo": "",
+                    "trscBrNo": "1188",
+                    "rsprEmpNo": "",
+                    "wsDemnPort": "",
+                    "smltnTrscYn": "N",
+                    "dtFrmt": "yyyymmdd",
+                    "wsDemnIpAdr": "",
+                    "tlrNo": "110",
+                    "trscDt": "2023/03/06",
+                    "usrNm": "Bryan",
+                    "sysLnggCd": "EN",
+                    "pwStCd": "",
+                    "sysDvCd": "LOCAL",
+                    "rsprApvCreYn": "N",
+                    "tmlNo": "1188",
+                    "scrnId": "CM02",
+                    "dtMarkFrmt": "YYYY/MM/DD",
+                    "rsprApvDvCd": "",
+                    "procSvcCd": "CMO0200ASVC",
+                    "lnggCd": "en",
+                    "chnlTypCd": "Y",
+                    "userId": "ONEQ005",
+                    "scrnMsgPrnYn": "Y",
+                    "logLev": "",
+                    "fstStrgSvcCd": "CMO0200ASVC",
+                    "bussBrUpdAlwnYn": "YES",
+                    "rsprApvYn": "N",
+                    "strgSvcCd": "CMO0200ASVC",
+                    "lnkIndvCanYn": "N",
+                    "opNo": "ONEQ005",
+                    "istBrNo": "1188",
+                    "instCd": "",
+                    "trscSeqNo": "",
+                    "subjCd": "CM",
+                    "langCd": "EN",
+                    "rsprApvAlwnYn": "YES"
+                },
+                EtcInfo: {
+                    "gyo": "",
+                    "net": "",
+                    "tseq": "",
+                    "opGb": "",
+                    "amod": "0",
+                    "ibGb": "",
+                    "thgb": "",
+                    "mnCm": "",
+                    "mnNo": "",
+                    "mujp": "",
+                    "mut": "",
+                    "stgu": "",
+                    "ibfGb": "",
+                    "jumCd": "00",
+                    "thid": "",
+                    "grpNo": "",
+                    "edcYn": "N",
+                    "edcRefNo": "",
+                    "edcHisNo": "0",
+                    "edcTicketNo": "",
+                    "edcTrmId": "",
+                    "clldMthCd": "",
+                    "bankCd": "",
+                    "inptRefNo": "",
+                    "scanDocId1": "",
+                    "scanDocId2": "",
+                    "scanDocId3": "",
+                    "scanDocId4": "",
+                    "scanCode1": "",
+                    "scanCode2": "",
+                    "scanCode3": ""
+                }
+            };
+
+            // 공통 데이터 (SysInfo, EtcInfo 등) 셋팅 -> 목록이 정해지지 않아서 모두 등록
+            //top.LIB.CDO.SysInfo = {...loginData.SysInfo};
+            for (let x in loginData) {
+                if (!['output'].includes(x) && typeof loginData[x] == 'object') {
+                    top.LIB.CDO[x] = loginData[x];
+                }
+            }
+
+            // 로그인(CMO0100) 반환값
+            /*
+            const loginData = {
+                "output": {
+                    "userId": "ONEQ005",
+                    "emailId": "-",
+                    "userName": "ONEQ005",
+                    "ledgStCd": "0",
+                    "role": "TESTGRP",
+                    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJPTkVRMDA1IiwiaXAiOiIwOjA6MDowOjA6MDowOjEiLCJzY29wZXMiOlsiVEVTVEdSUCJdLCJpc3MiOiJJTk9BTiIsImlhdCI6MTY5MDE3ODgzOCwiZXhwIjoxNjkwMjk4ODM4fQ.tNJhhtLxoKuYOeBwgC7P1jKPxCtorz1vNEcemhPy-RuYBbYerhL1_yILkpHa0NqvOnI28y_51_JgghwGk7XMdw"
+                },
+                "SysInfo": {
+                    "refNo": "",
+                    "trscBrNo": "1188",
+                    "rsprEmpNo": "",
+                    "wsDemnPort": "",
+                    "smltnTrscYn": "N",
+                    "dtFrmt": "yyyymmdd",
+                    "wsDemnIpAdr": "",
+                    "tlrNo": "110",
+                    "trscDt": "2023/03/06",
+                    "usrNm": "Bryan",
+                    "sysLnggCd": "EN",
+                    "globId": "20230724ONEQ005LBK_DB5284FD1BF01",
+                    "pwStCd": "",
+                    "sysDvCd": "LOCAL",
+                    "rsprApvCreYn": "N",
+                    "tmlNo": "1188",
+                    "scrnId": "",
+                    "dtMarkFrmt": "YYYY/MM/DD",
+                    "rsprApvDvCd": "",
+                    "procSvcCd": "LOGINSVC",
+                    "lnggCd": "en",
+                    "chnlTypCd": "Y",
+                    "userId": "ONEQ005",
+                    "scrnMsgPrnYn": "N",
+                    "logLev": "",
+                    "fstStrgSvcCd": "LOGINSVC",
+                    "bussBrUpdAlwnYn": "YES",
+                    "rsprApvYn": "N",
+                    "strgSvcCd": "LOGINSVC",
+                    "lnkIndvCanYn": "N",
+                    "opNo": "ONEQ005",
+                    "istBrNo": "1188",
+                    "instCd": "",
+                    "trscSeqNo": "",
+                    "subjCd": "CM",
+                    "langCd": "EN",
+                    "rsprApvAlwnYn": "YES"
+                }
+            };
+            */
+
+            console.log('loginData --> ', loginData);
+
+            top.LIB.accessToken = loginData.output?.accessToken ?? '';
+
+            showLoadTime('callService : Menu', false);
+
+            // 메뉴 조회 서비스 (/chnlLB/CM/CMO0200A.SVC)
+            /*
+            $.ajax({
+                type: "POST",
+                url: `${top.LIB.TestServer}/chnlLB/CM/CMO0200A.SVC`,
+                contentType: "application/json",
+                async: false,
+                headers:{"X-Auth-Token": `Bearer ${top.LIB.accessToken}`},
+                data: JSON.stringify({
+                    "input": {
+                        "sepId": "M",
+                        "opNo": userId,
+                        "brNo": "",
+                        "grpNo": "" // SysInfo 누락 -> FXFIG_GRP_NO
+                    },
+                    "SysInfo": {
+                        "brNo": "", // 1188
+                        "userId": userId,
+                        "trscDt": "",
+                        "lnkIndvCanYn": "N",
+                        "scrnMsgPrnYn": "N"
+                    }
+                }),
+                success: function(data){
+                    menuData = data;
+                },
+                error: function(xhr, code, errMsg) {
+                    console.log(errMsg);
+                    ProcLoginError(errMsg.toString());
+                }  
+            });
+
+            if (menuData == null) {
+                HideProgress();
+                LoginAble = true;
+                return;
+            }
+            */
+
+            //console.log('menuData --> ', menuData);
+
+            // 임시 메뉴 데이터 (AS-IS)
+            /*
+            const menuData = [
+                {"FOCM02_MENU_PATH": "00100", "FOCM02_MENU_ID": "00100", "FOCM02_PARENT_MENU_ID": "00000","FOCM02_UPMU_CODE": "CM.", "FOCM02_MENU_NAME": "Common", "FOCM02_SRC_URL": "0", "TR_TYPE": "E1", "SORT_SEQ": 10},
+                {"FOCM02_MENU_PATH": "00103", "FOCM02_MENU_ID": "00103", "FOCM02_PARENT_MENU_ID": "00000","FOCM02_UPMU_CODE": "AD.", "FOCM02_MENU_NAME": "International Banking", "FOCM02_SRC_URL": "0", "TR_TYPE": "E1", "SORT_SEQ": 40},
+                {"FOCM02_MENU_PATH": "00103|01009", "FOCM02_MENU_ID": "01009", "FOCM02_PARENT_MENU_ID": "00103","FOCM02_UPMU_CODE": "AD..", "FOCM02_MENU_NAME": "Advice of L/C", "FOCM02_SRC_URL": ".", "TR_TYPE": "E1", "SORT_SEQ": 0},
+                {"FOCM02_MENU_PATH": "00103|01012", "FOCM02_MENU_ID": "01012", "FOCM02_PARENT_MENU_ID": "00103","FOCM02_UPMU_CODE": "CB..", "FOCM02_MENU_NAME": "Purchase of foreign check", "FOCM02_SRC_URL": ".", "TR_TYPE": "E1", "SORT_SEQ": 0},
+                {"FOCM02_MENU_PATH": "00103|01040", "FOCM02_MENU_ID": "01040", "FOCM02_PARENT_MENU_ID": "00103","FOCM02_UPMU_CODE": "GO..", "FOCM02_MENU_NAME": "Global Online Service", "FOCM02_SRC_URL": ".", "TR_TYPE": "E1", "SORT_SEQ": 0},
+                {"FOCM02_MENU_PATH": "00103|01009|02135", "FOCM02_MENU_ID": "02135", "FOCM02_PARENT_MENU_ID": "01009","FOCM02_UPMU_CODE": "AD01", "FOCM02_MENU_NAME": "Ledger detail inquiry", "FOCM02_SRC_URL": "ad/AD01.html", "TR_TYPE": "I1", "SORT_SEQ": 10},
+                {"FOCM02_MENU_PATH": "00103|01009|02136", "FOCM02_MENU_ID": "02136", "FOCM02_PARENT_MENU_ID": "01009","FOCM02_UPMU_CODE": "AD02", "FOCM02_MENU_NAME": "All ledger inquiry", "FOCM02_SRC_URL": "ad/AD02.html", "TR_TYPE": "I1", "SORT_SEQ": 20},
+                {"FOCM02_MENU_PATH": "00103|01009|02137", "FOCM02_MENU_ID": "02137", "FOCM02_PARENT_MENU_ID": "01009","FOCM02_UPMU_CODE": "AD03", "FOCM02_MENU_NAME": "Incoming information check list", "FOCM02_SRC_URL": "ad/AD03.html", "TR_TYPE": "I1", "SORT_SEQ": 30},
+                {"FOCM02_MENU_PATH": "00103|01009|02140", "FOCM02_MENU_ID": "02140", "FOCM02_PARENT_MENU_ID": "01009","FOCM02_UPMU_CODE": "AD09", "FOCM02_MENU_NAME": "Ledger modify", "FOCM02_SRC_URL": "ad/AD09.html", "TR_TYPE": "I1", "SORT_SEQ": 90},
+            ];
+            */
+
+            showLoadTime('callService : Menu', true);
+
+            //top.LIB.CDO.MenuData = menuData.output?.grid01 ?? [];
+            top.LIB.CDO.MenuData = tempMenuData;
+
+            console.log('top.LIB.CDO --> ', top.LIB.CDO);
+
+            /* NH_CODE
+            try {
+                var RS = loginIn.recordset;
+                RS.fields("FICM01_USER_ID").value  = (txtUserId.value+'').trim().toUpperCase();
+                RS.fields("FICM01_PASSWORD").value = txtPassWd.value;
+                RS.fields("FICM01_LANG_CD").value  = langCD.value;
+
+                if (RetryPasswd < 5)
+                    RS.fields("FICM01_PASSWD_LOCK").value = "0";
+                else
+                    RS.fields("FICM01_PASSWD_LOCK").value = "1";
+
+                LoginDS.call();
+
+                console.log(">>>>>>>>>>>>>>>>>>>>",LoginDS.RawResult);
+                console.log(">>>>>>>>>>>>>>>>>>>>",LoginDS.isResultError);
+                if (LoginDS.isResultError === true) {
+                    var errMsg = LoginDS.RawResult.PARAMS.ERR_STR;
+                    console.log('isResultError',errMsg);
+                    var err = new Error();
+                    err['description'] = errMsg;
+                    throw err;
+                }
+
+                var oRS = loginOut.recordset;
+                if (oRS.fields("FOCM01_PASSWD_LOCK").value == "1") {
+                    RetryPasswd = 0;
+                    var err = new Error();
+                    err['description'] = "Password is locked (input mistake 5 times).";
+                    throw err;
+                }
+                else if (oRS.fields("FOCM01_PASSWD_LOCK").value == "2") {
+                    var err = new Error();
+                    err['description'] = "Please check your id and password!\r\nPASSWD|";
+                    throw err;
+                }
+                else if (oRS.fields("FOCM01_PASSWD_LOCK").value == "3") {
+                    var err = new Error();
+                    err['description'] = "Please check your id and password!\r\nPASSWD|";
+                    throw err;
+                }
+
+                try {
+
+                    top.LIB.loadCacheList();
+                } catch(E){ }
+
+                makeFXFIG(LoginDS.RawResult);
+
+                //==========================
+                // Get GBS-MENU Data
+                var MIN = MenuIn.recordset;
+                MIN.fields("FICM02_SEP_ID").value = "M"; //"4"; //"M";
+                MIN.fields("FICM02_OP_NO").value  = (txtUserId.value+'').trim().toUpperCase();
+                MIN.fields("FICM02_GRP_NO").value = oRS.fields("FXFIG_GRP_NO").value;
+
+                MenuDS.call();
+                makeMENUDATA(MenuDS.RawResult);
+                // 			APM().connector(txtUserId.value);	    //Main.html에서 수행하도록 변경
+
+                top.MAIN.location.replace("/common/Main.html");
+            } catch (e) {
+                console.log('Login Exception',e);
+                var errors = e.description.split("\n");
+
+                if (errors.length == 2 ) {
+                    if (errors[1].substr(0, 7) == "PASSWD|") {
+                        RetryPasswd++;
+                        if (RetryPasswd >= 5) {
+                            LoginProc();
+                        }
+                        else {
+                            top.LIB.ShowErrorDialog(e.description, "/login.html", 10001);
+                        }
+                    }
+                    else
+                        top.LIB.ShowErrorDialog(e.description, "/login.html", 10002);
+                }
+                else
+                    top.LIB.ShowErrorDialog(e.description, "/login.html", 10003);
+            }
+            */
+
+            top.FRM_MAIN.src = "/frame/main.html";
+
+            LoginAble = true;
+            HideProgress();
+        }
+
+        /*
+        function makeFXFIG(argRawResult) {
+            var coms = argRawResult.PARAMS.COMMON;
+            var DC = top.LIB.GDC;
+            //		console.log('makeFXFIG',argRawResult);
+            for (var i=0;i<coms.length;i++){
+                if ((coms[i].name == 'FXFIG_COM')||(coms[i].name == 'FMGRINFO')){
+                    DC.setSectionValue(coms[i].name,coms[i].REC);
+                }
+            }
+            console.log('makeFXFIG',DC.data);
+            return true;
+        }
+
+        function makeMENUDATA(argRawResult) {
+            var DC = top.LIB.GDC;
+            var Prm = argRawResult.PARAMS.PARAM;
+
+            for (var i = 0; i < Prm.length; i++) {
+                if (Prm[i].name == "SCR_OUTPUT_ARR") {
+                    DC.setSectionValue("MENUDATA",Prm[i].REC);
+                }
+                else if (Prm[i].name == "SCR_MA_GRANTS") {
+                    DC.setSectionValue("MAGRANTS",Prm[i].REC);
+
+                    // TDW ?????ε? ?????? ???????????? ???? ????o??
+                    var sqlStmt  = "CM"                                                       //?????? ???????
+                    sqlStmt  = sqlStmt + "|" + "203";                                     //?????? ??u??  
+                    sqlStmt  = sqlStmt + "|" + "F69";                                     //?????1
+
+                    if(Prm[i].REC !== undefined){
+                        for(var j=0; j<Prm[i].REC.length; j++){
+                            DC.recordIndex = j;
+                            sqlStmt  = sqlStmt + "|" + DC.getItemValue("FOCM02_MA_UPMU");      //?????
+                        }
+                    }
+
+                    top.LIB.wasMAGDSO.call(sqlStmt);
+
+                }
+            }
+        }
+        */
+
+        function saveid() {
+            var expdate = new Date();
+            expdate.setTime(expdate.getTime() + 1000 * 3600 * 24 * 30);
+            setCookie("saveid", txtUserId.value, expdate);
+        }
+
+        function langcd() {
+            var expdate = new Date();
+            expdate.setTime(expdate.getTime() + 1000 * 3600 * 24 * 30);
+            setCookie("langcd", langCD.selectedIndex, expdate);
+        }
+
+        function setCookie( name, value, expires ) {
+            document.cookie = name + "=" + escape (value) + "; path=/; expires=" + expires.toGMTString();
+        }
+
+        function getCookie(name) {
+            try {
+                var search = name + "="
+                if (document.cookie.length > 0) {
+                    offset = document.cookie.indexOf(search);
+
+                    if (offset != -1) {
+                        offset += search.length
+                        end = document.cookie.indexOf(";", offset)
+                        if (end == -1) end = document.cookie.length
+                        return unescape(document.cookie.substring(offset, end))
+                    }
+                }
+            }
+            catch(E) {
+                alert(E.message);
+            }
+        }
+
+        function ShowProgress() {
+            loader.style.display = "";
+            prog.style.display = "";
+            /*
+            var ctx = prog.getContext("2d");
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fillRect(0,0,100,100);
+            */
+        }
+
+        function HideProgress() {
+            loader.style.display = "none";
+            prog.style.display = "none";
+        }
+        
+        function SetInputFocus() {
+            if (txtUserId.value != '') {
+                txtPassWd.focus();
+            } else {
+                txtUserId.focus();
+            }
+        }
+
+        async function ProcLoginError(ErrMsg) {
+            try {
+                //window.clearInterval(LoginITV);
+                AlreadyProc = false;
+                if (ErrMsg != '') await top.LIB.ShowInfoDialog2("BEST Login", ErrMsg);
+                try {
+                    txtPassWd.focus();
+                }
+                catch(E) {}
+            }
+            catch(E) {
+                alert("ProgLoginError : "+E.message);
+            }
+        }
+
+        /*
+        function SetSysInfo(){
+            var wasSQLDSO = top.LIB.wasTmpDSO;
+            
+            var sqlStmt   = "CM";                               //호출조회 업무코드
+            sqlStmt       = sqlStmt + "|" + "073";              //호출조회 일련번호
+
+            wasSQLDSO.call(sqlStmt);
+
+            try {
+                if (wasSQLDSO.recordset.recordCount > 0) {
+                    SysInfo = wasSQLDSO.recordset.fields("SSID").value;
+                }
+            } catch(E) {
+                //alert(E.message);
+            }
+        }
+        */
+    </script>
+</head>
+<body>
+    <div id="wrap">
+        <div class="bg"></div>
+
+        <div id="login-wrapper">
+            <div class="title">
+               <h1><img src="./images/logo1.png" alt="#" class="login-icon">
+                </h1>
+            </div>
+            <div id="login-form">
+                <div class="input-boxes">
+                    <div class="input-container">
+                     <div class="input-box">
+                        <i class="user">
+                            <img src="./images/user.png" alt="#">
+                        </i>
+                    <input type="text" id="txtUserId" placeholder="USER ID" name="id" autocomplete="off" spellcheck="false">
+                  </div>
+                  <div class="input-box">
+                    <i class="lock">
+                        <img src="./images/lock.png" alt="#">
+                    </i>
+                    <input type="password" id="txtPassWd" placeholder="PASSWORD" name="password" onkeydown="if (event.keyCode == 13) {LoginProc();}">
+                  </div>
+                    </div>
+                  <div class="input-button">
+                    <button value="LOGIN" onClick="LoginProc();" style="text-align: center;">LOGIN</button>
+                  </div>  
+                </div>
+                <div class="text"><a href="#">Forgot password</a></div>
+
+                <div class="language">
+                    <p>Language</p>
+                    <select name="lang" id="langCD">
+                        <option value="EN" >EN</option>
+                        <option value="IN" >IN</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div id="footer">
+                <div class="logo">
+                    <img src="./images/footerlogo.png" alt="#">
+                </div>    
+                <address>
+                    <p>
+                        PT Bank KEB Hana Indonesia, MANGKULUHUR CITY - TOWER ONE, JL, JEND. GATOT SUBROTO KAV. 1-3, JAKARTA 12930
+                    </p>    
+                    <p>
+                        Copyright (c) 2023.All Rights Reserved.
+                    </p>
+                </address>
+            </div>
+        </footer>      
+    </div>
+    <!-- <canvas id="prog" width="100px" height="100px" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; display: none;"></canvas> -->
+    <div id="prog" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: rgba(0,0,0,0.3); display: none;"></div>
+    <div id="loader" style="display:none;"></div>
+</body>
+</html>

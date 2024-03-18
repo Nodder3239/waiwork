@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html style="height:700px;width:1000px;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Image</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="/waiDoc/viewer/Img.core.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/waiDoc/viewer/css/Img.viewer.css">
+    <style>
+        #btn {
+            display: flex; flex-direction: row; justify-content: space-evenly;
+            position: absolute; right: 1px; bottom: 0; width: 190px;
+        }
+        #btn > button {
+            display: block; position: relative;
+            font-size: 11px; font-weight: 600;
+            width: 100%; height: 20px;
+            border: 1px solid #b8cdce; border-radius: 2px;
+            outline: none; box-shadow: 1px 1px 4px #cad1cd;cursor: pointer;
+            text-indent: -15px; letter-spacing: 1px; transition: all 0.2s;
+        }
+        #btn > button.close {
+            font-family: 'HanaM'; text-indent: -10px;
+            background-color: #f6f6f6; color: #898989;
+        }
+        #btn > button.close::before {
+            display: block;
+            content: "";
+            position: absolute;
+            top: 6.6px;
+            right: 8px;
+            width: 9px;
+            height: 9px;
+            background-image: url(/frame/images/input_close.png);
+            background-size: contain;
+        }
+        #btn > button.close:hover {
+            color: rgb(100, 100, 100);
+            background-color: #d3d3d3;
+        }
+    </style>
+    <script type="text/javascript">
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                var scan_svr_ip = "";
+                var scan_svr_port = "";
+                var valid_msg = "";
+                var scan_doc_id = "";
+                try {
+                    if (window.dialogArguments.Args != null) {
+                        scan_svr_ip   = window.dialogArguments.Args[0] ?? "";
+                        scan_svr_port = window.dialogArguments.Args[1] ?? "";
+                        valid_msg     = window.dialogArguments.Args[2] ?? "";
+                        scan_doc_id   = window.dialogArguments.Args[3] ?? "";
+                    }
+                    else {
+                        scan_svr_ip   = getMainCommData('EtcInfo').scanSvrIp;
+                        scan_svr_port = getMainCommData('EtcInfo').scanSvrPort;
+                        scan_doc_id   = getMainCommData('EtcInfo').scanDocId1; // scanDocId1, scanDocId2, scanDocId3, scanDocId4
+                    }
+
+                    /** Load Image */
+                    imgViewerLoadImage(VisSBRecVerify, scan_svr_ip, scan_svr_port, scan_doc_id);
+
+                    if(valid_msg != '') {
+                        // VisSBRecVerify.AddText(valid_msg,100,0,1400,100,17);
+                    }
+                } catch(e) {
+                    console.error(e.message);
+                }
+            }
+        }
+    </script>
+</head>
+<body style="overflow: hidden; margin: 0px;">
+    <waiDocImgViewer id="VisSBRecVerify" zoom="auto" topSide="true" leftSide="true" style="position:absolute;width:100%;height:100%;"></waiDocImgViewer>
+    <!-- <div id="btn" style="position: absolute;right: 5px;bottom: 10px;width: 110px;height: 28px;">
+        <button id="btnClose" class="close" onclick="window.close()" style="width: 104px; height: 24px;">Close</button>
+    </div> -->
+</body>
+</html>

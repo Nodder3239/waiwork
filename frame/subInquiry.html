@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+    <meta charset="UTF-8">
+    <title>GBS SubInquiry</title>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/subentry.css" />
+	<script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="/wai/default.css" />
+    <script type="text/javascript">
+        //=====================================================================
+        // Work Global Variant
+        //=====================================================================
+        var BDO = {};
+
+        var OPStatus  = (-1);
+        var Inited    = false;
+        var LinkCIFNo = "";
+        var SUB_TYPE  = "INQ";   //20130613_Cho_1
+        
+        window.onerror = SubErrorProc;
+
+        //=====================================================================
+        // struct
+        //=====================================================================
+        function structSI() {
+            var Mode = "";
+            var ScenarioKey = "";    
+        };
+        
+        var SUB_DATA = new structSI();
+
+        //=====================================================================
+        // K.D.J 2010.6.24
+        // Action Listener Event processing..
+        //=====================================================================
+        function ExecAct(OPID) {
+            //alert(OPID);
+            switch(OPID) {
+                case 0 : // CNF Inquiry
+                    // LinkCIFNo Get..
+                    ActionLsnr.ActionManager.ExecAction("ActCNFInquiry");
+                    var DArg  = new DArgument();
+                    DArg.Args = new Array(1);
+                    DArg.Args[0]  = LinkCIFNo;
+            
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 727px; dialogWidth: 1280px;";
+                    //var Result = window.showModalDialog('/biz/iq/IQ10.html', DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('/iq/IQ10.html'), DArg, strWinSts, function(Result) {
+
+                    });
+                    break;
+                case 1 : // Customer Contact
+                    // LinkCIFNo Get..
+                    ActionLsnr.ActionManager.ExecAction("ActCustContact");
+                    var DArg  = new DArgument();
+                    DArg.Args = new Array(1);
+                    DArg.Args[0]  = LinkCIFNo;
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 770px; dialogWidth: 1280px;";
+                    //var Result = window.showModalDialog('/biz/cg/CG10.html', DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('/cg/CG10.html'), DArg, strWinSts, function(Result) {
+
+                    });
+                    break;
+            }
+        }
+
+        /**
+         * @param {string} svcUrl - A string containing the URL to which the request is sent.
+         * @param {object} [data] - Data to be sent to the server.
+         * @param {object} [onResult] - A function to be called if the request succeeds
+         * @param {object} [onError] - A function to be called if the request fails
+         * @param {object} [options] - call options - A set of key/value pairs that configure the request.
+         *			 				{
+         *					        	'type'     : 'POST',   // An alias for method
+         *					        	'async'    : true,     // Asynchronous type
+         *					          	'timeout'  : 300000,   // Set a timeout (in milliseconds) for the request
+         *				           		'dataType' : 'JSON',   // The type of data that you're expecting back from the server
+         *				        	   	'jsonText' : false,    // Whether to process data in json string format
+         *           					'headers'  : {},       // An object of additional header key/value pairs to send
+         *                              'argObj'   : {}        // User-defined object when calling a service
+         *					       	}
+         */
+        function callService(svcUrl, data = {}, onResult, onError, options = {}) {
+            if (!svcUrl) {
+                return;
+            }
+
+            options.beforeCallEvent = NeedParams;
+            options.afterCallEvent = ResultParams;
+
+            defCallService(svcUrl, data, onResult, onError, options);
+        }
+
+        async function callServiceAsync(svcUrl, data = {}, onResult, onError, options = {}) {
+            if (!svcUrl) {
+                return;
+            }
+
+            options.beforeCallEvent = NeedParams;
+            options.afterCallEvent = ResultParams;
+
+            return await defCallServiceAsync(svcUrl, data, onResult, onError, options);
+        }
+
+        function NeedParams(inputData, callOpt) {
+            // console.log('SubInquiry NeedParams --- START');
+            if (!BDO.SysInfo) {
+                BDO.SysInfo = {};
+            }
+            if (!BDO.EtcInfo) {
+                BDO.EtcInfo = {};
+            }
+
+            let scrInfo = {
+                'gwam' : callOpt.url.split('/').at(-1).substr(0, 2),
+                //'geor' : callOpt.url.split('/').at(-1).substr(3, 2),
+                'ibcd' : bizTabCtrl().getCurrentTab(window).id
+            };
+            
+            BDO.SysInfo.subjCd = scrInfo.gwam;
+            // BDO.SysInfo.trscCd = scrInfo.geor; // TO-BE: 사용안함
+            BDO.SysInfo.scrnId = scrInfo.ibcd;
+
+            const CDO = LIB().CDO;
+
+            if (CDO.SysInfo !== null) {
+                CDO.SysInfo.subjCd = scrInfo.gwam;
+                // CDO.SysInfo.trscCd = scrInfo.geor; // TO-BE: 사용안함
+                CDO.SysInfo.scrnId = scrInfo.ibcd;
+            }
+
+            for (let x in CDO) {
+                if (!['MenuData', 'MenuGrant'].includes(x)) {
+                    inputData[x] = JSON.parse(JSON.stringify(CDO[x]));
+                }
+            }
+
+            for (let x in BDO) {
+                if (!['input'].includes(x)) {
+                    const isArray = Array.isArray(BDO[x]);
+                    if (isArray) {
+                        inputData[x] = JSON.parse(JSON.stringify(BDO[x]));
+                    } else {
+                        if (!inputData[x]) {
+                            inputData[x] = {};
+                        }
+                        for (let y in BDO[x]) {
+                            inputData[x][y] = JSON.parse(JSON.stringify(BDO[x][y] ?? ''));
+                        }
+                    }
+                }
+            }
+
+            // console.log('SubInquiry NeedParams --- END');
+            console.log(`[${callOpt.url.split('/').at(-1)}] inputData -> `, inputData);
+
+            return true;
+        }
+
+        const bizCommItem = [
+            'scrnId', // SysInfo - FXFIG_IBCD
+            'subjCd', // SysInfo - FXFIG_GWAM
+            'trscCd', // SysInfo - FXFIG_GEOR
+            'custNo', // SysInfo - FXFIG_CIX_NO
+            'refNo', // SysInfo - FXFIG_REF_NO
+            'trscSeqNo', // SysInfo - FXFIG_HIS_NO
+            'trscDt', // SysInfo - FXFIG_TRX_DT
+            'ibfGb', // SysInfo - FXFIG_IBF_GB
+            'rsprApvYn', // SysInfo
+            // 'ovrdDvCd', // OvrdInfo? - FXFIG_OVGB
+            'ovrdApvNo', // EtcInfo - FXFIG_OVRD_APV_NO
+            'edcYn', // EtcInfo - FXFIG_EDC_YN
+            'edcRefNo', // EtcInfo - FXFIG_EDC_REF_NO
+            'edcHisNo', // EtcInfo - FXFIG_EDC_HIS_NO
+            'edcTicketNo', // EtcInfo - FXFIG_EDC_TICKET_NO
+            'clldMthCd', // EtcInfo - FXFIG_CLLD_MTH_CD
+            'scanDocId1', // EtcInfo - FXFIG_SCAN_DOC_ID1
+            'scanDocId2', // EtcInfo - FXFIG_SCAN_DOC_ID2
+            'scanDocId3', // EtcInfo - FXFIG_SCAN_DOC_ID3
+            'scanDocId4', // EtcInfo - FXFIG_SCAN_DOC_ID4
+            'scanCode1', // EtcInfo - FXFIG_SCAN_CODE1
+            'scanCode2', // EtcInfo - FXFIG_SCAN_CODE2
+            'scanCode3', // EtcInfo - FXFIG_SCAN_CODE3
+            'scanCode4', // EtcInfo - FXFIG_SCAN_CODE4
+            'japJbuf', //  EtcInfo - FOJAP_JBUF
+            'japJbufList', //  EtcInfo - FOJAP_JBUF
+            'japJbufStruct', //  EtcInfo - FOJAP_JBUF
+            'japTitle', // EtcInfo - FOJAP_TITLE
+            'orgScrnId'
+        ];
+
+        function ResultParams(send, recv) {
+            const isBizError = recv?.data?.output?.errorCode ? true : false;
+
+            if (!recv.isError && !isBizError && recv.data) {
+                const CDO = LIB().CDO;
+                
+                // console.log('recv.data ---> ', recv.data);
+
+                // Clear biz screen common data
+                for (let key in BDO) {
+                    if (!['SysInfo', 'EtcInfo'].includes(key)) {
+                        delete BDO[key];
+                    }
+                }
+
+                if (typeof recv.data == 'object' && !Array.isArray(recv.data)){
+                    for (let x in recv.data) {
+                        if (!['output', 'GlobalId', 'SysInfo', 'EtcInfo', 'OvrdInfo'].includes(x)) {
+                            BDO[x] = JSON.parse(JSON.stringify(recv.data[x]));
+                        }
+
+                        if (['SysInfo', 'EtcInfo'].includes(x)) {
+                            BDO[x] = BDO[x] ?? {};
+                            for (let y in recv.data[x]) {
+                                if (bizCommItem.includes(y)) {
+                                    BDO[x][y] = recv.data[x][y] ?? '';
+                                }
+                            }
+                        }
+
+                        if (x == 'OvrdInfo') {
+                            BDO[x] = BDO[x] ?? {};
+                            for (let y in recv.data[x]) {
+                                const value = JSON.parse(JSON.stringify(recv.data[x][y] ?? ''));
+                                if (y != 'mngrList') {
+                                    BDO[x][y] = value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+        
+        function SubErrorProc(sMsg, sUrl, sLine) {
+            //HideProgress();
+            return true;
+        }
+        
+        /** Dialog Arugments Construction function **/
+        function DArgument() {
+            if (!window.dialogArguments)
+                this.topWindow = window.top;
+            else
+                this.topWindow = window.dialogArguments.topWindow;
+            this.openWindow = window;
+            this.Args = null;
+        }
+
+        function SubInquiryLoaded() {
+            top.MAIN.OnFrmLoadSync(window);
+            InitDC();
+        }
+
+        function InitDC() {
+            BDO.SysInfo = {};            
+            BDO.SysInfo.trscBrNo = LIB().CDO.SysInfo.trscBrNo;
+            BDO.SysInfo.acBrNo = LIB().CDO.SysInfo.acBrNo;
+            
+            // SubInquiry에 대한 Logout Timer 이벤트 셋팅
+            document.onmousemove = top.MAIN.fResetTimer;
+            document.onkeydown   = top.MAIN.fResetTimer;
+        }
+
+        function WorkFrameLoad() {
+            //console.log('subInquiry.WorkFrameLoad()');
+            //console.log({'workFrame':WorkFrame});
+            var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+            if (wnd.$wai === undefined) return;
+
+            /* JSON.call 적용 필요
+            var ivks = wnd.$wai.core.getDataServices();
+            for (var i=0;i<ivks.length;i++){
+                ivks[i]._evt_beforeCall = NeedParams;
+                ivks[i]._evt_afterCall = ResultParams;
+            }
+            */
+
+            wnd['callService'] = callService;
+            wnd['callServiceAsync'] = callServiceAsync;
+            wnd['callBasicService'] = callBasicService;
+
+            const actManElem = wnd.document.querySelector('ACTMAN');
+            if (actManElem && actManElem.id) {
+                const actMan = wnd[actManElem.id];
+                if (actMan) {
+                    ActionLsnr.ActionManager = actMan;
+                }
+            }
+
+            // 좌측 버튼 처리
+            const actions = ActionLsnr.ActionManager?.actions;
+            if (actions) {
+                actions.forEach(action => {
+                    const actionObj = ActionLsnr.actions.find(elem => elem.name == action.name);
+                    if (actionObj) {
+                        actionObj.elem.parentElement.style.display = '';
+                    }
+                })
+            }
+
+            // 공통 버튼 디스플레이
+            document.querySelectorAll('.bottom_btn').forEach(elem => {
+                if (elem.className == 'bottom_btn') {
+                    if (Array.prototype.find.call(elem.querySelectorAll('li'), liElem => liElem.style.display != 'none')) {
+                        elem.style.display = '';
+                    }
+                } else {
+                    elem.style.display = '';
+                }
+            });
+            
+            // SubInquiry에서 호출하는 업무 화면에 대한 Logout Timer 이벤트 셋팅
+            wnd.document.onmousemove = top.MAIN.fResetTimer;
+            wnd.document.onkeydown   = top.MAIN.fResetTimer;
+            
+            //console.log('ivks',ivks);
+            if ( wnd.onLoadPage !== undefined ) {
+                setTimeout(() => {wnd.onLoadPage(false)}, 100);
+            } else {
+                if ($wai.debug > 0) console.log('subInquiry.WorkFrameLoad : "['+WorkFrame.src+'].onLoadPage()" function undefined - Skiped execute');
+            }
+        }
+
+        function procError(e) {
+            // KDJ Add 2010.6.14 // HHU Mod : 2016.06.28 // 필수 항목 검사 및 포커스
+            if( e.number == 80013 ) {
+                var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+                var errs = e.description.split('|');
+                if( errs.length == 1 ){
+                    LIB().ShowErrorDialog('Mandatory Field: "' + errs[0]+'"', '', '');
+                } else {
+                    if (errs[2]) { // manalerttext
+                        LIB().ShowErrorDialog('Mandatory Field: "' + errs[2] +'"', '', '');
+                    } else { // labelid
+                        LIB().ShowErrorDialog('Mandatory Field: "' + wnd[errs[1]].innerText +'"', '', '');
+                    }
+                }
+                try {
+                    wnd[errs[0]].focus();
+                } catch(E) { }
+            } else if ( e.number == 80014 ) {
+                LIB().ShowInfoDialog(e.message);
+            } else if ( e.number == 80015 ) {
+                LIB().ShowErrorDialog(e.message);
+            } else if ( e.number == 99999 ) {
+                LIB().ShowErrorDialog(e.stack);
+            }else {
+                if (e.message) {
+                    LIB().ShowErrorDialog(e.message);
+                }
+            }
+        }
+
+        function chkManFld() {
+            var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+            var result = ChkCpnClassByWF(wnd.document.body);
+            if (result) {
+                procError(new GBSError(80013, result));
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        /*
+        $(() => {
+            const sideElem = document.querySelector('#side');
+            if (Array.prototype.find.call(sideElem.querySelectorAll('button'), elem => elem.style.display == '')) {
+                sideElem.style.display = '';
+            } else {
+                sideElem.style.display = 'none';
+            }
+        });
+
+        $(()=>{
+            $('#side li').on('click', function(){
+                $(this).stop().toggleClass('on').siblings().stop().removeClass('on').parent().next().find('li').removeClass('on');
+            });
+        });
+        */
+    </script>
+</head>
+<body style="height: 100%; margin: 0px; overflow: hidden;" onload="SubInquiryLoaded()">
+    
+    <div id="sub_entry">
+        <div id="side">
+            <ul class="bottom_btn" style="display: none;">
+                <li style="display: none;">
+                    <button class="" id="CNFInqBtn" onclick="ExecAct(0)" actenabletype="2" title="CNFInq">
+                        <img src="./images/CNFkey.png" alt="#" class="off">
+                        <img src="./images/CNFkey_hover.png" alt="#" class="on">
+                    </button>
+                </li>
+                <li style="display: none;">
+                    <button class="" id="CCntctBtn" onclick="ExecAct(1)" actenabletype="2" title="CCntct">
+                        <img src="./images/CusCntct.png" alt="#" class="off">
+                        <img src="./images/CusCntct_hover.png" alt="#" class="on">
+                    </button>
+                </li> 
+            </ul>
+        </div>
+        
+        <div id="work">
+            <iframe id="WorkFrame" frameborder="0" border="0" width="100%" height="100%" onload="WorkFrameLoad()"></iframe>
+        </div>
+
+    </div>
+
+    <actlsnr id="ActionLsnr">
+        <actlink linkid="CNFInqBtn" actionname="ActCNFInquiry"></actlink>
+        <actlink linkid="CCntctBtn" actionname="ActCustContact"></actlink>
+    </actlsnr>
+</body>
+</html>

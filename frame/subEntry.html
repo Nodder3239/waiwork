@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+    <meta charset="UTF-8">
+    <title>GBS SubEntry</title>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/subentry.css" />
+	<script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="/wai/default.css" />
+    <script type="text/javascript">
+        //=====================================================================
+        // Work Global Variant
+        //=====================================================================
+        var BDO = {};
+
+        var OPStatus       = (-1);
+        var Inited         = false;
+        // var PBHNDC         = null;
+        var Passbook = waiBrowser.modules.Passbook;
+        var HasPBPrintData = 0;
+        var LinkCIFNo      = "";
+        var LinkREFNo      = "";           // 20120613_Son_1
+        var LinkHISNo      = 0;            // 20120613_Son_1
+        var isAlwaysEDC    = false;
+        var FXInfoRst      = null;         // 20120613_Son_1
+        var FXProc         = 0;            // 20120613_Son_1
+        var RstArr         = new Array(5); // 20120613_Son_1
+        var StopExecute    = false;
+        //var LinkDOCId      = "";           // 20130719_KDJ_1
+        var Trx_Caller     = "";
+        var SUB_TYPE       = "ENT"     //20130613_Cho_1
+        var FXDocProc      = 0;
+        var FXDocRst       = null;
+
+        //=====================================================================
+        // 초기화 및 화면 이벤트 처리 함수(들)
+        //=====================================================================
+        function SubErrorProc(sMsg, sUrl, sLine) {
+            console.error('[GBS] SubEntry ('+sLine+') : '+sMsg);
+            return true;
+        }
+        window.onerror = SubErrorProc;
+
+        //=====================================================================
+        // struct
+        //=====================================================================
+        function structSE() {
+           var Mode = "";
+           var ScenarioKey = "";
+        }
+
+        var SUB_DATA = new structSE();
+
+        //-------------------------------------------------------
+        // SubEntry 페이지 최소 이벤트 - body.onLoad
+        //-------------------------------------------------------
+        //var wasSQLSubEntry = null;
+        
+        function SubEntryLoaded() {
+            showLoadTime('loadScreen : subEntry', false);
+            //wasSQLSubEntry = new $wai.classes.DSQLService();
+
+            top.MAIN.OnFrmLoadSync(window);
+            InitDC();
+        }
+
+        //-------------------------------------------------------
+        // 서브 공통 BDC (구 : lHNDC) 데이터 설정
+        //-------------------------------------------------------
+        function InitDC() {
+            //var sqlBRNO = "";
+
+            /* AS-IS
+            var XND_FXFIG_SCR =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FXFIG_SCR']");
+            var XND_FGINP =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FGINP']");
+            var XND_FIGLBASE  =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FIGLBASE']");
+            var XND_FIGLINF   =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FIGLINF']");
+            var XND_FIGLCHK   =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FIGLCHK']");
+            var XND_FIGLDUETO =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FIGLDUETO']");
+            // 20120613_Son_1
+            var XND_FXINFO =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FXINFO']");
+            var XND_FXDOCBASE =
+              top.LIB.xmlCInitData.selectSingleNode("//PARAMS/COMMON[@name='FXDOCBASE']");
+
+            // Section(s) Add
+            try {
+            HNDC.AddSection("FXFIG_SCR", XND_FXFIG_SCR.cloneNode(true));
+            HNDC.AddSection("FGINP",     XND_FGINP.cloneNode(true));
+            HNDC.AddSection("FIGLBASE",  XND_FIGLBASE.cloneNode(true));
+            HNDC.AddSection("FIGLINF",   XND_FIGLINF.cloneNode(true));
+            HNDC.AddSection("FIGLCHK",   XND_FIGLCHK.cloneNode(true));
+            HNDC.AddSection("FIGLDUETO", XND_FIGLDUETO.cloneNode(true));
+            HNDC.AddSection("FXINFO",    XND_FXINFO.cloneNode(true));   // 20120613_Son_1
+            HNDC.AddSection("FXDOCBASE", XND_FXDOCBASE.cloneNode(true));
+            } catch (e) { alert(e.description) }
+            */
+
+            BDO.SysInfo = {};
+            BDO.EtcInfo = {};
+
+            /*------------------------------------*/
+            /* TRX DATE Set                       */
+            /*------------------------------------*/
+            const SysInfo = LIB().CDO.SysInfo;
+
+            var TrxDateVal = SysInfo.procBascDt ? LIB().Util.DateToLocal(SysInfo.procBascDt, 'YYYY/MM/DD', 'S') : '';
+            dtpTRX_DATE.value = TrxDateVal;
+
+            trxBrNoProg.style.display = "";
+            callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '69'}, output => {
+                trxBrNoProg.style.display = "none";
+                cbbCJUM.setData(output.output69?.grid01 ?? []);
+                cbbCJUM.value = SysInfo.trscBrNo;
+            }, recv => {
+                trxBrNoProg.style.display = "none";
+                onSvcErrorDialog(recv);
+            }, {skipProg: true});
+
+            BDO.SysInfo.trscDt = TrxDateVal;
+            BDO.SysInfo.trscBrNo = SysInfo.trscBrNo;
+            BDO.SysInfo.acBrNo = SysInfo.acBrNo ?? '';
+            
+            // SubEntry에 대한 Logout Timer 이벤트 셋팅
+            document.onmousemove = top.MAIN.fResetTimer;
+            document.onkeydown   = top.MAIN.fResetTimer;
+
+            var tab = top.MAIN.tabCtrl.getCurrentTab(window);
+            if (tab != null){
+                var Data = (tab.data.desc+'').trim().split('|');
+                if ( Data[2].substr(1,1) == "1" ) {
+                    /* 20210308_Franky - HQBSG-2020-OUT-409 */
+                    isCentralize(top.LIB.CDO.SysInfo.userId ?? '', tab.id, function(nRet) {
+                        if ( (nRet == 1) || (nRet == 2) ) {
+                            /* Show Branch option */
+                            // cbbCJUM.style.display = "";
+                            areaCbbCJUM.style.display = '';
+                        } else {
+                            /* Do not show Branch option */
+                            // cbbCJUM.style.display = "none";
+                            areaCbbCJUM.style.display = 'none';
+                        }
+                    });
+                }
+
+                if ( Data[2].substr(2,1) == "1" ) {
+                    // cbbTRXOVRDdiv.style.display = "";
+                    areaCbbTRXOVRD.style.display = '';
+                }
+
+                if ( Data[2].substr(3,1) == "1" ) {
+                    isAlwaysEDC = true;
+                    lblHDWARE.display = "";
+                    chkHDWARE.display = "";
+                } else if ( Data[2].substr(3,1) == "2" ) {
+                    isAlwaysEDC = false;
+                    lblHDWARE.display = "none";
+                    chkHDWARE.display = "none";
+                }
+
+                SUB_DATA.Mode = Data[4];
+                SUB_DATA.ScnroKey = Data[5];
+
+                if( cbbTRXOVRD.value == "" ){
+                    //cbbTRXOVRD.style.display = "none";
+                }
+            }
+        }
+
+        /* 20210308_Franky (S) - HQBSG-2020-OUT-409 */
+        /*-------------------------------------------------------------------------------*/
+        /*  FUNCTION    : isCentralize                                                   */
+        /*-------------------------------------------------------------------------------*/
+        /*  DESCRIPTION : Check whether this is transaction related Centralization or No */
+        /*  INPUT       : op_no -> user operator no                                      */
+        /*                ibcd -> Transaction Code / Menu Code                           */
+        /*  OUTPUT      : 0 -> Transaction related Centralization                        */
+        /*                1 -> Not related Centralization                                */
+        /*                2 -> Menu is not related Centralization. Show branch option    */
+        /*-------------------------------------------------------------------------------*/
+        function isCentralize(op_no, ibcd, callback) {
+            //Check by menu
+            /*
+            var sSqlStmt = "";
+
+            sSqlStmt += "SELECT count(DISTINCT code) as CNT   \n";
+            sSqlStmt += "    FROM acom_comh_code A            \n";
+            sSqlStmt += "        ,acom_comh_menu B            \n";
+            sSqlStmt += "    WHERE A.type = 'F1067'           \n";
+            sSqlStmt += "      AND A.code = '" + ibcd + "'    \n";
+            sSqlStmt += "      AND A.code = B.upmu_code       \n";
+
+            wasSQLSubEntry.SQL = sSqlStmt;
+
+            if( wasSQLSubEntry.recordset.Fields("CNT").value == 1 ){
+                //continue checking by group no
+            }
+            else{
+                //The menu is showing Branch Options even before Centralization Project. Thus, we still need to show the branch option
+                return(2);
+            }
+            */
+            callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '72', param1: ibcd}, output => {
+                const count = output.output72?.count ?? 0;
+                if (count != 1) {
+                    //The menu is showing Branch Options even before Centralization Project. Thus, we still need to show the branch option
+                    callback(2);
+                    return;
+                }
+
+                // sSqlStmt = "";
+
+                // //Check by grp_no
+                // sSqlStmt += "SELECT *                             \n";
+                // sSqlStmt += "    FROM acom_comh_user              \n";
+                // sSqlStmt += "    WHERE grp_no IN (                \n";
+                // sSqlStmt += "            'HOCTO10'                \n";      /* Head Office Customer Data Services Staff */
+                // sSqlStmt += "           ,'HOCTO11'                \n";      /* Head Office Transaction Services Staff */
+                // sSqlStmt += "           ,'HOCTO02'                \n";      /* Head Office Transaction Services Approval */
+                // sSqlStmt += "      )                              \n";
+                // sSqlStmt += "      AND op_no = '" + op_no + "'    \n";
+
+                // wasSQLSubEntry.SQL = sSqlStmt;
+
+                // if( wasSQLSubEntry.recordset.recordCount == 1 ){
+                //     //Centralization Group
+                //     return(1);
+                // }
+                // else{
+                //     //Not Centralization Group
+                //     return(0);
+                // }
+
+                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '73', param1: op_no}, output => {
+                    if (output.output73) {
+                        //Centralization Group
+                        callback(1);
+                    } else {
+                        //Not Centralization Group
+                        callback(0);
+                    }
+                });
+            });
+        }
+        /* 20210308_Franky (E) */
+
+        //-------------------------------------------------------
+        // 업무 화면 로딩 완료 이벤트
+        //-------------------------------------------------------
+        function WorkFrameLoad() {
+            var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+            if (wnd.$wai === undefined) return;
+
+            console.log('WorkFrameLoad : START');
+
+            /* JSON.call 적용 필요
+            var ivks = wnd.$wai.core.getDataServices();
+            for (var i=0;i<ivks.length;i++){
+                console.log('ivks['+i+']',ivks[i]);
+                ivks[i]._evt_beforeCall = NeedParams;
+                ivks[i]._evt_afterCall = ResultParams;
+            }
+            */
+
+            wnd['callService'] = callService;
+            wnd['callServiceAsync'] = callServiceAsync;
+            wnd['callBasicService'] = callBasicService;
+
+            const actManElem = wnd.document.querySelector('ACTMAN');
+            if (actManElem && actManElem.id) {
+                const actMan = wnd[actManElem.id];
+                if (actMan) {
+                    ActionLsnr.ActionManager = actMan;
+                }
+            }
+
+            // 공통 버튼 셋팅
+            const actions = ActionLsnr.ActionManager?.actions;
+            if (actions) {
+                actions.forEach(action => {
+                    const actionObj = ActionLsnr.actions.find(elem => elem.name.toUpperCase() == (action.name ?? '').toUpperCase());
+                    if (actionObj) {
+                        actionObj.elem.parentElement.style.display = '';
+
+                        if (actionObj.elem.parentElement.style.display == 'none') { // 가변 버튼
+                            actionObj.elem.parentElement.style.display = '';
+                        } else { // 고정 버튼
+                            actionObj.elem.classList.remove('disabled');
+                            actionObj.elem.disabled = false;
+                        }
+                    }
+                });
+            }
+
+            // 공통 버튼 디스플레이
+            document.querySelectorAll('.top_btn, .bottom_btn, #bottom').forEach(elem => {
+                if (elem.className == 'bottom_btn') {
+                    if (Array.prototype.find.call(elem.querySelectorAll('li'), liElem => liElem.style.display != 'none')) {
+                        elem.style.display = '';
+                    }
+                } else {
+                    elem.style.display = '';
+                }
+            });
+            
+            // SubEntry에서 호출하는 업무 화면에 대한 Logout Timer 이벤트 셋팅
+            wnd.document.onmousemove = top.MAIN.fResetTimer;
+            wnd.document.onkeydown   = top.MAIN.fResetTimer;
+            
+            ExecAct(0);
+
+            showLoadTime('loadScreen : subEntry', true);
+
+            //console.log('wnd.$wai.core.getDataServices',ivks);
+            if ( wnd.onLoadPage !== undefined ) {
+                setTimeout(() => {wnd.onLoadPage(false)}, 100);
+            } else {
+                if ($wai.debug > 0) console.log('subEntry.WorkFrameLoad : "['+WorkFrame.src+'].onLoadPage()" function undefined - Skiped execute');
+            }
+        }
+
+        function onSvcErrorDialog(recv) {
+            // let errMsg = '';
+            // const errOutput = recv.xhr?.responseJSON?.output;
+            // if (errOutput) {
+            //     errMsg = `${errOutput.message ?? 'Error'}\n\n${errOutput.error ?? ''}`;
+            // } else {
+            //     errMsg = (recv.errThrown?.message ?? recv.errThrown) || "Service Error";
+            // }
+            // ShowErrorDialog(errMsg);
+            const errObj = new Error();
+            // let errMsg = '';
+            const errOutput = recv.xhr?.responseJSON?.output;
+            if (errOutput) {
+                // errMsg = `${errOutput.message ?? 'Error'}\n\n${errOutput.error ?? ''}`;
+                errObj.message = `${errOutput.message ?? 'Error'}`;
+                errObj.stack = errOutput.error ?? '';
+                errObj.errInfo = {
+                    globId: '',
+                    msg: errObj.message,
+                    subMsg: '',
+                    stack: errOutput.error ?? ''
+                }
+            } else {
+                // errMsg = (recv.errThrown?.message ?? recv.errThrown) || 'Error';
+                errObj.message = (recv.errThrown?.message ?? recv.errThrown) || 'Error';
+                errObj.stack = '';
+                errObj.errInfo = {
+                    globId: '',
+                    msg: errObj.message,
+                    subMsg: '',
+                    stack: ''
+                }
+            }
+            errObj.bSvcErr = true;
+            errObj.status = recv.xhr?.status;
+            throw errObj;
+        }
+
+        //-------------------------------------------------------
+        // 화면 컨트롤 이벤트(s)
+        //-------------------------------------------------------
+        function SetCJUM() {
+            BDO.SysInfo.trscBrNo = cbbCJUM.value ?? '';
+            BDO.SysInfo.acBrNo = cbbCJUM.value ?? '';
+        }
+
+        function cbbCJUM_onChange() {
+
+        }
+
+        function SetTRXOVRD() {
+            BDO.EtcInfo = BDO.EtcInfo ?? {};
+            BDO.EtcInfo.ovrdApvNo = cbbTRXOVRD.value ?? '';
+        }
+
+        function fSetcbbTRXOVRD() {
+            cbbTRXOVRD.value = "";
+            cbbTRXOVRD.clear();
+
+            /* DSQL_CODE
+            var sqlStr = "";
+
+            top.LIB.HNDC.SectionName = "FXFIG_COM";
+            top.LIB.HNDC.RecordIndex = 0;
+            top.LIB.InitCB(cbbTRXOVRD,  "F181");
+            sqlStr = "SELECT 'F181' as type, ovrd_apv_no as code, remark as code_nm, 1 as sort_seq\n" +
+                    "FROM   acom_ovrd_apl\n" +
+                    "WHERE  apl_br =  '" + cbbCJUM.Value + "' AND apl_sts = '2'\n" +
+                    "AND    val_dt = '" + top.LIB.Util.LocalToDate(dtpTRX_DATE.Value) + "'" +
+                    "AND    trx_op_no = '" + top.LIB.HNDC.GetItemValue("FXFIG_OPNO") + "'";
+
+            cbbTRXOVRD.SQL = sqlStr;
+            */
+
+            if (dtpTRX_DATE.unmaskedValue().length < 8) {
+                cbbTRXOVRD.setData([]);
+                return;
+            }
+           
+            const inputData = {
+                dvCd: '70',
+                param1: cbbCJUM.value,
+                param2: dtpTRX_DATE.value ? top.LIB.Util.LocalToDate(dtpTRX_DATE.value) : '',
+                param3: top.LIB.CDO.SysInfo.userId
+            };
+
+            trxOVRDProg.style.display = "";
+            cbbTRXOVRD.closedPanel = true;
+            callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                trxOVRDProg.style.display = "none";
+                cbbTRXOVRD.setData(output.output70?.grid01 ?? []);
+                cbbTRXOVRD.closedPanel = false;
+                cbbTRXOVRD.openPanel();
+            }, recv => {
+                trxBrNoProg.style.display = "none";
+                onSvcErrorDialog(recv);
+            }, {skipProg: true});
+        }
+
+        function TrxDateChange() {
+            BDO.SysInfo.trscDt = dtpTRX_DATE.value ?? '';
+        }
+
+        function fchkHDWARE_onClick() {
+            if(!chkHDWARE.checked) {
+                return;
+            }
+            var DArg  = new DArgument();
+            var strWindowStatus = 'status:no; resizable:no; scroll:no; center:yes; dialogHeight:360px; dialogWidth:530px;';
+
+            DArg.Args = new Array(1);
+            DArg.Args[0] = getMainCommData('SysInfo').opNo; //GET_COMM_DATA('FXFIG_COM', 'FXFIG_OPNO');
+            DArg.Args[1] = BDO.SysInfo.refNo ?? '';
+
+            //var rArg = window.showModalDialog('/EdcInfo.html',DArg,strWindowStatus);
+            openPopup('/frame/edcInfo.html', DArg, strWindowStatus, function(rArg){
+                if (rArg != null) {
+                    BDO.EtcInfo = BDO.EtcInfo ?? {};
+                    BDO.EtcInfo.edcYn       = rArg[0];
+                    BDO.EtcInfo.edcRefNo    = rArg[1];
+                    BDO.EtcInfo.edcHisNo    = rArg[2];
+                    BDO.EtcInfo.edcTicketNo = rArg[3];
+                } else {
+                    chkHDWARE.checked = false;
+                    if (BDO.EtcInfo) {
+                        BDO.EtcInfo.edcYn       = 'N';
+                        BDO.EtcInfo.edcRefNo    = '';
+                        BDO.EtcInfo.edcHisNo    = 0;
+                        BDO.EtcInfo.edcTicketNo = '';
+                    }
+                }
+            });
+        }
+
+        //==================================================================================================================
+        // FX Information 관련
+        //==================================================================================================================
+        {
+            function fSetFXINFO() {
+                FXProc = 1;
+                BDO.EtcInfo = BDO.EtcInfo ?? {};
+
+                if (FXInfoRst != null) {
+                    BDO.EtcInfo.infoCntpTyCd   = trim(FXInfoRst[0]); // FXINFO_CNTPTY_CD
+                    BDO.EtcInfo.infoNonBkCd    = trim(FXInfoRst[1]); // FXINFO_NONBK_CD
+                    BDO.EtcInfo.infoBisTy      = trim(FXInfoRst[2]); // FXINFO_BIS_TY
+                    BDO.EtcInfo.infoTrxRsn     = trim(FXInfoRst[3]); // FXINFO_TRX_RSN
+                    BDO.EtcInfo.infoNpwpCd     = trim(FXInfoRst[4]); // FXINFO_NPWP_CD
+                    BDO.EtcInfo.infoDocType    = trim(FXInfoRst[5]); // FXINFO_DOC_TYPE
+                    BDO.EtcInfo.infoDocNotes   = trim(FXInfoRst[6]); // FXINFO_DOC_NOTES
+                    BDO.EtcInfo.infoDocKindRcv = trim(FXInfoRst[7]); // FXINFO_DOC_KIND_RCV
+                } else {
+                    BDO.EtcInfo.infoCntpTyCd   = '';
+                    BDO.EtcInfo.infoNonBkCd    = '';
+                    BDO.EtcInfo.infoBisTy      = '';
+                    BDO.EtcInfo.infoTrxRsn     = '';
+                    BDO.EtcInfo.infoNpwpCd     = '';
+                    BDO.EtcInfo.infoDocType    = '';
+                    BDO.EtcInfo.infoDocNotes   = '';
+                    BDO.EtcInfo.infoDocKindRcv = '';
+                }
+            }
+
+            function fClearFXINFO() {
+                FXProc = 0;
+                FXInfoRst = null;
+                BDO.EtcInfo = BDO.EtcInfo ?? {};
+
+                BDO.EtcInfo.infoCntpTyCd   = '';
+                BDO.EtcInfo.infoNonBkCd    = '';
+                BDO.EtcInfo.infoBisTy      = '';
+                BDO.EtcInfo.infoTrxRsn     = '';
+                BDO.EtcInfo.infoNpwpCd     = '';
+                BDO.EtcInfo.infoDocType    = '';
+                BDO.EtcInfo.infoDocNotes   = '';
+                BDO.EtcInfo.infoDocKindRcv = '';
+            }
+
+            function fSetFXDOC() {
+                FXDocProc = 1;
+                BDO.EtcInfo = BDO.EtcInfo ?? {};
+
+                let idx = 0;
+                let idx2 = 0;
+
+                if (FXDocRst != null) {
+                    while(1) {
+                        if (FXDocRst[idx] != null) {
+                            BDO.EtcInfo[`docBaseRefNo${idx+1}`] = trim(FXDocRst[idx]);
+                        } else {
+                            break;
+                        }
+                        idx++;
+                    }
+                } else {
+                    while(1) {
+                        if (idx2 < 50) {
+                            BDO.EtcInfo[`docBaseRefNo${idx+1}`] = '';
+                        } else {
+                            break;
+                        }
+                        idx2++;
+                    }
+                }
+            }
+
+            function fClearFXDOC() {
+                FXDocProc = 0;
+                FXDocRst = null;
+                BDO.EtcInfo = BDO.EtcInfo ?? {};
+
+                let idx = 0;
+
+                while(1) {
+                    if (idx < 50) {
+                        BDO.EtcInfo[`docBaseRefNo${idx+1}`] = '';
+                    } else {
+                        break;
+                    }
+                    idx++;
+                }
+            }
+        } // FXInfo
+
+        //==================================================================================================================
+        // Action 처리 및 Active 흐름 처리
+        //==================================================================================================================
+        //var CurJobMode    = (-1);
+        var CurOVLevelCnt = 0;
+
+        function StopExec() {
+            console.log('StopExec : StopExecute Process');
+            StopExecute = true;
+        }
+
+        function procError(e) {
+            // KDJ Add 2010.6.14 // HHU Mod : 2016.06.28 // 필수 항목 검사 및 포커스
+            if( e.number == 80013 ) {
+                var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+                var errs = e.description.split('|');
+                if( errs.length == 1 ){
+                    LIB().ShowErrorDialog('Mandatory Field: "' + errs[0]+'"', '', '');
+                } else {
+                    if (errs[2]) { // manalerttext
+                        LIB().ShowErrorDialog('Mandatory Field: "' + errs[2] +'"', '', '');
+                    } else { // labelid
+                        LIB().ShowErrorDialog('Mandatory Field: "' + wnd[errs[1]].innerText +'"', '', '');
+                    }
+                }
+                try {
+                    wnd[errs[0]].focus();
+                } catch(E) { }
+            } else if ( e.number == 80014 ) {
+                if (e.message) {
+                    LIB().ShowInfoDialog(e.message);
+                }
+            } else if ( e.number == 80015 ) {
+                if (e.message) {
+                    LIB().ShowErrorDialog(e.message);
+                }
+            } else if ( e.number == 99999 ) {
+                LIB().ShowErrorDialog(e.stack);
+            } else {
+                if (e.message) {
+                    LIB().ShowErrorDialog(e.message);
+                }
+            }
+        }
+
+        function chkManFld() {
+            var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+            var result = ChkCpnClassByWF(wnd.document.body);
+            if (result) {
+                procError(new GBSError(80013, result));
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        function ExecAct(OPID) {
+            switch(OPID) {
+                case 0 :// Entry
+                    OPStatus = OPID;
+                    ActionLsnr.ActionManager.ExecAction("ActEntry");
+                    break;
+                case 1 :// Cancel
+                    OPStatus = OPID;
+                    ActionLsnr.ActionManager.ExecAction("ActCancel");
+                    break;
+                case 2 :// Simulation
+                    OPStatus = OPID;
+                    ActionLsnr.ActionManager.ExecAction("ActSimulation");
+                    break;
+                case 3 :// MSG Inqry
+                    ActionLsnr.ActionManager.ExecAction("ActMsgInqry");
+                    break;
+                case 4 :// MST Inqry
+                    ActionLsnr.ActionManager.ExecAction("ActMstInqry");
+                    break;
+                case 5 :// Execute
+                    try {
+                        //--------------------------
+                        BeforeExecuteJob(() => {
+                            try {
+                                //--------------------------
+                                StopExecute = false;
+                                
+                                // var Ret = ActionLsnr.ActionManager.ExecAction("ActExecute");
+                                
+                                // if ((Ret !== undefined) || (Ret !== null)) {
+                                //     // if (!Ret || !(typeof Ret == 'boolean')) {
+                                //     if (!Ret) {
+                                //         return false;
+                                //     }
+                                // }
+                                
+                                // ASyncExecFlow.execFuncStart(AfterSuccessJob);
+                                // ActionLsnr.ActionManager.ExecAction("ActExecute");
+                                callActExecute();
+                                        
+                                if (StopExecute) return false;
+                                //--------------------------
+                                // AfterSuccessJob(); // 비동기 처리로 인한 호출 시점 변경
+                                //--------------------------
+                            } catch (e) {
+                                ASyncExecFlow.initCall();
+                                procError(e);
+                            }
+                        });
+                    } catch (e) {
+                        procError(e);
+                    }
+                    break;
+                case 6 : // Cancel Job
+                    ActionLsnr.ActionManager.ExecAction("ActCancelJob");
+                    fClearFXINFO();                                               // 20120613_Son_1
+                    fClearFXDOC();
+                    break;
+                case 7 : // CNF Inquiry // LinkCIFNo Get..
+                    ActionLsnr.ActionManager.ExecAction("ActCNFInquiry");
+                    var DArg  = new DArgument();
+                    DArg.Args = new Array(1);
+                    DArg.Args[0]  = LinkCIFNo;
+
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 727px; dialogWidth: 1280px;";
+                    //var Result = window.showModalDialog(LIB().GetTransURL('/iq/IQ10.html'), DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('/iq/IQ10.html'), DArg, strWinSts, function(Result){
+                        
+                    });
+                    break;
+                case 8 : // Customer Contact // LinkCIFNo Get
+                    ActionLsnr.ActionManager.ExecAction("ActCustContact");
+                    var DArg  = new DArgument();
+                    DArg.Args = new Array(1);
+                    DArg.Args[0]  = LinkCIFNo;
+
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 770px; dialogWidth: 1280px;";
+                    //var Result = window.showModalDialog(LIB().GetTransURL('/cg/CG10.html'), DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('/cg/CG10.html'), DArg, strWinSts, function(Result){
+                        
+                    });
+                    break;
+                /*
+                * HOBIS_CODE (case 9 ~ 13)
+                */    
+                // 20120613_Son_1
+                case 9 : // Set Description for postion
+                    // Set FX Information..
+                    ActionLsnr.ActionManager.ExecAction("ActFXInfo");
+                    /* REF_NOê° ìë ¥ëì§ ìì¼ë©´ ë¬´ì¡°ê±´ ì´ê¸°í */
+                    //if(trim(LinkREFNo).length == 0 && LinkHISNo == 0 ) fClearFXINFO();
+
+                    var DArg  = new DArgument();
+                    DArg.Args = new Array(11);
+
+                    // If Entry is chosen
+                    if (OPStatus == 0)
+                    {
+                        DArg.Args[0]  = LinkREFNo;
+                        DArg.Args[1]  = LinkCIFNo;
+                        DArg.Args[9]  = Trx_Caller;
+                        if (DArg.Args[9] == 'RT21')
+                        {
+                            DArg.Args[10] = Is_RTGS;
+                        }
+                        if (FXInfoRst != null)
+                        {
+                            DArg.Args[2] = FXInfoRst[0];
+                            DArg.Args[3] = FXInfoRst[1];
+                            DArg.Args[4] = FXInfoRst[2];
+                            DArg.Args[5] = FXInfoRst[3];
+                            DArg.Args[6] = FXInfoRst[4];
+                            DArg.Args[7] = FXInfoRst[5];
+                            DArg.Args[8] = FXInfoRst[6];
+                            DArg.Args[11] = FXInfoRst[7];
+                        }
+                    }
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 320px; dialogWidth: 870px;";
+                    //FXInfoRst = window.showModalDialog(LIB().GetTransURL('cm/CM0010.html'), DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('cm/CM0010.html'), DArg, strWinSts, function(rtnVal) {
+                        FXInfoRst = rtnVal || null;
+                    });
+                    break;
+                case 10: // Compass Process
+                    // LinkCIFNo Get..
+                    ActionLsnr.ActionManager.ExecAction("ActCompass");
+                    var DArg  = new DArgument();         //Argument â«cÂ¿e
+                    DArg.Args = new Array(1);            //ArgumentÂ¿Â¡ Â¹eÂ¿Â­ AuAa
+                    DArg.Args[0]  = LinkCIFNo;
+
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 727px; dialogWidth: 1280px;";
+                    //var Result = window.showModalDialog(LIB().GetTransURL('cm/CM10.html'), DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('cm/CM10.html'), DArg, strWinSts);
+                    break;
+                case 11 : // Scan 20121116 cjh
+                    ActionLsnr.ActionManager.ExecAction("ActScan");
+                    break;
+                case 12 : // Trx By 20210929_Rani
+                    ActionLsnr.ActionManager.ExecAction("ActTrxBy");
+                    var DArg  = new DArgument();         //Argument â«cÂ¿e
+
+                    DArg.Args = new Array(1);
+                    DArg.Args[0]  = LinkCIFNo;
+                    DArg.Args[1]  = LinkREFNo;
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 200px; dialogWidth: 810px;";
+                    //var Result = window.showModalDialog(LIB().GetTransURL('cm/CM31.html'), DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('cm/CM31.html'), DArg, strWinSts);
+                    break;
+                case 13 : // Underlying Button 20230111_Rani
+                    ActionLsnr.ActionManager.ExecAction("ActDoc");
+                    var DArg  = new DArgument();         //Argument â«cÂ¿e
+
+                    DArg.Args = new Array(1);
+                    DArg.Args[0]  = LinkCIFNo;
+
+                    var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 727px; dialogWidth: 1280px;";
+                    //FXDocRst = window.showModalDialog(LIB().GetTransURL('ch/CH90.html'), DArg, strWinSts);
+                    openPopup(LIB().GetTransURL('ch/CH90.html'), DArg, strWinSts, function(rtnVal) {
+                        if (rtnVal) {
+                            FXDocRst = rtnVal;
+                        } else {
+                            FXDocRst = new Array(8).fill('');
+                        }
+                    });
+                    break;
+            } // Switch END
+        } // ExecAct END
+
+        function callActExecute() {
+            var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+            if (wnd.executeAction?.constructor.name == 'AsyncFunction') {
+                ActionLsnr.ActionManager.ExecAction("ActExecute").then(() => {
+                    AfterSuccessJob();
+                }).catch(e => {
+                    initExecuteInfo();
+                    procError(e);
+                });
+            } else {
+                ASyncExecFlow.execFuncStart(AfterSuccessJob);
+                ActionLsnr.ActionManager.ExecAction("ActExecute").then(() => {
+                    if (!ASyncExecFlow.isStandby) {
+                        ASyncExecFlow.initCall();
+                    }
+                }).catch(e => {
+                    ASyncExecFlow.initCall();
+                    initExecuteInfo();
+                    procError(e);
+                });
+            }
+        }
+
+        function initExecuteInfo() {
+            BDO.OvrdInfo = BDO.OvrdInfo ?? {};
+            BDO.OvrdInfo.ovrdDvCd = '';
+            BDO.OvrdInfo.ovrdItm = [];
+
+            BDO.Account = BDO.Account ?? {};
+            BDO.Account.routeGb = '0';
+            BDO.Account.info = [];
+        }
+
+        function BeforeExecuteJob(callback) {
+            // console.log('------BeforeSuccessJob------');
+
+            var strTRXOVRD = '';
+            try {
+                
+                // LIB 공통 데이터 초기화 : 책임자 승인
+                const SysInfo = LIB().CDO.SysInfo;
+                const EtcInfo = LIB().CDO.EtcInfo;
+                
+                EtcInfo.mnNo = '';
+                SysInfo.rsprEmpNo = '';
+                EtcInfo.mnCm = '';
+                            
+                // SubEntry 공통 데이터 설정
+                BDO.SysInfo.trscDt = dtpTRX_DATE.value ? LIB().Util.DateToLocal( dtpTRX_DATE.value, 'YYYY/MM/DD', 'S') : '';
+                BDO.EtcInfo.ovrdApvNo = cbbTRXOVRD.value ?? '';
+
+                strTRXOVRD = cbbTRXOVRD.value ?? '';
+                
+                BDO.OvrdInfo = BDO.OvrdInfo ?? {};
+
+                if ((strTRXOVRD != '') && (strTRXOVRD != null) && (strTRXOVRD.charAt(1) == '9')) {
+                    /* 책임자 승인 완료처리 */
+                    BDO.SysInfo.rsprApvYn = 'Y';
+                    BDO.OvrdInfo.ovrdDvCd = '2';
+                } else {
+                    BDO.OvrdInfo.ovrdDvCd = '';
+                }
+
+                BDO.OvrdInfo.ovrdItm = [];
+
+                if (OPStatus == 2) {
+                    BDO.SysInfo.smltnTrscYn = 'Y';
+                } else {
+                    BDO.SysInfo.smltnTrscYn = 'N';
+                }
+
+                BDO.Account = BDO.Account ?? {};
+                BDO.Account.routeGb = '0';
+                BDO.Account.info = [];
+
+                //BDC.setSectionValue("FIGLCHK",[]);   // deleteRecord // 사용 안함
+                //BDC.setSectionValue("FIGLDUETO",[]); // deleteRecord // 현재 미사용이라함
+
+                // KDJ Add 2010.6.14 // HHU Mod 2016.06.28 // 필수항목 검사
+                var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+
+                if( OPStatus == 0 && !wnd.document.body.exManChk) {
+                    var result = ChkCpnClassByWF(wnd.document.body);
+                    var FE = null;
+
+                    if(result != ""){
+                        FE = new GBSError(80013, result);
+                        throw FE;
+                    }
+                }
+
+                /* Edc Info */
+                if((isAlwaysEDC) && (!chkHDWARE.checked)) {
+                    chkHDWARE.checked = true;
+                    fchkHDWARE_onClick();
+                }
+    
+                if(chkHDWARE.checked) {
+                    chkHDWARE.checked = false;
+                } else {
+                    if (BDO.EtcInfo) {
+                        BDO.EtcInfo.edcYn       = 'N';
+                        BDO.EtcInfo.edcRefNo    = '';
+                        BDO.EtcInfo.edcHisNo    = 0;
+                        BDO.EtcInfo.edcTicketNo = '';
+                    }
+                }
+                
+                // Clear passbook info
+                if (BDO.EtcInfo) {
+                    BDO.EtcInfo.japJbuf = '';
+                    BDO.EtcInfo.japTitle = '';
+                }
+
+                /* 20120613_Son_1 - Set FX Information */
+                fSetFXINFO();
+                fSetFXDOC();
+
+                if (callback) {
+                    callback();
+                }
+            }
+            catch (e) {
+                if( e.number != 80013 )
+                    alert('Before Action Exception : '+e.message);
+                throw e;
+            }
+        } // BeforeExecuteJob END
+
+        function AfterSuccessJob() {
+            // console.log('------AfterSuccessJob------');
+            
+            var ref_no = "";
+            var free_text = "";
+            var prt_gb = "";
+            var title_txt = "";
+            var head_txt = "";
+            var line_txt = "";
+            var cif_no = "";
+            var tx_name = "";
+            var tx_date = "";
+            var tellnm = "";
+            var op_no = "";
+            var op_name = "";
+            var dm = "";
+            var prt_kind = "";
+            var cust_name;
+            var addr_nm1;
+            var addr_nm2;
+            var SQLStmt = "";
+            var sft_msg_yn = "";
+            var gbs_gid = "";
+            //var SQLStmt = "";
+
+            /*===============================*/
+            /* 계리 연동 Check               */
+            /* '0' - 미연동                  */
+            /* '1' - 조립요청                */
+            /* '2' - 조립완료                */
+            /* RouteGB Setting은 연동화면    */
+            /*  Dialog에서 합니다..          */
+            /*===============================*/
+            if (BDO.Account?.routeGb == "1") {
+                var DArg = new DArgument();
+                DArg.Args= new Array(1);
+                DArg.Args[0] = BDO.SysInfo.custNo ?? '';
+                
+                openPopup(LIB().GetTransURL('/cm/CMGL.html'), DArg, "status=no;resizable=no;scroll=no;center=yes;dialogHeight=800px;dialogWidth=1280px", function(GLDLG) {
+                    if (GLDLG && GLDLG[0] == "OK") {
+                        // ASyncExecFlow.execFuncStart(AfterSuccessJob);
+                        // ActionLsnr.ActionManager.ExecAction("ActExecute");
+                        callActExecute();
+                        return;
+                    } else {
+                        // throw "";
+                        delete BDO.Account;
+                        procError(new Error(''));
+                    }
+                });
+            } else {
+                // 책임자 승인요청 여부 Check
+                if (BDO.OvrdInfo?.ovrdDvCd == "1") {
+                    LIB().ScreenCaptureTM(function(imgData) {
+                        try {
+                            APVFlow(imgData);
+                        } catch (e) {
+                            //LIB().ShowErrorDialog(e.description);
+                            // throw "";
+                            procError(e);
+                        }
+                    });
+                }
+                else {
+                    procVoucher(() => {
+                        procFreePrint(() => {
+                            procPassBook(() => {
+                                Excute();
+                            });
+                        });
+                    });
+
+                    //---------------------------------------------------------------
+                    // VOUCHER
+                    //---------------------------------------------------------------
+                    function procVoucher(callback) {
+                        try {
+                            const FVOCINF = BDO.Voucher ?? {};
+                            prt_gb = FVOCINF.prnDvCd ?? '';
+
+                            if (prt_gb == "0" || prt_gb == "1" || prt_gb == "2" || prt_gb == "3" || prt_gb == 'A') {
+                                
+                                const RepViewer = LIB().getWaiReportVendor(); // 레포트 객체 생성
+                                
+                                with (RepViewer) {
+                                    DataType = "0";
+                                    ref_no = FVOCINF.refNo + "-" +
+                                             FVOCINF.trscSeqNo;
+                                    free_text = FVOCINF.th1LineCtt + "\n" +
+                                                FVOCINF.th2LineCtt + "\n" +
+                                                FVOCINF.th3LineCtt + "\n" +
+                                                FVOCINF.th4LineCtt + "\n" +
+                                                FVOCINF.th5LineCtt + "\n" +
+                                                FVOCINF.th6LineCtt + "\n" +
+                                                FVOCINF.th7LineCtt + "\n" +
+                                                FVOCINF.th8LineCtt;
+
+                                    //Trx Base Search - Trx Base Search Voucher Title 2006.12.07
+                                    // SQLStmt = "SELECT sts from aact_trx_base  "
+                                    //         + " WHERE ac_il  = '" + BDC.getItemValue("FVOCINF_AC_IL")  + "'"
+                                    //         + "   AND ref_no = '" + BDC.getItemValue("FVOCINF_REF_NO") + "'"
+                                    //         + "   AND his_no = "  + BDC.getItemValue("FVOCINF_HIS_NO");
+                                }
+
+                                const inputData = {
+                                    dvCd: '71',
+                                    param1: FVOCINF.acProcDt,
+                                    param2: FVOCINF.refNo,
+                                    param3: FVOCINF.trscSeqNo
+                                };
+
+                                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                                    try {
+                                        const rtnObj = output.output71;
+                                        if (rtnObj) {
+                                            with (RepViewer) {
+                                                const sysDvCd = getMainCommData('SysInfo').sysDvCd;
+                                                if (rtnObj.sts == '0') {
+                                                    if( sysDvCd == "I1" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "VOUCHER");
+                                                    else if( sysDvCd == "I2" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "");
+                                                    else if( sysDvCd == "I3" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "VOUCHER(DEV)");
+                                                    else
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "VOUCHER(UAT)");
+                                                } else if (rtnObj.sts == '1') {
+                                                    if( sysDvCd == "I1" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "VOUCHER");
+                                                    else if( sysDvCd == "I2" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "VOUCHER");
+                                                    else if( sysDvCd == "I3" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "VOUCHER(DEV)");
+                                                    else
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "VOUCHER(UAT)");
+                                                } else if (rtnObj.sts == '8' || rtnObj.sts == '9') {
+                                                    if( sysDvCd == "I1" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "CANCEL VOUCHER");
+                                                    else if( sysDvCd == "I2" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "CANCEL VOUCHER");
+                                                    else if( sysDvCd == "I3" )
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "CANCEL VOUCHER(DEV)");
+                                                    else
+                                                        AddData("ReportHeader", "VOC_TITLE1", "text", "CANCEL VOUCHER(UAT)");
+                                                }
+                                            }
+                                        }
+                                    } catch(e) {
+                                        console.log('SubEntry.Voucher Print Error : ', e);
+                                    } finally {
+                                        callbackProc();
+                                    }
+                                }, function() {
+                                    callbackProc();
+                                });
+
+                                function callbackProc() {
+                                    try {
+                                        with (RepViewer) {
+                                            if (prt_gb == "2" || prt_gb == "3") {
+                                                AddData("ReportHeader", "prnDvCd",  "text", "Re-Printing" );
+                                                AddData("PageHeader",   "prnDvCd2", "text", "Re-Printing" );
+                                            }
+                                            else {
+                                                AddData("ReportHeader", "prnDvCd", "text", ""    );
+                                            }
+    
+                                            AddData("ReportHeader", "tlrNo",    "text", FVOCINF.tlrNo);
+                                            AddData("ReportHeader", "vouNo", "text", FVOCINF.vouNo);
+                                            AddData("ReportHeader", "acProcDt",      "text", FVOCINF.acProcDt);
+                                            // AddData("ReportHeader", "acProcDt",      "text", LIB().Util.DateToLocal(FVOCINF.acProcDt, "YYYY/MM/DD", "S"));
+                                            AddData("ReportHeader", "refNo",     "text", ref_no);
+                                            AddData("ReportHeader", "trscNm",   "text", FVOCINF.trscNm);
+                                            AddData("ReportHeader", "trscDt",     "text", FVOCINF.trscDt);
+                                            // AddData("ReportHeader", "trscDt",     "text", LIB().Util.DateToLocal(FVOCINF.trscDt, "YYYY/MM/DD", "S"));
+                                            // AddData("PageHeader",   "FVOCINF_TRX_PDT",    "text", FVOCINF.trscDt); // 필드 없음
+                                            AddData("ReportHeader", "otherRefNo",  "text", FVOCINF.otherRefNo);
+                                            AddData("ReportHeader", "custNo",     "text", FVOCINF.custNo);
+                                            AddData("ReportHeader", "custNm",   "text", FVOCINF.custNm);
+                                            AddData("ReportHeader", "bene",      "text", FVOCINF.bene);
+                                            AddData("ReportHeader", "rmk",     "text", FVOCINF.rmk);
+                                            // AddData("ReportHeader", "rmk",     "text", (typeof(FVOCINF.rmk) == "object" ? FVOCINF.rmk[0] : FVOCINF.rmk));
+                                            AddData("PageFooter",   "optrEmpNo",      "text", FVOCINF.optrEmpNo);
+                                            AddData("PageFooter",   "optrEmpNm",    "text", FVOCINF.optrEmpNm);
+                                            AddData("ReportFooter", "freeText",  "text", free_text);
+    
+                                            //XML = BDC.GetSectionAsXML("FVOCTRX").xml;
+                                            //BDC.setSectionName("FVOCTRX");
+                                            //console.log('Voucher Data : ',BDC.record);
+                                            
+                                            //JSON = BDC.record;
+                                            JSON = FVOCINF.details ?? [];
+                                        }
+    
+                                        LIB().InitVoucher(RepViewer);
+    
+                                        RepViewer.ReportUrl = LIB().RptURL()+"/report/voucher.yrf";
+                                        const reportHandler = RepViewer.Show();
+                                        LIB().reportCallbackMap.set(reportHandler, function() {
+                                            callback();
+                                        });
+                                    } catch(e) {
+                                        console.log('SubEntry.Voucher Print Error : ', e);
+                                        callback();
+                                    }
+                                }
+                            } else {
+                                callback();
+                            }
+                        } catch(e) {
+                            console.log('SubEntry.Voucher Print Error : ',e);
+                            callback();
+                        }
+                    }
+
+                    //---------------------------------------------------------------
+                    // FREEPRINT
+                    //---------------------------------------------------------------
+                    function procFreePrint(callback) {
+                        try {
+                            //BDC.setSectionName("FREEPRT_HEAD");
+                            const FREEPRT = BDO.FreePrint ?? []; // FREEPRT_HEAD
+                            
+                            function procPrint(i) {
+                                try {
+                                    // prt_gb   = FREEPRT[i].FFREEPRT_PRT_GB;
+                                    // prt_kind = FREEPRT[i].FFREEPRT_PRT_KIND;
+                                    prt_gb   = FREEPRT[i].prtGb;
+                                    prt_kind = FREEPRT[i].prtKind;
+                                                                
+                                    const FreeViewer = LIB().getWaiReportVendor(); // 레포트 객체 생성
+                                                                
+                                    if (prt_gb == "0") {
+                                        with (FreeViewer) {
+                                            if (prt_kind == "01") {
+                                                DataType = "0";
+                                                title_txt = FREEPRT[i].titleTxt; // FFREEPRT_TITLE_TXT
+                                                head_txt  = FREEPRT[i].headTxt; // FFREEPRT_HEAD_TXT
+                                                ref_no    = FREEPRT[i].refNo; // FFREEPRT_REF_NO
+                                                cif_no    = FREEPRT[i].custNo; // FFREEPRT_CIX_NO
+                                                tx_name   = FREEPRT[i].txName; // FFREEPRT_TX_NAME
+                                                tx_date   = FREEPRT[i].txDate; // FFREEPRT_TX_DATE
+                                                tellnm    = FREEPRT[i].trlNm; // FFREEPRT_TELLNM
+                                                op_no     = FREEPRT[i].optrEmpNo; // FFREEPRT_OP_NO
+                                                op_name   = FREEPRT[i].opNm; // FFREEPRT_OP_NAME
+
+                                                AddData("ReportHeader", "titleTxt", "text", title_txt ); // FFREEPRT_TITLE_TXT
+                                                AddData("ReportHeader", "refNo",       "text", ref_no    ); // FXFIG_REF_NO
+                                                AddData("ReportHeader", "txName",       "text", tx_name   ); // FXFIG_TRX_NO
+                                                // AddData("ReportHeader", "FXFIG_REF_NO1",     "text", ""    );
+                                                AddData("ReportHeader", "txDate",     "text", tx_date   ); // FFREEPRT_TX_DATE
+                                                AddData("ReportHeader", "custNo",       "text", cif_no    ); // FXFIG_CIF_NO
+                                                AddData("PageFooter",   "Field17",            "text", op_no     );
+                                                AddData("PageFooter",   "Field18",            "text", op_name   );
+                                                AddData("ReportHeader", "PRT_KIND",           "text", prt_kind  );
+
+                                                //JSON = BDC.data['FREEPRT_BODY']; //XML = BDC.GetSectionAsXML("FREEPRT_BODY").xml;
+                                                JSON = FREEPRT[i].body ?? []; // FREEPRT_BODY
+
+                                                LIB().InitReportData( FreeViewer );
+
+                                                FreeViewer.ReportUrl = LIB().RptURL()+"/report/white.yrf";
+                                                const reportHandler = FreeViewer.Show();
+                                                LIB().reportCallbackMap.set(reportHandler, function() {
+                                                    callbackProc();
+                                                });
+                                            }
+                                            else if (prt_kind == "02" || prt_kind == "03") {
+                                                title_txt = FREEPRT[i].titleTxt; // FFREEPRT_TITLE_TXT
+                                                cust_name = FREEPRT[i].custName; // FFREEPRT_CUST_NAME
+                                                addr_nm1  = FREEPRT[i].addrNm1; // FFREEPRT_ADDR_NM1
+                                                addr_nm2  = FREEPRT[i].addrNm2; // FFREEPRT_ADDR_NM2
+
+                                                AddData("ReportHeader", "titleTxt", "text", title_txt ); // FFREEPRT_TITLE_TXT
+                                                AddData("ReportHeader", "custName", "text", cust_name ); // FFREEPRT_CUST_NAME
+                                                AddData("ReportHeader", "addrNm1",  "text", addr_nm1  ); // FFREEPRT_ADDR_NM1
+                                                AddData("ReportHeader", "addrNm2",  "text", addr_nm2  ); // FFREEPRT_ADDR_NM2
+                                                AddData("ReportHeader", "PRT_KIND", "text", prt_kind  );
+
+                                                //JSON = BDC.data['FREEPRT_BODY']; //XML = BDC.GetSectionAsXML("FREEPRT_BODY").xml;
+                                                JSON = FREEPRT[i].body ?? []; // FREEPRT_BODY
+
+                                                // KKY 20070814 QIB : 아래줄 함수를 써야 하는데 공통부는 현재 이거 안된다함
+                                                //LIB().InitReportData( FreeViewer );
+                                                const SysInfo = LIB().CDO.SysInfo;
+                                                const EtcInfo = LIB().CDO.EtcInfo;
+
+                                                //var Sig_Header = "For "+SysInfo.FXFIG_BKNM+", "+SysInfo.FXFIG_BRNM;
+                                                var Sig_Header = "For " + (EtcInfo.bknm ?? '') + ", " + (EtcInfo.brnm ?? '');
+
+                                                AddData("ReportHeader", "bra1",  "Caption", EtcInfo.bra1 ); // FXFIG_BRA1
+                                                AddData("ReportHeader", "brtn",  "Caption", EtcInfo.brtn ); // FXFIG_BRTN
+                                                AddData("ReportHeader", "brfn",  "Caption", EtcInfo.brfn ); // FXFIG_BRFN
+                                                AddData("ReportFooter", "SIG_HEADER",  "Caption", Sig_Header );
+
+                                                //Preview
+                                                if (['DXP', 'DIP', 'DIR', 'DRT', 'DAD', 'DSI', 'DUS', 'DDP', 'DKN', 'DDA']
+                                                    .includes(FREEPRT[i].refNo.substr(0,3))) {
+                                                    FreeViewer.ReportUrl = LIB().RptURL()+"/report/ip_debit.yrf";
+                                                } else {  
+                                                    FreeViewer.ReportUrl = LIB().RptURL()+"/report/custnotice.yrf";
+                                                }
+                                                const reportHandler = FreeViewer.Show();
+                                                LIB().reportCallbackMap.set(reportHandler, function() {
+                                                    callbackProc();
+                                                });
+                                            }
+                                        }
+                                    }
+                                    else if (prt_gb == "1") {
+                                        with (FreeViewer) {
+                                            if (prt_kind == "01") {
+                                                DataType = "0";
+                                                title_txt = FREEPRT[i].titleTxt; // FFREEPRT_TITLE_TXT
+                                                head_txt  = FREEPRT[i].headTxt; // FFREEPRT_HEAD_TXT
+                                                ref_no    = FREEPRT[i].refNo; // FFREEPRT_REF_NO
+                                                cif_no    = FREEPRT[i].custNo; // FFREEPRT_CIX_NO
+                                                tx_name   = FREEPRT[i].txName; // FFREEPRT_TX_NAME
+                                                tx_date   = FREEPRT[i].txDate; // FFREEPRT_TX_DATE
+                                                tellnm    = FREEPRT[i].trlNm; // FFREEPRT_TELLNM
+                                                op_no     = FREEPRT[i].optrEmpNo; // FFREEPRT_OP_NO
+                                                op_name   = FREEPRT[i].opNm; // FFREEPRT_OP_NAME
+
+                                                AddData("ReportHeader", "titleTxt", "text", title_txt ); // FFREEPRT_TITLE_TXT
+                                                AddData("ReportHeader", "refNo",       "text", ref_no    ); // FXFIG_REF_NO
+                                                AddData("ReportHeader", "txName",       "text", tx_name   ); // FXFIG_TRX_NO
+                                                // AddData("ReportHeader", "FXFIG_REF_NO1",     "text", ""    );
+                                                AddData("ReportHeader", "txDate",     "text", tx_date   ); // FFREEPRT_TX_DATE
+                                                AddData("ReportHeader", "custNo",       "text", cif_no    ); // FXFIG_CIF_NO
+                                                AddData("PageFooter",   "Field17",            "text", op_no     );
+                                                AddData("PageFooter",   "Field18",            "text", op_name   );
+                                                AddData("ReportHeader", "PRT_KIND",           "text", prt_kind  );
+
+                                                //JSON = BDC.data['FREEPRT_BODY']; //XML = BDC.GetSectionAsXML("FREEPRT_BODY").xml;
+                                                JSON = FREEPRT[i].body ?? []; // FREEPRT_BODY
+
+                                                LIB().InitReportData( FreeViewer );
+
+                                                FreeViewer.ReportUrl = LIB().RptURL()+"/report/white.yrf";
+                                                const reportHandler = FreeViewer.Show();
+                                                LIB().reportCallbackMap.set(reportHandler, function() {
+                                                    callbackProc();
+                                                });
+                                            }
+                                            else if (prt_kind == "02" || prt_kind == "03") {
+                                                title_txt = FREEPRT[i].titleTxt; // FFREEPRT_TITLE_TXT
+                                                cust_name = FREEPRT[i].custName; // FFREEPRT_CUST_NAME
+                                                addr_nm1  = FREEPRT[i].addrNm1; // FFREEPRT_ADDR_NM1
+                                                addr_nm2  = FREEPRT[i].addrNm2; // FFREEPRT_ADDR_NM2
+
+                                                AddData("ReportHeader", "titleTxt", "text", title_txt ); // FFREEPRT_TITLE_TXT
+                                                AddData("ReportHeader", "custName", "text", cust_name ); // FFREEPRT_CUST_NAME
+                                                AddData("ReportHeader", "addrNm1",  "text", addr_nm1  ); // FFREEPRT_ADDR_NM1
+                                                AddData("ReportHeader", "addrNm2",  "text", addr_nm2  ); // FFREEPRT_ADDR_NM2
+                                                AddData("ReportHeader", "PRT_KIND", "text", prt_kind  );
+
+                                                //JSON = BDC.data['FREEPRT_BODY']; //XML = BDC.GetSectionAsXML("FREEPRT_BODY").xml;
+                                                JSON = FREEPRT[i].body ?? []; // FREEPRT_BODY
+
+                                                LIB().InitReportData( FreeViewer );
+
+                                                const SysInfo = LIB().CDO.SysInfo;
+                                                const EtcInfo = LIB().CDO.EtcInfo;
+
+                                                //var Sig_Header = "For "+GDC.getItemValue("FXFIG_BKNM")+", "+GDC.getItemValue("FXFIG_BRNM");
+                                                var Sig_Header = "For " + (EtcInfo.bknm ?? '') + ", " + (EtcInfo.brnm ?? '');
+
+                                                AddData("ReportHeader", "bra1",  "Caption", EtcInfo.bra1 ); // FXFIG_BRA1
+                                                AddData("ReportHeader", "brtn",  "Caption", EtcInfo.brtn ); // FXFIG_BRTN
+                                                AddData("ReportHeader", "brfn",  "Caption", EtcInfo.brfn ); // FXFIG_BRFN
+                                                AddData("ReportFooter", "SIG_HEADER",  "Caption", Sig_Header );
+
+                                                //Preview
+                                                if (['DXP', 'DIP', 'DIR', 'DRT', 'DAD', 'DSI', 'DUS', 'DDP', 'DKN', 'DDA']
+                                                    .includes(FREEPRT[i].refNo.substr(0,3))) {
+                                                    FreeViewer.ReportUrl = LIB().RptURL()+"/report/ip_debit.yrf";
+                                                } else {  
+                                                    FreeViewer.ReportUrl = LIB().RptURL()+"/report/custnotice.yrf";
+                                                }
+                                                const reportHandler = FreeViewer.Show();
+                                                LIB().reportCallbackMap.set(reportHandler, function() {
+                                                    callbackProc();
+                                                });
+                                            }
+                                        }
+                                    }
+                                } catch (e) {
+                                    throw e;
+                                }
+                            }
+
+                            let callCnt = 0;
+
+                            if (FREEPRT.length > 0) {
+                                procPrint(callCnt);
+                            } else {
+                                callback();
+                            }
+
+                            function callbackProc() {
+                                try {
+                                    callCnt++;
+                                    if (callCnt == FREEPRT.length) {
+                                        callback();
+                                    } else {
+                                        procPrint(callCnt);
+                                    }
+                                } catch(e) {
+                                    console.log('SubEntry.FreePrint Print Error : ', e);
+                                    callback();
+                                }
+                            }
+                        }
+                        catch (e){
+                            console.log('SubEntry.FreePrint Print Error : ', e);
+                            callback();
+                        }
+                    }
+                    // WHITE - END
+
+                    //---------------------------------------------------------------
+                    // PASSBOOK
+                    //---------------------------------------------------------------
+                    function procPassBook(callback) {
+                        try {
+                            if (Passbook.connected) {
+                                const japTitle = BDO.EtcInfo?.japTitle ?? '';
+                                const japJbuf = BDO.EtcInfo?.japJbuf ?? '';
+                                const japJbufList = BDO.EtcInfo?.japJbufList ?? [];
+                                const japJbufStruct = BDO.EtcInfo?.japJbufStruct ?? [];
+
+                                if (Array.isArray(japJbufStruct) && japJbufStruct.length > 0) {
+                                    japJbufStruct.forEach((japObj, idx) => {
+                                        const japJbuf = japObj.japJbuf ?? '';
+                                        let japTitle = japObj.japTitle ?? '';
+                                        japTitle += `\\n\\nPage Count : ${idx + 1}/${japJbufStruct.length}`;
+                                        
+                                        Passbook.addPrtBuff(japJbuf, japTitle);
+                                        HasPBPrintData++;
+
+                                        console.log(HasPBPrintData, " [passbook info] title :", japTitle);
+                                        console.log(HasPBPrintData, " [passbook info] itext :", japJbuf);
+                                    });
+                                } else if (Array.isArray(japJbufList) && japJbufList.length > 0) {
+                                    japJbufList.forEach(text => {
+                                        const japJbuf = text ?? '';
+                                        
+                                        Passbook.addPrtBuff(japJbuf, japTitle);
+                                        HasPBPrintData++;
+
+                                        console.log(HasPBPrintData, " [passbook info] title :", japTitle);
+                                        console.log(HasPBPrintData, " [passbook info] itext :", japJbuf);
+                                    });
+                                } else if (japJbuf) {
+                                    Passbook.addPrtBuff(japJbuf, japTitle);
+                                    HasPBPrintData++;
+
+                                    console.log(HasPBPrintData, " [passbook info] title :", japTitle);
+                                    console.log(HasPBPrintData, " [passbook info] itext :", japJbuf);
+                                }
+                            }
+
+                            callback();
+                        }
+                        catch (e) {
+                            console.log('SubEntry.PassBook Print Error : ', e);
+                            callback();
+                        }
+                    }
+                }
+            }
+        } // AfterSuccessJob END
+
+        function Excute() {
+            try {
+                var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+                if (wnd.AfterActExecute?.constructor.name == 'AsyncFunction') {
+                    wnd.AfterActExecute().then(ContFlg => {
+                        AfterActExecuteCallback(ContFlg);
+                    }).catch(e => {
+                        // console.log('e -> ', e);
+                        AfterActExecuteCallback();
+                    });
+                } else {
+                    var ContFlg = wnd.AfterActExecute();
+                    AfterActExecuteCallback(ContFlg);
+                }
+            } catch(e) {
+                // console.log('e -> ', e);
+                AfterActExecuteCallback();
+            }
+
+            function AfterActExecuteCallback(ContFlg) {
+                try {
+                    var commMsg = GetCommonMsg();
+
+                    if (ContFlg) {
+                        //console.log('AfterActExecute : ',ContFlg);
+                        if (ContFlg.toUpperCase().substr(0,1) == "C") {
+                            try{
+                                ExecAct(5);
+                            }catch(e){
+                                if ( HasPBPrintData > 0 ) {
+                                    try {
+                                        Passbook.doPrint();
+                                        HasPBPrintData = 0;
+                                    } catch(e) { }
+                                }
+                            }
+
+                        } else {
+                            if ( HasPBPrintData > 0 ) {
+                                try {
+                                    Passbook.doPrint();
+                                    HasPBPrintData = 0;
+                                } catch(e) { }
+
+                                if ( LIB().NoNextMessage == true ) {
+                                    LIB().NoNextMessage = false;
+                                } else {
+                                    LIB().ShowInfoDialog(commMsg);
+                                    if(FXProc > 0) fClearFXINFO();
+                                    if(FXDocProc > 0) fClearFXDOC();
+                                }
+                            } else {
+                                if ( LIB().NoNextMessage == true ) {
+                                    LIB().NoNextMessage = false;
+                                } else {
+                                    LIB().ShowInfoDialog(commMsg);
+                                    if(FXProc > 0) fClearFXINFO();
+                                    if(FXDocProc > 0) fClearFXDOC();
+                                }
+                            }
+                        }
+                    } else {
+                        const curTabId = top.MAIN.tabCtrl.getCurrentTab(window).id;
+                        if ( HasPBPrintData > 0 ) {
+                            try {
+                                Passbook.doPrint();
+                                HasPBPrintData = 0;
+                            } catch(e) { }
+
+                            if ( LIB().NoNextMessage == true ) {
+                                LIB().NoNextMessage = false;
+                            } else {
+                                if (curTabId != "CG19"      // 20141121_Ho_1
+                                    && curTabId != "CG30"      // 20151130_jo_seung_jae
+                                    && curTabId != "CG45") {   // 20160902_Vivi
+                                    LIB().ShowInfoDialog(commMsg);
+                                }
+                                if(FXProc > 0) fClearFXINFO();
+                                if(FXDocProc > 0) fClearFXDOC();
+                            }
+                        } else {
+                            if ( LIB().NoNextMessage == true ) {
+                                LIB().NoNextMessage = false;
+                            } else {
+                                if (curTabId != "CG19"      // 20141121_Ho_1
+                                    && curTabId != "CG30"      // 20151130_jo_seung_jae
+                                    && curTabId != "CG45") {   // 20150902_Vivi
+                                    LIB().ShowInfoDialog(commMsg);
+                                }
+                                if(FXProc > 0) fClearFXINFO();
+                                if(FXDocProc > 0) fClearFXDOC();
+                            }
+                        }
+                    }
+
+                    // by csh
+                    //dtpTRX_DATE.value = LIB().Util.DateToLocal( LIB().GDC.getItemValue("FXFIG_IBIL"), "DD/MM/YYYY", "S");
+                    //dtpTRX_DATE.value = LIB().Util.DateToLocal( GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL", 0), "YYYY/MM/DD", "S");
+                    dtpTRX_DATE.value = getMainCommData("SysInfo").procBascDt ? LIB().Util.DateToLocal( getMainCommData("SysInfo").procBascDt, "YYYY/MM/DD", "S") : '';
+                } catch (e) {}
+            }
+        }
+
+        function VoucherPrintTest() {
+            try {
+                const EtcInfo = LIB().CDO.EtcInfo ?? {};
+
+                alert(
+                    EtcInfo.bknm  ?? '' + "\n" +
+                    EtcInfo.brnm  ?? '' + "\n" +
+                    EtcInfo.bra1  ?? '' + "\n" +
+                    EtcInfo.bra2  ?? '' + "\n" +
+                    EtcInfo.bra3  ?? '' + "\n" +
+                    EtcInfo.brtn ?? '' + "\n" +
+                    EtcInfo.brfn ?? '' + "\n" +
+                    EtcInfo.sfcd  ?? '' + "\n" +
+                    EtcInfo.tlxn  ?? ''
+                );
+
+            } catch(e) {
+                alert(e.message);
+            }
+        }
+
+        function PrintBufferProc() {
+            if ( HasPBPrintData > 0 ) {
+                try {
+                    Passbook.doPrint();
+                    HasPBPrintData = 0;
+                } catch(e) { }
+            }
+        }
+
+        function APVFlow(imgData) {
+            //================================
+            // 책임자 승인 - 승인 레벨
+            //================================
+            var DArg  = new DArgument();
+            DArg.Args = new Array();
+            DArg.Args = {
+                imgData
+            };
+
+            if (
+                [
+                    'BSPTL01', 
+                    'BOPTL01', 
+                    'BOPTL02', 
+                    'BOPTL03'
+                ].includes(getMainCommData("SysInfo").grpNo)
+                /*20140806_Agus_1 - HQOPR-2014-INT-677 Return remote approval for all user group*/
+                && 
+                ![
+                    '1104', /*Tanah Abang*/
+                    '1123', /*Cikarang Jababeka*/
+                    '1126', /*Lotte Shopping*/
+                    '1133'  /*Curug*/
+                ].includes(getMainCommData("SysInfo").trscBrNo)
+            ) 
+            {
+                openPopup("/frame/APMOPLocalRequest.html", DArg, "dialogWidth=626px;dialogHeight=200px;status=no;resizable=no;center=yes;scroll=yes", function(MGRDLG) {
+                    requestCallback(MGRDLG);
+                });
+            } else {
+                openPopup("/frame/APMOPRequest.html", DArg, "dialogWidth=626px;dialogHeight=476px;status=no;resizable=no;center=yes;scroll=yes", function(MGRDLG) {
+                    requestCallback(MGRDLG);
+                });
+            }
+
+            function requestCallback(MGRDLG) {
+                if (MGRDLG) {
+                    BDO.SysInfo.rsprApvYn = 'Y';
+                    BDO.OvrdInfo.ovrdDvCd = '2';
+                    if (BDO.Account) {
+                        BDO.Account.ydEndYn = 'N';
+                    }
+                    // ASyncExecFlow.execFuncStart(AfterSuccessJob);
+                    // ActionLsnr.ActionManager.ExecAction("ActExecute");
+                    callActExecute();
+                    return;
+                } else {
+                    // throw "";
+                    BDO.OvrdInfo.ovrdDvCd = '';
+                    BDO.OvrdInfo.ovrdItm = [];
+                    procError(new Error(''));
+                }
+            }
+        }
+        
+        function GetCommonMsg() {
+            
+            var msg = "Common Message: Execute Success !!";
+
+            var wnd = (WorkFrame.contentWindow !== undefined) ? WorkFrame.contentWindow : WorkFrame;
+            
+            msg = wnd.getExecuteMsg() || msg;
+            wnd.setExecuteMsg('');
+            
+            return msg;
+        }
+        
+        /**
+         * @param {string} svcUrl - A string containing the URL to which the request is sent.
+         * @param {object} [data] - Data to be sent to the server.
+         * @param {object} [onResult] - A function to be called if the request succeeds
+         * @param {object} [onError] - A function to be called if the request fails
+         * @param {object} [options] - call options - A set of key/value pairs that configure the request.
+         *			 				{
+         *					        	'type'     : 'POST',   // An alias for method
+         *					        	'async'    : true,     // Asynchronous type
+         *					          	'timeout'  : 300000,   // Set a timeout (in milliseconds) for the request
+         *				           		'dataType' : 'JSON',   // The type of data that you're expecting back from the server
+         *				        	   	'jsonText' : false,    // Whether to process data in json string format
+         *           					'headers'  : {},       // An object of additional header key/value pairs to send
+         *                              'argObj'   : {}        // User-defined object when calling a service
+         *					       	}
+         */
+        function callService(svcUrl, data = {}, onResult, onError, options = {}) {
+            if (!svcUrl) {
+                return;
+            }
+
+            options.beforeCallEvent = NeedParams;
+            options.afterCallEvent = ResultParams;
+
+            defCallService(svcUrl, data, onResult, onError, options);
+        }
+
+        async function callServiceAsync(svcUrl, data = {}, onResult, onError, options = {}) {
+            if (!svcUrl) {
+                return;
+            }
+
+            options.beforeCallEvent = NeedParams;
+            options.afterCallEvent = ResultParams;
+
+            return await defCallServiceAsync(svcUrl, data, onResult, onError, options);
+        }
+        
+        function NeedParams(inputData, callOpt) {
+			// console.log('SubEntry NeedParams --- START');
+            if (!BDO.SysInfo) {
+                BDO.SysInfo = {};
+            }
+            if (!BDO.EtcInfo) {
+                BDO.EtcInfo = {};
+            }
+    
+            let scrInfo = {
+                'gwam' : callOpt.url.split('/').at(-1).substr(0, 2),
+                //'geor' : callOpt.url.split('/').at(-1).substr(3, 2),
+                'ibcd' : bizTabCtrl().getCurrentTab(window).id
+            };
+
+            BDO.SysInfo.subjCd = scrInfo.gwam;
+            // BDO.SysInfo.trscCd = scrInfo.geor; // TO-BE: 사용안함
+            BDO.SysInfo.scrnId = scrInfo.ibcd;
+    
+            const CDO = LIB().CDO;
+
+            if (CDO.SysInfo !== null) {
+                CDO.SysInfo.subjCd = scrInfo.gwam;
+                // CDO.SysInfo.trscCd = scrInfo.geor; // TO-BE: 사용안함
+                CDO.SysInfo.scrnId = scrInfo.ibcd;
+            }
+
+            for (let x in CDO) {
+                if (!['MenuData', 'MenuGrant'].includes(x)) {
+                    inputData[x] = JSON.parse(JSON.stringify(CDO[x]));
+                }
+            }
+
+            for (let x in BDO) {
+                if (!['input'].includes(x)) {
+                    const isArray = Array.isArray(BDO[x]);
+                    if (isArray) {
+                        inputData[x] = JSON.parse(JSON.stringify(BDO[x]));
+                    } else {
+                        if (!inputData[x]) {
+                            inputData[x] = {};
+                        }
+                        for (let y in BDO[x]) {
+                            inputData[x][y] = JSON.parse(JSON.stringify(BDO[x][y] ?? ''));
+                        }
+                    }
+                }
+            }
+
+            // NH_CODE
+            //delete( dsObj.commons[0].rec[0]['FXFIG_OVGB'] ); // 확인 필요..
+    
+            // console.log('SubEntry NeedParams --- END');
+            console.log(`[${callOpt.url.split('/').at(-1)}] inputData -> `, inputData);
+
+            return true;
+        }
+
+        const bizCommItem = [
+            'scrnId', // SysInfo - FXFIG_IBCD
+            'subjCd', // SysInfo - FXFIG_GWAM
+            'trscCd', // SysInfo - FXFIG_GEOR
+            'custNo', // SysInfo - FXFIG_CIX_NO
+            'refNo', // SysInfo - FXFIG_REF_NO
+            'trscSeqNo', // SysInfo - FXFIG_HIS_NO
+            'trscDt', // SysInfo - FXFIG_TRX_DT
+            'ibfGb', // SysInfo - FXFIG_IBF_GB
+            'rsprApvYn', // SysInfo
+            // 'ovrdDvCd', // OvrdInfo? - FXFIG_OVGB
+            'ovrdApvNo', // EtcInfo - FXFIG_OVRD_APV_NO
+            'edcYn', // EtcInfo - FXFIG_EDC_YN
+            'edcRefNo', // EtcInfo - FXFIG_EDC_REF_NO
+            'edcHisNo', // EtcInfo - FXFIG_EDC_HIS_NO
+            'edcTicketNo', // EtcInfo - FXFIG_EDC_TICKET_NO
+            'clldMthCd', // EtcInfo - FXFIG_CLLD_MTH_CD
+            'scanDocId1', // EtcInfo - FXFIG_SCAN_DOC_ID1
+            'scanDocId2', // EtcInfo - FXFIG_SCAN_DOC_ID2
+            'scanDocId3', // EtcInfo - FXFIG_SCAN_DOC_ID3
+            'scanDocId4', // EtcInfo - FXFIG_SCAN_DOC_ID4
+            'scanCode1', // EtcInfo - FXFIG_SCAN_CODE1
+            'scanCode2', // EtcInfo - FXFIG_SCAN_CODE2
+            'scanCode3', // EtcInfo - FXFIG_SCAN_CODE3
+            'scanCode4', // EtcInfo - FXFIG_SCAN_CODE4
+            'japJbuf', //  EtcInfo - FOJAP_JBUF
+            'japJbufList', //  EtcInfo - FOJAP_JBUF
+            'japJbufStruct', //  EtcInfo - FOJAP_JBUF
+            'japTitle', // EtcInfo - FOJAP_TITLE
+            'orgScrnId'
+        ];
+    
+        function ResultParams(send, recv) {
+            const isBizError = recv?.data?.output?.errorCode ? true : false;
+
+            if (!recv.isError && !isBizError && recv.data) {
+                const CDO = LIB().CDO;
+                
+                // console.log('recv.data ---> ', recv.data);
+
+                // Clear biz screen common data
+                const arrExClearKey = ['SysInfo', 'EtcInfo', 'OvrdInfo'];
+
+                // Except CMGL - No return output
+                if (!recv.data.output) {
+                    arrExClearKey.push('Account');
+                }
+
+                for (let key in BDO) {
+                    if (!arrExClearKey.includes(key)) {
+                        delete BDO[key];
+                    }
+                }
+
+                if (typeof recv.data == 'object' && !Array.isArray(recv.data)){
+                    for (let x in recv.data) {
+                        if (!['output', 'GlobalId', 'SysInfo', 'EtcInfo', 'OvrdInfo'].includes(x)) {
+                            BDO[x] = JSON.parse(JSON.stringify(recv.data[x]));
+                        }
+
+                        if (['SysInfo', 'EtcInfo'].includes(x)) {
+                            BDO[x] = BDO[x] ?? {};
+                            for (let y in recv.data[x]) {
+                                if (bizCommItem.includes(y)) {
+                                    BDO[x][y] = recv.data[x][y] ?? '';
+                                }
+                            }
+                        }
+                        
+                        if (x == 'OvrdInfo') {
+                            CDO[x] = CDO[x] ?? {};
+                            BDO[x] = BDO[x] ?? {};
+                            for (let y in recv.data[x]) {
+                                const value = JSON.parse(JSON.stringify(recv.data[x][y] ?? ''));
+                                if (y == 'mngrList') {
+                                    CDO[x][y] = value;
+                                } else {
+                                    BDO[x][y] = value;
+                                }
+                            }
+                        }
+                    }
+
+                    // Reset approval check field
+                    if (recv.data.SysInfo?.rsprApvCreYn == 'Y' && BDO.SysInfo?.rsprApvYn == 'Y') {
+                        BDO.SysInfo.rsprApvCreYn = 'N';
+                        BDO.SysInfo.rsprApvYn = 'N';
+                    }
+                }
+
+                /*
+                var common = dsObj.RawResult.PARAMS.COMMON;
+                //console.log('COMMON',common);
+                function getArr(obj){
+                    var rt = [];
+                    if ( obj !== undefined ) { if (obj.length === undefined) { rt.push(obj); } else { rt = obj; } }
+                    return rt;
+                }
+        
+                for (var i=0;i<common.length;i++){
+                    var nm = common[i].name;
+        
+                    if ((nm != 'FXFIG_COM')&&(nm != 'FMGRINFO')&&(nm != 'FGINP')) {
+                        try {
+                            BDC.setSectionValue(nm,[]); //DelSection
+                        } catch(E) { }
+        
+                        var rec = getArr(common[i].REC);
+                        BDC.setSectionValue(nm,rec)
+                    } else {
+                        if (common[i].REC.FXFIG_OVGB !== undefined){
+                            BDC.setSectionName('FXFIG_SCR');
+                            BDC.recordIndex = 0;
+                            BDC.setItemValue('FXFIG_OVGB',common[i].REC.FXFIG_OVGB);
+                        }
+                    }
+        
+                    if (nm == 'FMGRINFO') {
+                        try {
+                            GDC.setSectionValue(nm,[]); //DelSection
+                        } catch(E) { }
+                        var rec = getArr(common[i].REC);
+                        GDC.setSectionValue(nm,rec);
+                    }
+                }
+                */
+            } else {
+                // Reset approval check field
+                if (BDO.SysInfo?.rsprApvYn == 'Y') {
+                    BDO.SysInfo.rsprApvYn = 'N';
+                }
+            }
+            
+            return true;
+        }
+
+        //==================================================================================================================
+        // ETC
+        //==================================================================================================================
+        function DArgument() {
+            if (!window.dialogArguments)
+                this.topWindow = window.top;
+            else
+                this.topWindow = window.dialogArguments.topWindow;
+            this.openWindow = window;
+            this.Args = null;
+        }
+
+        // SubEntry
+        $(()=>{
+            $('.top_btn li').on('click', function(evt){
+                if (this.querySelector('button')?.classList.contains('disabled')) {
+                    return;
+                }
+                $(this).stop().addClass('on').siblings().stop().removeClass('on').parent().next().find('li').removeClass('on');
+                evt.preventDefault();
+            });
+        });
+
+        //iframe 영역 클릭 시 사라짐
+        window.addEventListener("blur", (e) => {
+            if (document.activeElement.tagName === "IFRAME") {
+                if (dtpTRX_DATE.child.cal.style.visibility == 'visible') {
+                    dtpTRX_DATE.root.querySelector('.cal-close').click();
+                }
+            }
+        });
+    </script>
+</head>
+<body style="height: 100%; margin: 0px; overflow: hidden;" onload="SubEntryLoaded()">
+    <div id="sub_entry">
+        <div id="side">
+            <ul class="top_btn" style="display: none;">
+                <li class="on">
+                    <button class="entry disabled" id="entryBtn" onclick="ExecAct(0)" disabled>Entry</button>
+                </li>
+                <li>
+                    <button class="cancel disabled" id="cancelBtn" onclick="ExecAct(1)" disabled>Cancel</button>
+                </li> 
+                <li style="display: none;">
+                    <button class="simulation" id="simulBtn" onclick="ExecAct(2)" actenabletype="2">Simul</button>
+                </li>
+            </ul>
+        
+            <ul class="bottom_btn" style="display: none;">
+                <li style="display: none;">
+                    <button class="" id="CNFInqBtn" onclick="ExecAct(7)" actenabletype="2" title="CNFInq">
+                        <img src="./images/CNFkey.png" alt="#" class="off">
+                        <img src="./images/CNFkey_hover.png" alt="#" class="on">
+                    </button>
+                </li>
+                <li style="display: none;">
+                    <button class="" id="CCntctBtn" onclick="ExecAct(8)" actenabletype="2" title="CCntct">
+                        <img src="./images/CusCntct.png" alt="#" class="off">
+                        <img src="./images/CusCntct_hover.png" alt="#" class="on">
+                    </button>
+                </li>
+                <li style="display: none;">
+                    <button class="money" id="FXInfoBtn" onclick="ExecAct(9)" actenabletype="2" title="FXInfo">
+                        <img src="./images/exchange-rate.png" alt="#" class="off">
+                        <img src="./images/exchange-rate-hover.png" alt="#" class="on">
+                    </button>
+                </li>
+                <li style="display: none;">
+                    <button class="folder" id="DocBtn" onclick="ExecAct(13)" actenabletype="2" title="Doc">
+                        <img src="./images/folders.png" alt="#" class="off">
+                        <img src="./images/folders-hover.png" alt="#" class="on">
+                    </button>
+                </li>
+                <li style="display: none;">
+                    <button class="" id="ScanBtn" onclick="ExecAct(11)" actenabletype="2">Scan</button>
+                </li>
+                <li style="display: none;">
+                    <button class="" id="TrxByBtn" onclick="ExecAct(12)" actenabletype="2">Trx By</button>
+                </li>
+                <li style="display: none;">
+                    <button class="" id="CmpssBtn" onclick="ExecAct(10)" actenabletype="2" title="Cmpss">
+                        <img src="./images/compass.png" alt="#" class="off">
+                        <img src="./images/compass_hover.png" alt="#" class="on">
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div id="bottom" style="display: none;">
+            <div class="container">
+                <ul class="left">
+                    <li class="select" id="areaCbbTRXOVRD"> 
+                        <p class="ovrd">
+                            TRX OVRD
+                        </p>
+                        <div id="cbbTRXOVRDdiv" style="width: 80px; height: 24px;">
+                            <codecombo  class="codecombo" id="cbbTRXOVRD" idField="code" textField="codeNm" cbDisplayTextField="false" labelWidth="0px" style="position:absolute;width: 80px; height: 24px;" labelStyle="width: 0px; margin-left: 0px; display: block; height: 15px; "  editable="false" editType="all" panelWidth="250px" panelHeight="110px" showHeader="true" fitColumns="true" dropdownkeycode="145" onBeforeShowPanel="fSetcbbTRXOVRD();" onChange="SetTRXOVRD();">
+                            "columns" : [
+                                {"field":"code","title":"CODE","sortable":true,"align":"center","width":64,"boxWidth":55,"deltaWidth":9,"cellClass":"datagrid-cell-c3-CODE"}
+                                ,{"field":"codeNm","title":"CODE_NAME","sortable":true,"width":263,"boxWidth":254,"deltaWidth":9,"cellClass":"datagrid-cell-c3-CODE_NM"}
+                            ],
+                            "data":""
+                            </codecombo>
+                            <div id="trxOVRDProg" class="cbProgDiv" style="display:none;"><div class="loader"></div></div>
+                        </div>
+                    </li>
+        
+                    <li class="box">
+                        <p>
+                            <label class="edc" id="lblHDWARE" style="color: #4e4e4e; cursor: default;">EDC</label>
+                        </p>
+                        <input type="checkbox" id="chkHDWARE" onclick="fchkHDWARE_onClick()" style="height: auto; margin-bottom: 2px; ">
+                    </li>
+        
+                    <li class="select code" id="areaCbbCJUM" style="display: none;">
+                        <p class="brno">
+                           TRX BR NO
+                        </p>
+                        <div id="cbbCJUMdiv" style="width: 60px; height: 24px;">
+                            <codecombo class="codecombo" id="cbbCJUM" idField="code" textField="codeNm" cbDisplayTextField="false" labelWidth="0px" style="position:absolute;width: 60px; height: 24px; display: block;" labelStyle="width: 0px; margin-left: 0px; display: block; height: 15px;  " editable="true" editType="all" panelWidth="255px" panelHeight="155px" showHeader="true" fitColumns="true" dropdownkeycode="145" onChange="SetCJUM(); cbbCJUM_onChange();">
+                            "columns" : [
+                                {"field":"code","title":"CODE","sortable":true,"align":"center","width":60,"boxWidth":51,"deltaWidth":9,"cellClass":"datagrid-cell-c3-CODE"}
+                                ,{"field":"codeNm","title":"CODE_NAME","sortable":true,"width":247,"boxWidth":238,"deltaWidth":9,"cellClass":"datagrid-cell-c3-CODE_NM"}
+                            ],
+                            "data":""
+                            </codecombo>
+                            <div id="trxBrNoProg" class="cbProgDiv" style="display:none;"><div class="loader"></div></div>
+                        </div>
+                    </li>
+                </ul>
+
+                <ul class="right">
+                    <li class="date">
+                        <p onclick="VoucherPrintTest()" class="date" style="cursor: default;">TRX DATE</p>
+                        <dateedit id="dtpTRX_DATE" onchange="TrxDateChange()" style="width: 130px;height: 24px;"></dateedit>
+                    </li>
+        
+                    <li class="btn account" style="display: none;">
+                        <button class="inquiry" id="msgiqyBtn" onclick="ExecAct(3)" actenabletype="2"> Message Inquiry</button>
+                    </li>
+                    <li class="btn account" style="display: none;">
+                        <button class="inquiry" id="mstiqyBtn" onclick="ExecAct(4)" actenabletype="2"> Account Inquiry</button>
+                    </li>
+                    <li class="btn">
+                        <button class="excute disabled" id="execBtn" onclick="ExecAct(5)" disabled> Execute</button>
+                    </li>
+                    <li class="btn">
+                        <button class="clear disabled" id="canjobBtn" onclick="ExecAct(6)" disabled> Clear</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="work">
+            <iframe id="WorkFrame" frameborder="0" border="0" width="100%" height="100%" onload="WorkFrameLoad()"></iframe>
+        </div>
+
+    </div>
+    <!-- ActionLister -->
+    <actlsnr id="ActionLsnr">
+        <actlink linkid="entryBtn"  actionname="ActEntry"></actlink>
+        <actlink linkid="cancelBtn" actionname="ActCancel"></actlink>
+        <actlink linkid="simulBtn"  actionname="ActSimulation"></actlink>
+        <actlink linkid="CNFInqBtn" actionname="ActCNFInquiry"></actlink>
+        <actlink linkid="CCntctBtn" actionname="ActCustContact"></actlink>
+        <actlink linkid="CmpssBtn"  actionname="ActCompass"></actlink>
+        <actlink linkid="FXInfoBtn" actionname="ActFXInfo"></actlink>
+        <actlink linkid="DocBtn"    actionname="ActDoc"></actlink>
+        <actlink linkid="ScanBtn"   actionname="ActScan"></actlink>
+        <actlink linkid="TrxByBtn"  actionname="ActTrxBy"></actlink>
+        <actlink linkid="msgiqyBtn" actionname="ActMsgInqry"></actlink>
+        <actlink linkid="mstiqyBtn" actionname="ActMstInqry"></actlink>
+        <actlink linkid="execBtn"   actionname="ActExecute"></actlink>
+        <actlink linkid="canjobBtn" actionname="ActCancelJob"></actlink>
+    </actlsnr>
+</body>
+</html>

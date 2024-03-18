@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Info.</title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+</head>
+<body onload="fInitProc()">
+    <div class="" style="position: absolute; width: 1230px; height: 800px; left: 24px; top: 14px;">
+        <div class="conditiontitle" style="left: -3px; top: 83px; position: absolute; width: 192px; height: 24px;">
+            <label class="Mtitle" lang="CustomerInformation" style="height: 24px; position: absolute; left: 20px; top: 10px; width: 160px;">
+        Customer Information
+      </label>
+        </div>
+        <div class="conditiontitle" style="left: 1px; top: 220px; position: absolute; width: 216px; height: 24px;">
+            <label class="Mtitle" style="left: 16px; top: 0px; width: 183px; height: 24px; position: absolute;">
+        Investment Account Info.
+      </label>
+            <div class="infoDiv" style="left: 0px; width: 1227px; top: 28px; height: 148px; position: absolute;">
+                <div class="infoIngray" style="width: 1228px; height: 94px; position: absolute; left: 0px; top: 0px;">
+                    <label class="search" lang="OpeningDate" style="position: absolute; width: 200px; height: 24px; left: 5px; top: 5px;">
+          Opening Date
+          <dateedit id="dtpNEW_DT" class="readonly" tabindex="-1" title="Apply start date" readonly dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 204px; top: 0px;"></dateedit>
+                    </label>
+                    <label class="search" lang="ClosingDate" style="position: absolute; width: 130px; height: 24px; left: 664px; top: 5px;">
+          Closing Date
+          <dateedit id="dtpTRMN_DT" class="readonly" tabindex="-1" title="Apply close date" readonly dateOrder="yyyymmdd" style="position: absolute; width: 100px; height: 24px; left: 134px; top: 0px;"></dateedit>
+                    </label>
+                    <label class="search" style="position: absolute; width: 200px; height: 24px; left: 5px; top: 33px;">
+          Settlement Account
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtFRC_CNNT_ACCT_NO" style="position: absolute; width: 200px; left: 204px; top: 0px; height: 24px;">
+                    </label>
+                    <label class="search" lang="Currency" style="position: absolute; width: 130px; height: 24px; left: 664px; top: 33px;">
+          Currency
+          <codecombo id="cboCUR_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 145px; height: 100%;" labelWidth="145px" url="/jsondb/F2.json" cbDisplayTextField="false" class="readonly" readonly panelWidth="230px" panelHeight="110px" dropdownkeycode="145" tabindex="-1" style="position: absolute; width: 200px; height: 24px; left: 134px; top: 0px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":45.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":183.2}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" lang="AccountName" style="position: absolute; width: 200px; height: 24px; left: 5px; top: 61px;">
+          Account Name
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtACCT_NM" style="position: absolute; width: 560px; left: 204px; top: 0px; height: 24px;">
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="conditiontitle" style="left: 1px; top: 347px; position: absolute; width: 216px; height: 24px;">
+            <div class="infoDiv" style="left: 0px; width: 1224px; top: 23px; height: 160px; position: absolute;">
+                <div class="" style="width: 1227px; height: 160px; position: absolute; left: 0px; top: 5px;">
+                    <grid id="gridBase" dsoName="BDO0400.prmDSOOutLstsRel" oncelldblclick="fGridDblClick(1)" style="font-size: 8pt; color: rgb(48, 48, 48); position: absolute; top: 0px; left: 0px; width: 1228px; height: 150px;">
+                        "options" : {
+                          "editable":false
+                          ,"columnHeight":20
+                          ,"cellHeight":20
+                          ,"fixColumn":0
+                          ,"aggregate":""
+                          ,"appendmode":false
+                          ,"autohiddencols":false
+                          ,"autofit":false
+                          ,"contextmenu":true
+                          ,"indicator":{"show":false,"width":30}
+                          ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                          ,"group":[]
+                          ,"columns" : [
+                            {"text":"No.","field":"FOBD04_SEQ_NO","alignment":"center","width":76,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right"},"lang":"No.","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Dt"
+                              ,"field":"FOBD04_TRSC_DT"
+                              ,"alignment":"center"
+                              ,"width":80
+                              ,"editable":"false"
+                              ,"focusing":"false"
+                              ,"displayformat":"!9999-99-99;0;_"
+                              ,"style":"custSty1"
+                              ,"type":"column"
+                              ,"height":20
+                              ,"visible":true
+                              ,"sortable":true
+                              ,"editor":{"type":"MaskEdit","alignment":"center","displayformat":"!9999-99-99;0;_"}
+                            }
+                            ,{"text":"Date","field":"FOBD04_TRSC_DATE","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"lang":"Date","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Tr_No.","field":"FOBD04_TRSC_SEQ_NO","alignment":"center","width":101,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Hold Bond","field":"FOBD04_PRODUCT_NO","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Hold Bond Name","field":"FOBD04_PRODUCT_NAME","alignment":"center","width":180,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Transaction Name","field":"FOBD04_TRSC_DV_NM","alignment":"center","width":161,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"lang":"TransactionName","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Trading Status","field":"FOBD04_TRAD_PROCSS_STA_NM","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Cancel","field":"FOBD04_CAN_DV_NM","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"lang":"Cancel","style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Transaction Amount"
+                              ,"field":"FOBD04_TRSC_FACE_VAL_AMT"
+                              ,"alignment":"center"
+                              ,"width":177
+                              ,"editable":"false"
+                              ,"focusing":"false"
+                              ,"displayformat":",0.00"
+                              ,"style":"custSty1"
+                              ,"type":"column"
+                              ,"height":20
+                              ,"visible":true
+                              ,"sortable":true
+                              ,"editor":{"type":"CalcEdit","alignment":"right","displayformat":",0.00"}
+                            }
+                            ,{"text":"Approved Employee","field":"FOBD04_OPTR_EMP_NO","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Transaction Account","field":"FOBD04_ACCT_NO","alignment":"center","width":140,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Process Time","field":"FOBD04_PROC_LST_TM","alignment":"center","width":119,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Process Branch","field":"FOBD04_TRT_BR_NO","alignment":"center","width":131,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Process Branch Name","field":"FOBD04_TRT_BR_NM","alignment":"center","width":171,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Process User","field":"FOBD04_OPTR_EMP_NO","alignment":"center","width":151,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"Process User Name","field":"FOBD04_OPTR_EMP_NM","alignment":"center","width":183,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"TRSC_KIND_CD","field":"FOBD04_TRSC_KIND_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"TRAD_PROCSS_STA_CD","field":"FOBD04_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                            ,{"text":"CAN_DV_CD ","field":"FOBD04_CAN_DV_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1","type":"column","height":20,"visible":true,"sortable":true}
+                          ]
+                          ,"style":{}
+                          ,"effect":{"columnHighlight":true}
+                          ,"size":{"vertScrollWidth":19}
+                          ,"footer":{"show":true,"height":24}
+                          ,"conditionalstyle":[]
+                        }
+                    </grid>
+                </div>
+            </div>
+            <label class="Mtitle" lang="TransactionInformation" style="position: absolute; left: 16px; top: 0px; width: 184px; height: 24px;">
+        Transaction Information
+      </label>
+        </div>
+        <tabControl id="tabControl1" index="0" onTabChange="tabOnChange( event )" style="position: absolute; left: 1px; top: 541px; width: 1228px; height: 216px;">
+            <tabPage id="tabPage1" title="Buy Information" style="width: 100%; height: 100%; display: block;">
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 5px; top: 35px;">
+              Product No
+              <input fldname="" dsoname="" maxlength="20" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NO" style="position: absolute; width: 200px; left: 184px; top: 0px; height: 24px;">
+                </label>
+                <label class="search" lang="ProductName" style="position: absolute; width: 180px; height: 24px; left: 610px; top: 35px;">
+              Product Name
+              <input fldname="" dsoname="" maxlength="60" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NAME" style="position: absolute; width: 200px; left: 184px; top: 0px; height: 24px;">
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 5px; top: 63px;">
+              Customer Price
+              <edit id="cedFOBD04_1_CUST_PRICE" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 610px; top: 63px;">
+              Broker Price
+              <edit id="cedFOBD04_1_BROKER_PRICE" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 5px; top: 91px;">
+              Face Value
+              <edit id="cedFOBD04_1_TRSC_FACE_VAL_AMT" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 610px; top: 91px;">
+              P/L of Sale Retail Bond
+              <edit id="cedFOBD04_1_FEE_AMOUNT" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 5px; top: 119px;">
+              YTM
+              <edit id="cedFOBD04_1_YTM" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 5px; top: 147px;">
+              Accured Days
+              <edit id="cedFOBD04_1_ACCR_DAYS" type="CURRENCY" value="0" class="readonly" readonly digits="0" style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 610px; top: 147px;">
+              Accured Interest
+              <edit id="cedFOBD04_1_ACCR_INT" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 5px; top: 175px;">
+              Principal Amount
+              <edit id="cedFOBD04_1_BOND_PRIN_AMT" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="position: absolute; width: 180px; height: 24px; left: 610px; top: 175px;">
+              Settlement Amount
+              <edit id="cedFOBD04_1_BOND_SETL_AMT" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+            </tabPage>
+            <tabPage id="tabPage2" title="Sell Information" style="width: 100%; height: 100%; display: none;">
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 35px; height: 24px;">
+              Product No
+              <input fldname="" dsoname="" maxlength="20" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NO2" style="position: absolute; width: 200px; left: 184px; top: 0px; height: 24px;">
+                </label>
+                <label class="search" lang="ProductName" style="left: 610px; width: 180px; position: absolute; top: 35px; height: 24px;">
+              Product Name
+              <input fldname="" dsoname="" maxlength="60" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NAME2" style="position: absolute; width: 200px; left: 184px; top: 0px; height: 24px;">
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 63px; height: 24px;">
+              Customer Price
+              <edit id="cedFOBD04_1_CUST_PRICE2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 610px; width: 180px; position: absolute; top: 63px; height: 24px;">
+              Broker Price
+              <edit id="cedFOBD04_1_BROKER_PRICE2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 91px; height: 24px;">
+              Face Value
+              <edit id="cedFOBD04_1_TRSC_FACE_VAL_AMT2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 610px; width: 180px; position: absolute; top: 91px; height: 24px;">
+              P/L of Sale Retail Bond
+              <edit id="cedFOBD04_1_FEE_AMOUNT2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 119px; height: 24px;">
+              Capital Gain
+              <edit id="cedFOBD04_1_CAPT_GAIN2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 610px; width: 180px; position: absolute; top: 119px; height: 24px;">
+              Capital Gain Tax
+              <edit id="cedFOBD04_1_CAPT_GAIN_TAX2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 147px; height: 24px;">
+              Accured Interest
+              <edit id="cedFOBD04_1_ACCR_INT2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 610px; width: 180px; position: absolute; top: 147px; height: 24px;">
+              Accured Interest Tax
+              <edit id="cedFOBD04_1_ACCR_INT_TAX2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 175px; height: 24px;">
+              Principal Amount
+              <edit id="cedFOBD04_1_BOND_PRIN_AMT2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 610px; width: 180px; position: absolute; top: 175px; height: 24px;">
+              Settlement Amount
+              <edit id="cedFOBD04_1_BOND_SETL_AMT2" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+            </tabPage>
+            <tabPage id="tabPage3" title="Coupon Information" style="width: 100%; height: 100%; display: none;">
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 35px; height: 24px;">
+              Product No
+              <input fldname="" dsoname="" maxlength="20" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NO3" style="position: absolute; width: 200px; left: 184px; top: 0px; height: 24px;">
+                </label>
+                <label class="search" lang="ProductName" style="left: 610px; width: 180px; position: absolute; top: 35px; height: 24px;">
+              Product Name
+              <input fldname="" dsoname="" maxlength="60" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NAME3" style="position: absolute; width: 200px; left: 184px; top: 0px; height: 24px;">
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 63px; height: 24px;">
+              Face Value Balance
+              <edit id="cedFOBD04_1_BOND_FACE_VAL_BAL3" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 610px; width: 180px; position: absolute; top: 63px; height: 24px;">
+              Payment Amount
+              <edit id="cedFOBD04_1_BOND_SETL_AMT3" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 91px; height: 24px;">
+              Tax Amount
+              <edit id="cedFOBD04_1_TAX_AMT3" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 610px; width: 180px; position: absolute; top: 91px; height: 24px;">
+              Payment Net Amount
+              <edit id="cedFOBD04_1_BOND_SETL_NET_AMT3" type="CURRENCY" value="0.00" class="readonly" readonly style="position: absolute; width: 130px; left: 184px; top: 0px; height: 24px;"></edit>
+                </label>
+                <label class="search" style="left: 5px; width: 180px; position: absolute; top: 119px; height: 24px;">
+              Trading Date
+              <dateedit id="dtpFOBD04_1_TRADE_DT3" class="readonly" tabindex="-1" readonly style="position: absolute; width: 100px; height: 24px; left: 184px; top: 0px;"></dateedit>
+                </label>
+                <label class="search" lang="DueDate" style="left: 610px; width: 180px; position: absolute; top: 119px; height: 24px;">
+              Due Date
+              <dateedit id="dtpFOBD04_1_DUE_DT3" class="readonly" tabindex="-1" readonly style="position: absolute; width: 100px; height: 24px; left: 184px; top: 0px;"></dateedit>
+                </label>
+            </tabPage>
+        </tabControl>
+    </div>
+    <div class="topbarIngreen" style="position: absolute; left: 24px; top: 24px; width: 1228px; height: 69px;">
+        <label class="registTop" style="position: absolute; width: 120px; height: 24px; left: 5px; top: 8px;">
+        Investment Account
+      </label>
+        <input class="default" name="MomAcctNo" size="16" type="text" width="0" maxlength="16" onkeypress="upperCase()" onkeydown="fOnKeyDown();" id="txtMOM_ACCT_NO" style="position: absolute; width: 120px; height: 24px; left: 129px; top: 8px;">
+        <input height="22" hspace="0" name="MOM_ACCT_NO" type="image" vspace="0" tabindex="-1" onclick="fPopUp(1)" src="/biz/images/detail.gif" id="btnMOM_ACCT_NO" style="left: 253px; width: 24px; position: absolute; top: 8px; height: 24px;">
+        <input height="0" maxlength="50" class="readonly" readonly size="50" type="text" width="0" tabindex="-1" id="txtMOM_ACCT_NM" style="left: 281px; width: 200px; position: absolute; top: 8px; height: 24px;">
+        <label class="registTop" style="position: absolute; width: 120px; height: 24px; left: 5px; top: 36px;">
+        Product Code
+      </label>
+        <input name="ProductNo" size="16" type="text" width="0" maxlength="20" onkeydown="fOnKeyDown();" onkeypress="upperCase()" id="txtPRODUCT_NO" style="position: absolute; width: 120px; height: 24px; left: 129px; top: 37px;">
+        <input height="22" hspace="0" name="ProductNo" onclick="fPopUp(2)" src="/biz/images/detail.gif" type="image" vspace="0" width="21" tabindex="-1" id="btnPRODUCT_NO" style="left: 253px; width: 24px; position: absolute; top: 37px; height: 24px;">
+        <input height="0" maxlength="50" class="readonly" readonly size="50" type="text" width="0" tabindex="-1" disabled id="txtPRODUCT_NM" style="left: 281px; width: 200px; position: absolute; top: 37px; height: 24px;">
+        <label class="registTop" lang="InquiryDate" style="position: absolute; width: 102px; height: 24px; left: 776px; top: 37px;">
+        Inquiry Date
+      </label>
+        <dateedit id="dtpBASC_DT1" class="default" tabindex="2" title="Apply start date" dateOrder="yyyymmdd" style="left: 882px; width: 100px; position: absolute; top: 37px; height: 24px;"></dateedit>
+        <label class="regist" style="left: 986px; width: 10px; padding-top: 3px; position: absolute; top: 37px; height: 24px;">
+        ~
+      </label>
+        <dateedit id="dtpBASC_DT2" class="default" tabindex="2" title="Apply end date" dateOrder="yyyymmdd" style="left: 1000px; width: 100px; position: absolute; top: 37px; height: 24px;"></dateedit>
+        <input type="button" name="imgSearch" height="21" hspace="0" size="1" src="" onmouseout="" onmouseover="" vspace="0" width="90" onclick="fOnClick(1)" tabindex="-1" id="imgSEARCH" value="Search" class="greenBtn" style="left: 1104px; width: 104px; position: absolute; top: 37px; height: 24px;">
+    </div>
+    <div class="infoDiv" style="left:-20px;width:875px;top:100px;height:100px;">
+        <div class="infoIngray" style="width: 1228px; height: 94px; position: absolute; left: 25px; top: 135px;">
+            <label class="search" lang="CifNo" style="position: absolute; width: 200px; height: 24px; left: 5px; top: 5px;">
+          Cif No
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCIF" style="position: absolute; width: 100px; left: 204px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" lang="Nationality" style="position: absolute; width: 130px; height: 24px; left: 664px; top: 5px;">
+          Nationality
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCNTY_CD" style="position: absolute; width: 50px; left: 134px; top: 0px; height: 24px;">
+                <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCNTY_NM" style="position: absolute; width: 225px; left: 188px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" lang="Name" style="position: absolute; width: 200px; height: 24px; left: 5px; top: 33px;">
+          Name
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCUST_ENM" style="position: absolute; width: 200px; left: 204px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="position: absolute; width: 130px; height: 24px; left: 664px; top: 33px;">
+          SID
+          <input type="text" class="readonly" readonly maxlength="16" id="txtSID" style="position: absolute; width: 193px; left: 134px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" lang="Address" style="position: absolute; width: 200px; height: 24px; left: 5px; top: 61px;">
+          Address
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtADDR_ENM" style="position: absolute; width: 630px; left: 204px; top: 0px; height: 24px;">
+            </label>
+        </div>
+    </div>
+</body>
+</html>

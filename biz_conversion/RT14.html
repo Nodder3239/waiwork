@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html style="width: 1319px; height: 837px;">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/css/Base_old.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="/biz/rt/commonRT.js"></script>
+    <script type="text/javascript">
+    // Dynamic-SQL Components generate
+    var wasSQLDSO = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlDso = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlDso1 = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlDsoJoh = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlDsoSeq = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlComm = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlInfo = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlAcct = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    var wasSqlAcctCcy = new $wai.classes.DSQLService(); //{"transcode":"RT11"}
+    </script>
+    <script id="bodyScript1" type="text/javascript">
+    var Prefix_CifNo  = "00";
+    var rt11_scan_code = "3";
+    var cdNormal = "1";
+    var cdWaive = "2";
+    var scrBrNo = "";
+    var tmpOPStatus = 0;
+	var is_new = false;
+      //메인화면의 ActionManager 연결
+      function ActionOnActive() {
+	  if(!window.dialogArguments)
+         parent.ActionLsnr.ActionManager = AMan;
+      }
+      //Main화면 등록/취소 실행
+      function actExecute(actid) {
+         switch(actid) {
+            case 1 :    //Entry
+                if(tmpOPStatus < 2)
+                {
+                   //fDataClear();
+                   cbbFIRT11_CH_GB.value         = "2";
+                   cbbDOC_TP.value = '99';
+                   gControlPerDisabled("cbbDOC_TP", true);
+                 }
+               fDataClear();
+               parent.OPStatus=0;
+               tmpOPStatus =  0;
+               break;
+            case 2 :    //Cancel
+               txtREF_NO.value="";
+               txtREF_NO.focus();
+               fDataClear();
+               parent.OPStatus=1;
+               tmpOPStatus =  1;
+               break;
+            case 3 :    //Simulation
+               fDataClear();
+               txtOP_NO.value                = GET_COMM_DATA("FXFIG_COM", "FXFIG_OPNO");
+               cbbFIRT11_CCY.value           = "USD";
+               cbbFIRT11_FEE_CCY.value       = "USD";
+               cbbFIRT11_OTHER_FEE_GB.value  = "1";
+               cbbFIRT11_CH_GB.value         = "2";
+               cbbFIRT11_FEE_RT_GB.value     = "1";
+               cbbRT_CD.value                = "4";
+               cbbFIRT11_SAME_DAY_VALUE_GB.value = "N";
+               cbbFIRT11_SPEED_YN.value      = "N";
+               cbbFIRT11_FULL_AMT_GB.value   = "N";
+               cbbFIRT11_HANA_KEB_GB.value   = "N";
+               cbbSAME_DAY_CCY.value         = "USD";
+               cbbSPEED_CCY.value            = "USD";
+               cbbCABLE_CCY.value            = "USD";
+               cbbFULL_AMT_CCY.value         = "USD";
+               //gControlPerDisabled("cbbFIRT11_FEE_CCY, cbbCABLE_CCY, cbbSAME_DAY_CCY, cbbSPEED_CCY, cbbFULL_AMT_CCY, cedSAME_DAY_AMT, cedSPEED_AMT, cedFULL_AMT", true);
+               //gControlPerDisabled("cedFIRT11_FEE_AMT, cedSAME_DAY_AMT, cedSPEED_AMT, cedFULL_AMT, cedFIRT11_CORR_AMT", true);
+               gControlPerDisabled("cedFIRT11_FEE_AMT, cedSAME_DAY_AMT, cedSPEED_AMT, cedFULL_AMT", true);
+               txtACCT_NO.value = "";
+               cbbOUTGOING.value = "1";
+               ;
+               cbbFIRT11_HANA_KEB_GB.focus();
+               parent.OPStatus = 0;            
+               tmpOPStatus =  2;
+               break;
+            case 5 :
+               gRT81PopUpShow(txtREF_NO.value);
+               break;
+            case 6 :
+               if(parent.OPStatus==1){
+                  fDataCancel();
+               }
+               else
+               {
+                  if (tmpOPStatus ==  2)
+                  {
+                      //var mainIHNDC = parent.BDC;
+                      //mainIHNDC.setSectionName( "FGINP" );
+                      //mainIHNDC.setItemValue("FGINP_TR_GB", "1");
+                  }
+                  fDataInsert();
+               }
+               break;
+            case 7 :
+               parent.OPStatus=0;
+               fDataClear();
+               txtOP_NO.value = GET_COMM_DATA("FXFIG_COM", "FXFIG_OPNO");
+               cbbFIRT11_CCY.value           = "USD";
+               cbbFIRT11_FEE_CCY.value       = "USD";
+               cbbSAME_DAY_CCY.value         = "USD";
+               cbbSPEED_CCY.value            = "USD";
+               cbbCABLE_CCY.value            = "USD";
+               cbbFULL_AMT_CCY.value         = "USD";
+               //cbbFIRT11_CORR_CCY.value      = "USD";
+               cbbFIRT11_OTHER_FEE_GB.value  = "1";
+               cbbFIRT11_CH_GB.value         = "2";
+               cbbFIRT11_FEE_RT_GB.value     = "1";
+               //cbbFIRT11_CORR_GB.value       = "1";
+               cbbRT_CD.value                = "4";
+               //cbbFIRT11_SAME_DAY_VALUE_GB.value    = "N";
+               cbbFIRT11_SPEED_YN.value             = "N";
+               cbbFIRT11_FULL_AMT_GB.value          = "N";
+               cbbOUTGOING.value = "1";
+               cbbFIRT11_CCY.focus();
+               txtCIF_NM.value = "";
+               break;
+         }
+      }
+	      /* 20120907_Mifta */
+	function fDialogInit(){
+		if(!window.dialogArguments)
+			return;
+			btnAdd.style.display = "block";
+			parent.OPStatus = 0;
+		if(window.dialogArguments.Args[0] != null) {
+			is_new   = true;
+			cbbDOC_TP.value = '99';
+			gControlPerDisabled("cbbDOC_TP", true);
+		}
+	}
+    //화면 초기화
+    function fInitProc() {
+        var sqlDdCd;
+        var sqlStatCd;
+        var sqlCategoryCd;
+        var sqlRelationCd;
+        var sqlMultiCcy;
+        var sqlFxCcy;
+        cbbFIRT11_CH_GB.value = "2";
+        TABINFO1.style.display  = "block";
+        Tab1.className = "tabselecttitle";
+        //DSO recordset 추가
+        prmDsoIn.recordset.addNew();
+        prmDsoIn18.recordset.addNew();
+        LIB().InitCB(cbbFIRT11_SD_CTRY);           /*송금국가코드 "F10"  */
+        LIB().InitCB(cbbFIRT11_CH_GB);             /*Charge부담   "F233" */
+        LIB().InitCB(cbbTAG59F_1);
+        LIB().InitCB(cbbTAG59F_2);
+        LIB().InitCB(cbbTAG59F_3);
+        LIB().InitCB(cbbTAG59F_4);
+        LIB().InitCB(cbbDOC_TP);
+        LIB().InitCB(cbbSTS);
+        cbbDOC_TP.value = '99';
+        gControlPerDisabled("cbbDOC_TP", true);
+        LIB().InitCB(cbbSTAT_CD);   /*Remittance Purpose code F2041*/
+        LIB().InitCB(cbbAPPL_STS);
+        LIB().InitCB(cbbBENE_STS);
+        LIB().InitCB(cbbAPPL_CAT);
+        LIB().InitCB(cbbBENE_CAT);
+        LIB().InitCB(cbbBENE_AFIL);
+        LIB().InitCB(cbbFIRT11_APPL_NATION);       /*국가코드     "F10"  */
+        sqlStatCd = "SELECT type, code, code_nm_kor || ' ' || etc5 code_nm, sort_seq " +
+                    "  FROM acom_comh_code                " +
+                    " WHERE type = 'F2041'                " +
+                    "   AND code LIKE '2%'                " +
+                    "   AND code1 = '0'                   " +  /*20140319_Agus_1 - Show only active LLD code*/
+                    "ORDER BY sort_seq, code";                 /*20140319_Agus_1 - Show only active LLD code*/
+        wasSqlDso.sql = sqlStatCd;
+        G_SetCBWithDSO(cbbSTAT_CD, wasSqlDso, "TYPE", "F2041", "CODE", "CODE_NM", false );
+        sqlCategoryCd = "SELECT type, code, code_nm, sort_seq " +
+                    "  FROM acom_comh_code                " +
+                    " WHERE type = 'F2065'                " +
+                    "   AND etc1 = 'CATEGORY'             " +
+                    "ORDER BY sort_seq";
+        wasSqlDso.sql = sqlCategoryCd;
+        G_SetCBWithDSO(cbbAPPL_CAT, wasSqlDso, "TYPE", "F2065", "CODE", "CODE_NM", false );
+        G_SetCBWithDSO(cbbBENE_CAT, wasSqlDso, "TYPE", "F2065", "CODE", "CODE_NM", false );
+        sqlRelationCd = "SELECT type, code, code_nm, sort_seq " +
+                    "  FROM acom_comh_code                " +
+                    " WHERE type = 'F2065'                " +
+                    "   AND etc1 = 'RELATIONSHIP'         " +
+                    "ORDER BY sort_seq";
+        wasSqlDso.sql = sqlRelationCd;
+        G_SetCBWithDSO(cbbBENE_AFIL, wasSqlDso, "TYPE", "F2065", "CODE", "CODE_NM", false );
+        g_name = "";
+        g_addr = "";
+        g_MtGb = "";
+        /* 20120831_Mifta */
+        txtAPPL_NM1.setAttribute('readOnly',false);
+        //prmDsoIn.recordset.fields("FIRT12_VALUE_DATE").value = LIB().Util.DateToLocal(GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL", 0), "YYYY/MM/DD", "S");
+        // dtpFIRT12_VALUE_DATE.value =  LIB().Util.DateToLocal(GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL", 0), "YYYY/MM/DD", "S");
+        // KEB 통합점포만 허용 - One trx
+        scrBrNo = GET_COMM_DATA("FXFIG_SCR", "FXFIG_CJUM", 0);
+        if (scrBrNo != "0888" &&
+            scrBrNo != "1130" &&
+            scrBrNo != "1131" &&
+            scrBrNo != "1132" &&
+            scrBrNo != "1133"   )
+        {
+            //ShowInfoDialog("This option is allowed to 1130~1133 Branch only");
+            chkONE_DEAL.disabled = true;
+        }
+        else {
+            chkONE_DEAL.disabled = false;
+            chkONE_DEAL.checked = true;
+        }
+        chkONE_DEAL.disabled = true;
+        chkONE_DEAL.checked = false;
+        cbbTAG59F_1.disabled = true;
+        cbbTAG59F_1.value = "1/";
+    }
+    //REF-NO조회
+    function fRefSearchRT0018(){
+    }
+    function fRefNoOnBlur(){
+        if(txtREF_NO.value!=""){
+            fRefSearch();
+        }
+    }
+    function fRefSearch(){
+        var SqlString
+        SqlString = "SELECT * FROM afex_remit_temp WHERE ref_no = '" + txtREF_NO.value + "'";
+        wasSqlDso.sql = SqlString;
+        txtAPPL_CIX_NO.value = wasSqlDso.recordset.fields("cix_no").value;
+        cbbSTS.value = wasSqlDso.recordset.fields("sts").value;
+        txtAPPL_NM1.value   = wasSqlDso.recordset.fields("appl_nm1").value             //(의뢰인)성명1
+        txtAPPL_ADDR1.value = wasSqlDso.recordset.fields("appl_addr1").value           //(의뢰인)주소1
+        txtAPPL_ADDR2.value = wasSqlDso.recordset.fields("appl_addr2").value           //(의뢰인)주소2
+        txtAPPL_ADDR3.value = wasSqlDso.recordset.fields("appl_addr3").value           //(의뢰인)주소3
+        txtAPPL_NM2.value    = wasSqlDso.recordset.fields("appl_nm2").value;
+        txtRCV_NM1.value = wasSqlDso.recordset.fields("rcv_nm1").value               //(수취인)성명1
+        txtRCV_NM2.value = wasSqlDso.recordset.fields("rcv_nm2").value
+        RCV_ADDR1.value = wasSqlDso.recordset.fields("rcv_addr1").value              //(수취인)주소1
+        RCV_ADDR2.value = wasSqlDso.recordset.fields("rcv_addr2").value              //(수취인)주소2
+        txtRCV_ACCT_NO.value = wasSqlDso.recordset.fields("rcv_acct_no").value       //(수취인)계좌번호
+        txtRCVBANK_BIC.value  = wasSqlDso.recordset.fields("rcvbank_bic").value;
+        txtINFO_NAME1.value = wasSqlDso.recordset.fields("info_name1").value;           //TAG70 1
+        txtINFO_NAME2.value = wasSqlDso.recordset.fields("info_name2").value;           //TAG70 2
+        txtINFO_NAME3.value = wasSqlDso.recordset.fields("info_name3").value;           //TAG70 3
+        txtINFO_NAME4.value = wasSqlDso.recordset.fields("info_name4").value;           //TAG70 4
+        //송금국가
+        if(wasSqlDso.recordset.fields("sd_ctry") != ""){
+              cbbFIRT11_SD_CTRY.value = wasSqlDso.recordset.fields("sd_ctry").value;
+        }
+        //CHARGE부담
+        if(wasSqlDso.recordset.fields("ch_gb") != ""){
+            cbbFIRT11_CH_GB.value = wasSqlDso.recordset.fields("ch_gb").value;
+        }
+        cbbAPPL_STS.value  = wasSqlDso.recordset.fields("lld_appl_ctry_cd").value;
+        cbbAPPL_CAT.value  = wasSqlDso.recordset.fields("lld_appl_cat").value;
+        cbbBENE_STS.value  = wasSqlDso.recordset.fields("lld_bene_ctry_cd").value;
+        cbbBENE_CAT.value  = wasSqlDso.recordset.fields("lld_bene_cat").value;
+        cbbBENE_AFIL.value = wasSqlDso.recordset.fields("lld_relation").value;
+        cbbSTAT_CD.value   = wasSqlDso.recordset.fields("lld_purpose").value;
+    }
+    function  fChangeCcy() {
+        cbbFIRT11_FEE_CCY.value = cbbFIRT11_CCY.value;
+        cbbCABLE_CCY.value      = cbbFIRT11_CCY.value;
+        cbbFULL_AMT_CCY.value   = cbbFIRT11_CCY.value;
+        cbbSPEED_CCY.value      = cbbFIRT11_CCY.value;
+        txtTOT_CCY.value        = cbbFIRT11_CCY.value;
+        cedFIRT11_FEE_AMT.value = 0.00;
+        cedFIRT11_OTHER_FEE_AMT.value = 0.00
+        cedSPEED_AMT.value = 0.00;
+        cedFULL_AMT.value = 0.00;
+        cedFIRT11_TOT_FAMT.value = 0.00;
+    }
+    function fDataInsert() {
+       strInput = new Array(2);
+       var acc = "";
+       var ccy = "";
+      //송금종류
+      prmDsoIn.recordset.fields("FXFIG_REF_NO").value          = txtREF_NO.value;                   //의뢰인 CIF 번호
+      prmDsoIn.recordset.fields("FXFIG_CIX_NO").value          = txtAPPL_CIX_NO.value;                   //의뢰인 CIF 번호
+      prmDsoIn.recordset.fields("FIRT11_APPL_NM1").value       = txtAPPL_NM1.value.toUpperCase();        //의뢰인 성명1
+      prmDsoIn.recordset.fields("FIRT11_APPL_NM2").value       = txtAPPL_NM2.value.toUpperCase();        //의뢰인 성명2
+      prmDsoIn.recordset.fields("FIRT11_APPL_ADDR1").value     = txtAPPL_ADDR1.value.toUpperCase();      //의뢰인 주소1
+      prmDsoIn.recordset.fields("FIRT11_APPL_ADDR2").value     = txtAPPL_ADDR2.value.toUpperCase();      //의뢰인 주소2
+      prmDsoIn.recordset.fields("FIRT11_APPL_ADDR3").value     = txtAPPL_ADDR3.value.toUpperCase();      //의뢰인 주소3
+      if (cbbTAG59F_2.value != "3/" && cbbTAG59F_3.value != "3/" && cbbTAG59F_4.value != "3/")
+      {
+          ShowInfoDialog("Beneficiary Information Beneficiary Country (3/) Needed");
+          LIB().NoNextMessage = true;
+          return false;
+      }
+      if (cbbTAG59F_2.value == "3/")
+      {
+          if (txtRCV_NM2.value == cbbFIRT11_SD_CTRY.value + "/")
+          {
+              throw new Error("In beneficiary information ' 3/ ' after ' " + txtRCV_NM2.value + " ', Please input information about city/region/district/subdistrict !!!");
+          }
+          if (txtRCV_NM2.value.substr(0, 3) != cbbFIRT11_SD_CTRY.value + "/")
+          {
+              throw new Error("Beneficiary information ' 3/ ' not valid, please check again !!!");
+          }
+      }
+      else if (cbbTAG59F_3.value == "3/")
+      {
+          if (RCV_ADDR1.value == cbbFIRT11_SD_CTRY.value + "/")
+          {
+              throw new Error("In beneficiary information ' 3/ ' after ' " + RCV_ADDR1.value + " ', Please input information about city/region/district/subdistrict !!!");
+          }
+          if (RCV_ADDR1.value.substr(0, 3) != cbbFIRT11_SD_CTRY.value + "/")
+          {
+              throw new Error("Beneficiary information ' 3/ ' not valid, please check again !!!");
+          }
+      }
+      else if (cbbTAG59F_4.value == "3/")
+      {
+          if (RCV_ADDR2.value == cbbFIRT11_SD_CTRY.value + "/")
+          {
+              throw new Error("In beneficiary information ' 3/ ' after ' " + RCV_ADDR2.value + " ', Please input information about city/region/district/subdistrict !!!");
+          }
+          if (RCV_ADDR2.value.substr(0, 3) != cbbFIRT11_SD_CTRY.value + "/")
+          {
+              throw new Error("Beneficiary information ' 3/ ' not valid, please check again !!!");
+          }
+      }
+      prmDsoIn.recordset.fields("FIRT11_RCV_NM1").value        = cbbTAG59F_1.value + txtRCV_NM1.value.toUpperCase();        //수취인 성명1
+      prmDsoIn.recordset.fields("FIRT11_RCV_NM2").value        = cbbTAG59F_2.value + txtRCV_NM2.value.toUpperCase();        //수취인 성명2
+      prmDsoIn.recordset.fields("FIRT11_RCV_ADDR1").value      = cbbTAG59F_3.value + RCV_ADDR1.value.toUpperCase();         //수취인 주소1
+      prmDsoIn.recordset.fields("FIRT11_RCV_ADDR2").value      = cbbTAG59F_4.value + RCV_ADDR2.value.toUpperCase();         //수취인 주소2
+      prmDsoIn.recordset.fields("FIRT11_RCV_ACCT_NO").value    = txtRCV_ACCT_NO.value.toUpperCase();    //수취인 계좌번호
+      prmDsoIn.recordset.fields("FIRT11_RCV_BKCD").value       = txtRCVBANK_BIC.value;
+      prmDsoIn.recordset.fields("FIRT11_RCV_BKNM1").value      = txtRCVBANK_BIC_NAME.value.toUpperCase(); //수취은행명1
+      prmDsoIn.recordset.fields("FIRT11_INFO_NAME1").value     = txtINFO_NAME1.value.toUpperCase();       //TAG70 1
+      prmDsoIn.recordset.fields("FIRT11_INFO_NAME2").value     = txtINFO_NAME2.value.toUpperCase();       //TAG70 2
+      prmDsoIn.recordset.fields("FIRT11_INFO_NAME3").value     = txtINFO_NAME3.value.toUpperCase();       //TAG70 3
+      prmDsoIn.recordset.fields("FIRT11_INFO_NAME4").value     = txtINFO_NAME4.value.toUpperCase();       //TAG70 4
+      prmDsoIn.recordset.fields("FIRT11_SD_CTRY").value    = cbbFIRT11_SD_CTRY.value;                //송금국가
+      prmDsoIn.recordset.fields("FIRT11_CH_GB").value      = cbbFIRT11_CH_GB.value;                  //charge 구분
+      prmDsoIn.recordset.fields("FIRT11_LLD_APPL_CTRY_CD").value = cbbAPPL_STS.value;
+      prmDsoIn.recordset.fields("FIRT11_LLD_APPL_CAT").value = cbbAPPL_CAT.value;
+      if(chkAPP_IDENTITY.checked)
+         prmDsoIn.recordset.fields("FIRT11_LLD_APPL_ID").value = chkAPP_IDENTITY.value;
+      else
+         prmDsoIn.recordset.fields("FIRT11_LLD_APPL_ID").value = "";
+      prmDsoIn.recordset.fields("FIRT11_LLD_BENE_CTRY_CD").value = cbbBENE_STS.value;
+      prmDsoIn.recordset.fields("FIRT11_LLD_BENE_CAT").value = cbbBENE_CAT.value;
+      prmDsoIn.recordset.fields("FIRT11_LLD_RELATION").value = cbbBENE_AFIL.value;
+      prmDsoIn.recordset.fields("FIRT11_LLD_PURPOSE").value = cbbSTAT_CD.value;
+      prmDsoIn.recordset.fields("FIRT11_LLD_DOCUMENT").value = cbbDOC_TP.value;
+      prmDsoIn.recordset.fields("REMIT_TEMP_STS").value = cbbSTS.value;
+      prmDsoIn.recordset.fields("FIRT11_APPL_NATION").value    = cbbFIRT11_APPL_NATION.value             //의뢰인 국적
+      prmDsoIn.recordset.update();
+      /* 20120831_Mifta */
+    if(!is_new) {
+            /* 20120831_Mifta */
+            if(fCheckGB('B') > 0)
+                throw new Error("clear first!");
+        }
+      ivkSqlQuery.call();
+      if (prmDsoOut.recordset.recordCount > 0) {
+	    prmDsoOut.recordset.moveFirst;
+//           alert(dsoOUT.recordset.fields("FXFIG_REF_NO").value);
+//           txtREF_NO.value = dsoOUT.recordset.fields("FXFIG_REF_NO").value;
+            txtREF_NO.value = prmDsoOut.recordset.Fields ("ROH_BASE_REF_NO").value;
+           /* 20120907_Mifta */
+           if(is_new) {
+                strInput[0] = txtREF_NO.value;
+                strInput[1] = "NEW TEMPLATE";
+                fWinClose();
+           }
+           else {
+                /* 20120831_Mifta */
+                if(fCheckGB('A') > 0)
+                    init_exec = 1;
+           }
+        // 송금 영수증(Customer Receipt) 발행
+        // voucher 출력 하지 않도록 주석처리, corebank, 2005/03/28
+    //    if(cbbFDDT_RT_CD.value == "4")
+    //       fPrint();
+      }
+   }
+	function fWinClose(){
+		window.returnValue = strInput;
+		window.close();
+	}
+   function fShowMessage() {
+        var gMainDialog   = null;
+        var DArg        = new DArgument();
+        DArg.Args       = new Array(4);
+        //rcvRowData[0]     = prmDsoOut.recordset.Fields ("COMH_MSG_DOC_ID").value
+        //var row_index     = paramDSOSearchOut.recordset.fields("FOMA11_OUT_CNT").value;
+        DArg.Args[0] = window;
+        DArg.Args[1] = prmDsoOut.recordset.Fields ("COMH_MSG_DOC_ID").value;
+        DArg.Args[3] = "RT72";
+        //DArg.Args[2] = row_index;
+        gMainDialog = window.showModalDialog(LIB().GetTransURL("ma/MA12.html"),DArg,"status=no;resizable=no;scroll=yes;center=yes;dialogHeight=720px;dialogWidth=660px");
+    }
+   function fDataCancel() {
+      prmDsoIn18.recordset.fields("FXFIG_REF_NO").value = txtREF_NO.value;             //REF_NO
+      prmDsoIn18.recordset.fields("FIRT18_CCY").value   = cbbFIRT11_CCY.value;         //통화
+      prmDsoIn18.recordset.fields("FIRT18_FAMT").value  = cedFIRT11_FAMT.value;        //외화금액
+      //기산일
+      prmDsoIn18.recordset.update();
+      /* 20120831_Mifta */
+      if(fCheckGB('B') > 0)
+        throw new Error("clear first!");
+      ivkSqlQuery18.call();
+      if(fCheckGB('A') > 0)
+        init_exec = 1;
+   }
+   function    Set_OutParam(){
+      //alert('입력 ok')
+      //20140325 ljh add - RT11 + RT12 통합
+      //if (chkONE_DEAL.checked == true) {
+      //   fShowMessage();
+      //}
+      // 20140324 ljh add - RT11 + RT12 통합 -- End
+   }
+   //은행코드 조회
+   function f_onClick2()
+   {
+      var oEventElement = event.srcElement;
+         var DArg       = new DArgument();
+         DArg.Args      = new Array(2);
+         var param      = new Array(5);
+         var gMainDialog;
+         DArg.Args[0] = '';
+         DArg.Args[1] = cbbFIRT11_CCY.value;
+         DArg.Args[2] = txtSET_BKCD.value;
+         gMainDialog = window.showModalDialog( LIB().GetTransURL('iq/IQ63.html'),DArg,"status:no;resizable:no;scroll:yes;center:yes;dialogHeight: 600px; dialogWidth: 915px");
+         if(gMainDialog != null)
+         {
+            param = gMainDialog;
+            txtSET_BKCD.value        = param[0];
+            // ShowInfoDialog("LMS TEST IN ccy put chekc " +param[1]);
+            // cbbDepo_Ccy.value    = param[1];
+            // f_getDataFromDB();
+         }
+         txtSET_BKCD.focus();
+   }
+   function fRefSearchHQBIC(){
+      var eventObj = event.srcElement;
+      var DArg     = new DArgument();
+          DArg.Args = new Array(3);
+      var strWindowStatus;
+      var strModalPut;
+      var arrModalGet = new Array(3);
+      if(eventObj.id=="btnHQBIC1"){
+         //Msg Receiving Bank
+         DArg.Args[0] = mskRCV_BANK_BIC.value;
+         mskRCV_BANK_BIC.focus();
+      }
+      else  if(eventObj.id=="btnHQBIC2"){
+         DArg.Args[0] = txtSET_BKCD.value;
+         txtSET_BKCD.focus();
+      }
+      else if (eventObj.id=="btnHQBIC3") {
+         //Receiving Bank
+         DArg.Args[0] = txtRCVBANK_BIC.value;
+         txtRCVBANK_BIC.focus();
+      }
+      else if (eventObj.id=="btnHQBIC4") {
+         //Rcv Corres
+         DArg.Args[0] = txtRCV_CORR.value;
+         txtRCV_CORR.focus();
+      }
+      else if (eventObj.id=="btnHQBIC5") {
+         DArg.Args[0] = txtINTER_BIC.value;
+         txtINTER_BIC.focus();
+      }
+      //DArg.Args[0] = "";
+      //DArg.Args[1] = "";
+      strWindowStatus = "status:no; resizable:no; scroll:no; center:yes; dialogHeight:540px;dialogWidth:920px;";
+      strModalPut = window.showModalDialog( LIB().GetTransURL("iq/IQ61.html"), DArg , strWindowStatus);
+/*
+      strWindowStatus = "status:no; resizable:no; scroll:no; center:yes; dialogWidth:920px;";
+      if(cbbOUTGOING.value == "1") {
+        //alert ("Outgoing Type is SWIFT");
+        strWindowStatus = strWindowStatus + "dialogHeight:540px;"
+        strModalPut = window.showModalDialog( LIB().GetTransURL("iq/IQ61.html"), DArg , strWindowStatus);
+      }
+      else if(cbbOUTGOING.value == "2") {
+        //alert ("Outgoing Type is FED");
+        strWindowStatus = strWindowStatus + "dialogHeight:590px;"
+        strModalPut = window.showModalDialog( LIB().GetTransURL("co/CO72.html"), DArg , strWindowStatus);
+      }
+      else {
+        alert ("Outgoing Type is null");
+        return;
+      }
+*/
+      arrModalGet = strModalPut;
+      if(eventObj.id=="btnHQBIC1"){
+         //Msg Receiving Bank
+         if(arrModalGet!=null){
+               mskRCV_BANK_BIC.value = arrModalGet[0];
+               txtRCV_BANK_NAME.value = arrModalGet[1];
+               //Receiving Bank 값이 없으면 동일하게 set
+               if(txtRCVBANK_BIC.value == "" || txtRCVBANK_BIC.value == "           ") {
+                  txtRCVBANK_BIC.value = arrModalGet[0];
+                  txtRCVBANK_BIC_NAME.value = arrModalGet[1];
+                  txtRCV_BK_ADDR2.value = arrModalGet[9];
+                  txtRCV_BK_ADDR3.value = arrModalGet[10];
+               }
+         }
+      }
+      //Reim Bank Code
+      else  if(eventObj.id=="btnHQBIC2"){
+         if(arrModalGet!=null){
+            txtSET_BKCD.value = arrModalGet[0];
+            txtSET_BKNM.value = arrModalGet[1];
+         }
+      }
+      else if (eventObj.id=="btnHQBIC3") {
+         if(arrModalGet!=null){
+            //Receiving Bank:
+            txtRCVBANK_BIC.value = arrModalGet[0];
+            txtRCVBANK_BIC_NAME.value = arrModalGet[1];
+            //Msg Receiving Bank 값이 없으면 동일하게 set
+            //txtRCV_BK_ADDR2.value = arrModalGet[9];
+            //txtRCV_BK_ADDR3.value = arrModalGet[10];
+         }
+      }
+      else if (eventObj.id=="btnHQBIC4") {
+         if(arrModalGet!=null){
+            //Rcv Corres
+            txtRCV_CORR.value = arrModalGet[0];
+            txtRCV_CORR_NAME.value = arrModalGet[1];
+         }
+      }
+      else if (eventObj.id=="btnHQBIC5") {
+         if(arrModalGet!=null){
+            txtINTER_BIC.value = arrModalGet[0];
+            txtINTER_BIC_NAME.value = arrModalGet[1];
+         }
+      }
+   }
+   function fCifSearch (){
+      var eventObj = event.srcElement;
+      var DArg     = new DArgument();
+          DArg.Args = new Array(3);
+      var strWindowStatus;
+      var strModalPut;
+      var arrModalGet = new Array(3);
+      DArg.Args[0] = "";
+      DArg.Args[1] = "";
+      strWindowStatus = "status:no; resizable:no; scroll:no; center:yes; dialogHeight:530px; dialogWidth:905px;";
+      strModalPut = window.showModalDialog( LIB().GetTransURL('iq/IQ11.html'), DArg , strWindowStatus);
+      arrModalGet = strModalPut;
+      if(arrModalGet!=null){
+         txtAPPL_CIX_NO.value = arrModalGet[0];
+         g_name               = arrModalGet[5];
+         g_addr               = arrModalGet[10];
+         txtAPPL_NM1.value    = g_name.substr(0,35);
+         txtAPPL_NM2.value    = g_name.substr(35,25);
+         txtAPPL_ADDR1.value  = g_addr.substr(0,35);
+         txtAPPL_ADDR2.value  = g_addr.substr(35,15);
+         //txtAPPL_ADDR3.value  = g_addr.substr(60,30);
+         txtCIF_NM.value      = arrModalGet[5];
+         f_acno();
+         txtAPPL_CIX_NO.focus();
+      }
+   }
+    function f_acno() {
+        var appl_addr;
+        SqlString= "";
+        SqlString= SqlString + " SELECT a.*, b.upjo_cd_antasena, c.code_nm FROM acom_cix_base a, acom_cix_lrpt b, (select code,code_nm from acom_comh_code where type = 'F787') c"
+        SqlString= SqlString + "  WHERE a.cix_no = '" + GET_COMM_DATA("FXFIG_COM", "FXFIG_JUM_CD") + txtAPPL_CIX_NO.value + "' "
+        SqlString= SqlString + " AND a.cix_no = b.cix_no AND b.dati_ii = c.code(+)"
+        wasSqlDsoSeq.sql = SqlString;
+        //No Date
+        if(wasSqlDsoSeq.recordset.recordCount == 0 ){
+        }
+        else
+        {
+            // 20150111_Stancent update according to new 59F 
+            txtAPPL_NM1.value           = "1/" + wasSqlDsoSeq.recordset.fields("CUST_HNM").value.substr(0,33);
+            if (wasSqlDsoSeq.recordset.fields("CUST_HNM").value.substr(33,33) != "")
+            {
+                prompt(1,wasSqlDsoSeq.recordset.fields("CUST_HNM").value.substr(33,33));
+                txtAPPL_NM2.value           = "1/" + wasSqlDsoSeq.recordset.fields("CUST_HNM").value.substr(33,33);
+            }
+            /*
+            txtAPPL_ADDR1.value         = wasSqlDsoSeq.recordset.fields("ADDR_ENM").value.substr(0,30);
+            txtAPPL_ADDR2.value         = wasSqlDsoSeq.recordset.fields("ADDR_ENM").value.substr(30,30);
+            txtAPPL_ADDR3.value         = trim(wasSqlDsoSeq.recordset.fields("ADDR_ENM").value.substr(60,30));
+            */
+            appl_addr                   = wasSqlDsoSeq.recordset.fields("ADDR_HNM_1").value + " " + wasSqlDsoSeq.recordset.fields("ADDR_HNM_2").value + " " + wasSqlDsoSeq.recordset.fields("ADDR_HNM_3").value;
+            txtAPPL_ADDR1.value         = "2/" + appl_addr.substr(0,33);
+            if (appl_addr.substr(33,33) != "")
+            {
+                txtAPPL_ADDR2.value         = "2/" + appl_addr.substr(33,33);
+            }
+            if (appl_addr.substr(66,33) != "")
+            {
+                txtAPPL_ADDR3.value         = "2/" + appl_addr.substr(66,33);
+            }
+            /*
+            txtAPPL_ADDR1.value         = wasSqlDsoSeq.recordset.fields("ADDR_HNM_1").value.substr(0,35);
+            txtAPPL_ADDR2.value         = wasSqlDsoSeq.recordset.fields("ADDR_HNM_1").value.substr(35,15) + wasSqlDsoSeq.recordset.fields("ADDR_HNM_2").value.substr(0,20);
+            txtAPPL_ADDR3.value         = wasSqlDsoSeq.recordset.fields("ADDR_HNM_2").value.substr(20,30) + wasSqlDsoSeq.recordset.fields("ADDR_HNM_3").value.substr(0,5);
+            if (txtAPPL_ADDR3.value == "")
+            {
+                txtAPPL_ADDR3.value = "2/INDONESIA";
+            }
+            else
+            {
+                if (txtAPPL_ADDR3.value.length > 23)
+                {
+                    txtAPPL_ADDR3.value = txtAPPL_ADDR3.value.substr(0,23) + "2/,INDONESIA";
+                }
+                else
+                {
+                    txtAPPL_ADDR3.value = txtAPPL_ADDR3.value + "2/,INDONESIA";
+                }
+            }
+            */
+            txtAPPL_ADDR3.value = "3/ID";
+            if (wasSqlDsoSeq.recordset.fields("code_nm").value.substr(0,30) != "")
+            {
+                txtAPPL_ADDR3.value += "/" + wasSqlDsoSeq.recordset.fields("code_nm").value.substr(0,30);
+            }
+            txtCIF_NM.value             = wasSqlDsoSeq.recordset.fields("CUST_HNM").value;
+            /* 20120831_Mifta */
+            txtAPPL_NM1.setAttribute('readOnly',true);
+            /*20140221_Agus_1 - LLD Report*/
+            /*if ID_TP type = 1: KTP, 2: SIM, 4: KITAS/KITAP, then the the applicant is a resident*/
+            if( wasSqlDsoSeq.recordset.fields("ID_TP").value == '1' ||
+                wasSqlDsoSeq.recordset.fields("ID_TP").value == '2' ||
+                wasSqlDsoSeq.recordset.fields("ID_TP").value == '4'   )
+            {
+               cbbAPPL_STS.value          = "ID";
+            } 
+            else cbbAPPL_STS.value        = wasSqlDsoSeq.recordset.fields("CTRY_CD").value;
+            /*if CIX_CD type = I1,I2: Individual, 
+                               B2,G1,G2: Government, 
+                               B1,C14,C17,C18,C19,C21,C22,C3,C5,C6,C7,C8,: Other
+                               B3,: Other bank                               
+                               C20,: Non-bank financial institution
+                               C1,C10,C11,C12,C13,C16,C2,C4,C9: Enterprises
+             if CIX = '20093' (HANA): Reporting Bank
+             if 651000: Other Bank
+             if 659001,659009,660000,671000,672100,672000: Non-bank financial institution
+             if 751000: Government
+            */
+            if( wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'I1' ||
+                wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'I2')
+            {
+               cbbAPPL_CAT.value       = "A0";
+            }
+            else if( wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'B2' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'G1' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'G2'   )
+            {
+                cbbAPPL_CAT.value       = "B0";
+            }
+            else if( wasSqlDsoSeq.recordset.fields("CIX_NO").value == '0000020093' )
+            {
+                cbbAPPL_CAT.value       = "C1";
+            }
+            else if( wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'B3' )
+            {
+                cbbAPPL_CAT.value       = "C9";
+            }
+            else if( wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C20' )
+            {
+                cbbAPPL_CAT.value       = "D0";
+            }
+            else if( wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C1' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C10' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C11' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C12' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C13' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C16' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C2' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C4' ||
+                     wasSqlDsoSeq.recordset.fields("CIX_CD").value == 'C9'   )
+            {
+                cbbAPPL_CAT.value       = "E0";
+            }
+            else
+            {
+                cbbAPPL_CAT.value       = "Z9";
+            }
+            /*if( wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '751000' )*/
+            if( wasSqlDsoSeq.recordset.fields("UPJO_CD_ANTASENA").value == '841000')
+            {
+                cbbAPPL_CAT.value       = "B0";
+            }
+            /*else if( wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '651000' )*/
+            else if( wasSqlDsoSeq.recordset.fields("UPJO_CD_ANTASENA").value == '641000')
+            {
+                cbbAPPL_CAT.value       = "C9";
+            }
+            /*else if( wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '659001' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '659009' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '660000' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '671000' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '672100' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD").value == '672000'   )*/
+            else if( wasSqlDsoSeq.recordset.fields("UPJO_CD_ANTASENA").value == '649100' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD_ANTASENA").value == '649900' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD_ANTASENA").value == '650000' ||
+                     wasSqlDsoSeq.recordset.fields("UPJO_CD_ANTASENA").value == '662000'  )
+            {
+                cbbAPPL_CAT.value       = "D0";
+            }
+            /****************/
+        }
+    }
+  function fAcct_no_Chg() {
+    txtAPPL_NM2.value = cbbACCT_NO.value;
+    txtACCT_CCY.value = cbbACCT_NO.labeltext.substr(1,3);
+  }
+  function fInq_cifinfo() {
+    //if (txtAPPL_CIX_NO.value != "        " || txtAPPL_CIX_NO.value != null) return;
+    /* 20131018_Park_2
+    if (cbbACCT_NO.value == "" || cbbACCT_NO.value == null) {
+        txtACCT_CCY.value = '';
+        return;
+    }
+    if (txtAPPL_NM2.value == cbbACCT_NO.value) return; */
+    if (trim(txtACCT_NO.value) == "" || txtACCT_NO.value == null
+    ||  txtACCT_NO.value == "               ") return;
+    if (txtAPPL_NM2.value == txtACCT_NO.value) return;
+    SqlString= "";
+    // 20120614_Park_1
+    if (trim(txtACCT_NO.value).length < 15)                                     // 20121030_Park_1
+    {
+        SqlString += "SELECT cix_no FROM acom_com_chref a, acom_cont_base b";
+        SqlString += " WHERE a.chref_use_ref = '" + trim(txtACCT_NO.value) + "' AND subj_cd LIKE '1%'";
+        SqlString += "   AND a.chref_hnb_ref = b.ref_no";
+        // 20131018_Park_2
+        SqlString += " UNION ";
+        SqlString += "SELECT cix_no FROM acom_psh_vtno_base ";
+        SqlString += " WHERE psd_no = '" + trim(txtACCT_NO.value) + "' AND no_type <= '3' AND sts = '0'";
+    }
+    else                                                                        // current acct no
+    {
+        SqlString= SqlString + "SELECT cix_no FROM acom_cont_base";
+        SqlString= SqlString + " WHERE ref_no = '" + trim(txtACCT_NO.value) + "' AND subj_cd LIKE '1%'";
+    }
+    wasSqlDso1.sql = trim(SqlString);
+    if (wasSqlDso1.recordset.recordCount > 0)
+    {
+        txtAPPL_CIX_NO.value = wasSqlDso1.recordset.fields("cix_no").value.substr(2,8);
+        txtAPPL_CIX_NO.focus();
+        f_acno();
+        fSearchDPBase();
+        cbbFIRT11_SD_CTRY.focus();
+    }
+    // 20120614_Park_1
+    else
+    {
+        ShowInfoDialog("No Data Found!");
+        txtACCT_NO.focus();
+    }
+  }
+  function f_onClick()
+  {
+      var eventObj = event.srcElement;
+      if(eventObj.name == "Io_Gubun")
+      {
+          if(checkedRadio(Io_Gubun).value == "I")
+          {
+           g_MtGb = "I";
+               }
+          else if(checkedRadio(Io_Gubun).value == "A")
+          {
+           g_MtGb = "A";
+          }
+          else if(checkedRadio(Io_Gubun).value == "N")
+          {
+           g_MtGb = "N";
+          }
+      }
+  }
+  function f_onClick3()
+  {
+      var eventObj = event.srcElement;
+      if(eventObj.name == "Io_Gubun")
+      {
+          if(checkedRadio(Io_Gubun).value == "REC")
+          {
+             txtINFO72_NAME1.value = "/REC/";
+          }
+          else if(checkedRadio(Io_Gubun).value == "ACC")
+          {
+             txtINFO72_NAME1.value = "/ACC/";
+          }
+      }
+  }
+  function f_BuzDays()
+  {
+     return;
+     var val_dt
+     //dtpFIRT12_VALUE_DATE.value =  LIB().Util.DateToLocal(GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL", 0), "YYYY/MM/DD", "S");
+     if( cbbFIRT11_CCY.value == "JPY" ) {
+     //   val_dt = AddBuzDays(dtpFIRT12_VALUE_DATE.value, 1);
+     //  dtpFIRT12_VALUE_DATE.value = LIB().Util.DateToLocal(AddInterBuzDays(dtpFIRT12_VALUE_DATE.value, 1, "JP"), "YYYY/MM/DD", "S");
+     }
+     else if( cbbFIRT11_CCY.value == "USD" ) {
+       if (cbbFIRT11_OTHER_FEE_GB.value == "2") {
+         cedFIRT11_OTHER_FEE_AMT.value = "0.00";
+       }
+       else {
+         //nayubu ??? cedFIRT11_OTHER_FEE_AMT.value = "15.00";
+       }
+     }
+     else {
+         cedFIRT11_OTHER_FEE_AMT.value = "0.00";
+     }
+     fReCalcFee();
+     f_RemitType();
+  }
+   /* N일후 영업일 :  AddBuzDays (argDate, 날수);  */
+   function AddBuzDays(fr_date, argDays)
+   {
+      var tSQL;
+      var tFR;
+      var tTO;
+      tFR = Util.LocalToDate(fr_date);
+      HNDC.setSectionName( "FXFIG_COM" );
+      HNDC.recordIndex = 0;
+      var AJUM = HNDC.getItemValue("FXFIG_AJUM");
+      tSQL = "select add_buz_days('" + tFR + "'," + argDays + ",'" +
+             AJUM + "') aaa from dual";
+      wasSQLDSO.sql = tSQL;
+      return wasSQLDSO.recordset.fields("aaa").value;
+   }
+  function checkedRadio(obj)
+  {
+      for(var i=0;i<obj.length;i++)
+      {
+          if(obj[i].checked) return obj[i];
+      }
+      return null;
+  }
+   function f_onblur()
+   {
+      var oEventElement = event.srcElement;
+      if(oEventElement.id == "mskRCV_BANK_BIC" ||
+//         oEventElement.id == "txtSET_BKCD" ||
+         oEventElement.id == "txtRCVBANK_BIC" ||
+         oEventElement.id == "txtRCV_CORR" ||
+         oEventElement.id == "txtINTER_BIC" )
+      {
+         var bResult = f_ValidateExec(oEventElement);
+         if(bResult)          //DB에서 Data를 가져와 Display한다.
+         {
+            f_getDataFromDB(oEventElement);
+            // 20140120 ljh add ------ Start --
+            // 20140120 ljh add ------ End ----
+         }
+      }
+      else if (oEventElement.id == "txtSET_BKCD") {
+         fDeponameSearch(oEventElement);
+      }
+   }
+   function f_ValidateExec(EventElm)
+   {
+      var bRet = true;
+      if (EventElm.id == "mskRCV_BANK_BIC"){
+         if(mskRCV_BANK_BIC.DataLength == 0)
+            return bRet;
+         if(mskRCV_BANK_BIC.DataLength == 8)
+         {
+            mskRCV_BANK_BIC.value = mskRCV_BANK_BIC.value.substr(0,8) + 'XXX';
+         }
+         if(mskRCV_BANK_BIC.DataLength >=8) {
+            var SqlString = "";
+            SqlString = "select cond_sts from acom_coh_base where Co_Bkcd=RPAD('" + mskRCV_BANK_BIC.value + "',11,'X') ";
+         }
+         else {
+            bRet = false;
+         }
+         return bRet;
+      }
+      else if (EventElm.id == "txtSET_BKCD") {
+         if(txtSET_BKCD.DataLength == 0)
+            return bRet;
+         if(txtSET_BKCD.DataLength == 8)
+         {
+            txtSET_BKCD.value = txtSET_BKCD.value.substr(0,8)  + 'XXX';
+         }
+         if(txtSET_BKCD.DataLength == 11){
+            var SqlString = "";
+            SqlString = "select cond_sts from acom_coh_base where Co_Bkcd='" + txtSET_BKCD.value + "'";
+         }
+         else {
+            bRet = false;
+         }
+         return bRet;
+      }
+      else if (EventElm.id == "txtRCVBANK_BIC"){
+         if(txtRCVBANK_BIC.DataLength == 0)
+            return bRet;
+         if(txtRCVBANK_BIC.DataLength == 8)
+         {
+            txtRCVBANK_BIC.value = txtRCVBANK_BIC.value.substr(0,8)  + 'XXX';
+         }
+         if(txtRCVBANK_BIC.DataLength == 11){
+            var SqlString = "";
+            SqlString = "select cond_sts from acom_coh_base where Co_Bkcd='" + txtRCVBANK_BIC.value + "'";
+         }
+         else {
+            bRet = false;
+         }
+         return bRet;
+      }
+      else if (EventElm.id == "txtRCV_CORR"){
+         if(txtRCV_CORR.DataLength == 0)
+            return bRet;
+         if(txtRCV_CORR.DataLength == 8)
+         {
+            txtRCV_CORR.value = txtRCV_CORR.value.substr(0,8)  + 'XXX';
+         }
+         if(txtRCV_CORR.DataLength == 11){
+            var SqlString = "";
+            SqlString = "select cond_sts from acom_coh_base where Co_Bkcd='" + txtRCV_CORR.value + "'";
+         }
+         else {
+            bRet = false;
+         }
+         return bRet;
+      }
+      else if (EventElm.id == "txtINTER_BIC"){
+         if(txtINTER_BIC.DataLength == 0)
+            return bRet;
+         if(txtINTER_BIC.DataLength == 8)
+         {
+            txtINTER_BIC.value = txtINTER_BIC.value.substr(0,8)  + 'XXX';
+         }
+         if(txtINTER_BIC.DataLength == 11){
+            var SqlString = "";
+            SqlString = "select cond_sts from acom_coh_base where Co_Bkcd='" + txtINTER_BIC.value + "'";
+         }
+         else {
+            bRet = false;
+         }
+         return bRet;
+      }
+      return bRet;
+   }
+   function f_getDataFromDB(EventElm)
+   {
+      var SQLStmt;
+      SQLStmt = "select co_bkcd,co_gb,send_gb,ctry_cd,ctry_nm,city_nm,co_bknm1,co_bknm2,co_sname,aba_no,co_addr1,co_addr2,co_addr3,bctry_nm,bcity_nm,fax_no,tel_no,cont_prsn1,cont_prsn2,cont_prsn3,cont_prsn4, ";
+      SQLStmt = SQLStmt + "cont_prsn5,email_addr1,email_addr2,email_addr3,email_addr4,email_addr5,tel_no1,tel_no2,tel_no3,tel_no4,tel_no5,head_depart1,head_depart2,head_depart3,head_depart4,head_depart5,depart1, ";
+      SQLStmt = SQLStmt + "depart2,depart3,depart4,depart5,bran_nm1,bran_nm2,bran_nm3,bran_nm4,bran_nm5, job_nm1,job_nm2,job_nm3,job_nm4,job_nm5,telex_no1,telex_no2,telex_no3,telex_no4,ans_back,bex_cd,bex_method, ";
+      SQLStmt = SQLStmt + "tkey_cd,sign_cd,tc_yn,ar_cd,to_char(bex_il, 'mm/dd/yyyy')bex_il ,to_char(tkey_il, 'mm/dd/yyyy')tkey_il,to_char(sign_il, 'mm/dd/yyyy')sign_il, to_char(tc_il, 'mm/dd/yyyy')tc_il, ";
+      SQLStmt = SQLStmt + "to_char(ar_il, 'mm/dd/yyyy')ar_il,depo_chk,depo_cd,acct_no,bnjm_gb,to_char(ct_il, 'mm/dd/yyyy')ct_il,ct_gb,to_char(make_il, 'mm/dd/yyyy')make_il,to_char(chng_il, 'mm/dd/yyyy')chng_il from acom_coh_base ";
+      if (EventElm.id == "mskRCV_BANK_BIC")
+         SQLStmt += "where co_bkcd='" + mskRCV_BANK_BIC.value + "' ";
+      else if (EventElm.id == "txtSET_BKCD")
+         SQLStmt += "where co_bkcd='" + txtSET_BKCD.value + "' ";
+      else if (EventElm.id == "txtRCVBANK_BIC")
+         SQLStmt += "where co_bkcd='" + txtRCVBANK_BIC.value + "' ";
+      else if (EventElm.id == "txtRCV_CORR")
+         SQLStmt += "where co_bkcd='" + txtRCV_CORR.value + "' ";
+      else if (EventElm.id == "txtINTER_BIC")
+         SQLStmt += "where co_bkcd='" + txtINTER_BIC.value + "' ";
+      /*===== 자료 유무 체크는 다음과 같이 한다.==== */
+      wasSqlDso.sql = SQLStmt;
+      if(wasSqlDso.recordset.recordCount != 0)
+      {
+         if(EventElm.id == "mskRCV_BANK_BIC")
+            txtRCV_BANK_NAME.value   = wasSqlDso.recordset.Fields ("co_bknm1");
+         else if(EventElm.id == "txtSET_BKCD")
+            txtSET_BKNM.value        = wasSqlDso.recordset.Fields ("co_bknm1");
+         else if(EventElm.id == "txtRCVBANK_BIC")
+            txtRCVBANK_BIC_NAME.value= wasSqlDso.recordset.Fields ("co_bknm1");
+         else if(EventElm.id == "txtRCV_CORR")
+            txtRCV_CORR_NAME.value   = wasSqlDso.recordset.Fields ("co_bknm1");
+         else if(EventElm.id == "txtINTER_BIC")
+            txtINTER_BIC_NAME.value  = wasSqlDso.recordset.Fields ("co_bknm1");
+      }
+      else
+      {
+      }
+   }
+   function fDeponameSearch (EventElm)
+   {
+      var SqlStmt;
+      SqlStmt = "select cd, bkcd, ccy, bknm from afex_rch_base ";
+      if(EventElm.id == "txtSET_BKCD") {
+         SqlStmt = SqlStmt + "where cd='" + txtSET_BKCD.value + "'";
+      }
+      SqlStmt = SqlStmt + " and ccy='"+cbbFIRT11_CCY.value+"'";
+      wasSqlDso.sql = SqlStmt;
+      if (wasSqlDso.recordset.recordCount > 0) {
+         if(EventElm.id == "txtSET_BKCD") {
+            txtSET_BKNM.value = wasSqlDso.recordset.fields("bknm");
+         }
+      }
+   }
+   function fDataClear(){
+      gControlSelClear("cbbFIRT11_SD_CTRY,cbbSTS,txtAPPL_NM1,txtAPPL_NM2");
+      gControlSelClear("txtAPPL_ADDR1,txtAPPL_ADDR2,txtAPPL_ADDR3,txtRCV_ACCT_NO");
+      gControlSelClear("cbbTAG59F_2,cbbTAG59F_3,cbbTAG59F_4,txtAPPL_CIX_NO");
+      gControlSelClear("txtRCV_NM1,txtRCV_NM2,RCV_ADDR1,RCV_ADDR2,txtCIF_NM,cbbDOC_TP");
+      gControlSelClear("txtRCVBANK_BIC, txtRCVBANK_BIC_NAME");
+      gControlSelClear("txtINFO_NAME1,txtINFO_NAME2,txtINFO_NAME3,txtINFO_NAME4");
+      init_exec = 0;
+      /* 20120831_Mifta */
+      txtAPPL_NM1.setAttribute('readOnly',false);
+      /* 20140221_Agus_1 - LLD Report*/
+      gControlSelClear("cbbSTAT_CD, cbbAPPL_STS, cbbBENE_STS, cbbAPPL_CAT, cbbBENE_CAT, cbbBENE_AFIL"); 
+      document.getElementById("chkAPP_IDENTITY").checked = false;
+      //20140619 ljh add
+      imgBlackLst.src = "";
+      imgDormant.src = "";
+      cbbFIRT11_CH_GB.value = "2";
+      cbbDOC_TP.value = '99';
+      gControlPerDisabled("cbbDOC_TP", true);
+   }
+   function fPrint() {
+      SqlString= "";
+      SqlString= SqlString + " SELECT * FROM acom_cix_base "
+      SqlString= SqlString + "  WHERE cix_no = '" + GET_COMM_DATA("FXFIG_COM", "FXFIG_JUM_CD") + txtAPPL_CIX_NO.value + "' "
+      wasSqlDsoSeq.sql = SqlString;
+      //No Date
+      if(wasSqlDsoSeq.recordset.recordCount == 0 ){
+      }
+      else{
+         prmDsoOut.recordset.fields("FORT11_CUST_NM").value = wasSqlDsoSeq.recordset.fields("CUST_HNM").value;
+         prmDsoOut.recordset.fields("FORT11_ADDR1").value   = wasSqlDsoSeq.recordset.fields("MAIL_ADDR_1").value.substr(0,45);
+         prmDsoOut.recordset.fields("FORT11_ADDR2").value   = wasSqlDsoSeq.recordset.fields("MAIL_ADDR_1").value.substr(45,5)
+                                                            + wasSqlDsoSeq.recordset.fields("MAIL_ADDR_2").value.substr(0,40);
+         prmDsoOut.recordset.fields("FORT11_ADDR3").value   = wasSqlDsoSeq.recordset.fields("MAIL_ADDR_2").value.substr(40,10)
+                                                            + wasSqlDsoSeq.recordset.fields("MAIL_ADDR_3").value.substr(0,35);
+         prmDsoOut.recordset.fields("FORT11_ADDR4").value   = wasSqlDsoSeq.recordset.fields("MAIL_ADDR_3").value.substr(35,15)
+                                                            + wasSqlDsoSeq.recordset.fields("MAIL_ADDR_4").value.substr(0,30);
+      }
+          /*************************************************************/
+          /*                         Report 출력 (Guarantee)           */
+          /*************************************************************/
+          RepViewer.ViewerURL = '/rpt/RPTView.html';
+          RepViewer.DataType  = 1;
+          RepViewer.RecordSet = prmDsoOut.recordset;
+          //alert(prmDsoOut.recordset.recordCount);
+          RepViewer.ReportUrl = '/rpt/rt11_ado.rpx';
+          //alert("RepViewer.Show");
+          //RepViewer.Show();
+          LIB().InitReportData(RepViewer);
+          //RepViewer.print();  PMH
+          //RepViewer.Show();
+    }
+    function f_RemitType() {
+       if(cbbRT_CD.value == "4") {
+          cbbFIRT11_FEE_RT_GB.value    = "1";
+          cbbFIRT11_OTHER_FEE_GB.value = "1";
+          txtDD_NO.value      = "";
+          cbbDD_TYPE.value    = "";
+          txtDD_NO.disabled   = true;
+          cbbDD_TYPE.disabled = true;
+       }
+       /* T/T 만 사용하므로 막음
+       if(cbbRT_CD.value == "4" || cbbRT_CD.value == "9" ){
+          // 4(T/T)  9(OTHER)
+          cbbFIRT11_FEE_RT_GB.value    = "1";
+          cbbFIRT11_OTHER_FEE_GB.value = "1";
+          txtDD_NO.value      = "";
+          cbbDD_TYPE.value    = "";
+          txtDD_NO.disabled   = true;
+          cbbDD_TYPE.disabled = true;
+       }
+       else
+       if( cbbRT_CD.value == "6" ) {
+          cbbFIRT11_FEE_RT_GB.value    = "1";
+          cbbFIRT11_OTHER_FEE_GB.value = "2";
+          cedFIRT11_OTHER_FEE_AMT.value = "0.00"
+          txtDD_NO.value      = "";
+          cbbDD_TYPE.value    = "";
+          txtDD_NO.disabled   = false;
+          cbbDD_TYPE.disabled = false;
+       }
+       else
+       if( cbbRT_CD.value == "4" ) {
+          // 1(D/D),3(M/T)
+          cbbFIRT11_FEE_RT_GB.value     = "2";
+          cedFIRT11_FEE_AMT.value       = "0.00";
+          cbbFIRT11_OTHER_FEE_GB.value  = "2";
+          cedFIRT11_OTHER_FEE_AMT.value = "0.00";
+          txtDD_NO.disabled   = false;
+          cbbDD_TYPE.disabled = false;
+       }
+       else {
+       }
+       if(cbbRT_CD.value != "4"){
+          rdoIo_Gubun[0].checked = false;
+          rdoIo_Gubun[1].checked = false;
+          rdoIo_Gubun[2].checked = true;
+       }
+       else {
+          rdoIo_Gubun[0].checked = true;
+          rdoIo_Gubun[1].checked = false;
+          rdoIo_Gubun[2].checked = false;
+       }
+       f_calcfee();
+       */
+    }
+    function f_ChangeFxCcy() {
+       if (cbbFIRT11_FX_CCY.value == "") {
+           cedFIRT11_FX_FAMT.value = 0;
+           cedFIRT11_FX_HRT.value = 0;
+       }
+       // 20120612_bayu
+       if (cbbFIRT11_FX_CCY.value == "KRW"){
+           // If customer wants to use KRW in FX CCY, same day value is always 'Y'.
+           // 20131206 ljh - 막음
+           //cbbFIRT11_SAME_DAY_VALUE_GB.value = "Y";
+           //cbbFIRT11_SAME_DAY_VALUE_GB.disabled ="true";
+           cedFIRT11_FX_FAMT.CurrencyPoint="0"; // 20120703_MIFTA
+       }
+       else
+       {
+            cbbFIRT11_SAME_DAY_VALUE_GB.disabled ="false";
+            if (cedFIRT11_FX_HRT.value == 0 ) // 20120703_MIFTA
+                cedFIRT11_FX_FAMT.CurrencyPoint="2";
+       }
+       f_get_ex_hrt();
+    }
+    function f_get_ex_hrt(){
+        var rValue = new Array(2);
+        if (cbbFIRT11_CCY.value.length != 3 ||
+            cbbFIRT11_FX_CCY.value.length != 3) return;
+        if (cbbFIRT11_CCY.value.length    != 0 &&
+            cbbFIRT11_FX_CCY.value.length != 0) {
+           SQLStmt  = "SELECT BASIC_HRT FROM ACOM_COM_EXRT WHERE SEQ_NO = 0 ";
+           //SQLStmt += " AND MAKE_IL = '" + LIB().Util.DateToLocal(GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL", 0)) + "' ";
+           SQLStmt += " AND MAKE_IL = '" + GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL", 0) + "' ";
+           SQLStmt += " AND BASE_CCY = 'USD' ";
+           SQLStmt += " AND CCY = '" + cbbFIRT11_FX_CCY.value + "' ";
+           wasSQLDSO.sql = SQLStmt;
+           var rsCount   = wasSQLDSO.recordset.recordCount;
+           if(rsCount > 0){
+              wasSQLDSO.recordset.moveFirst();
+              rValue[0] = wasSQLDSO.recordset.fields(0).value;
+              //rValue[1] = wasSQLDSO.recordset.fields(1).value;
+              //alert('rValue[0] : ' + rValue[0]);
+              //alert('rValue[1] : ' + rValue[1]);
+           }else{
+              ShowInfoDialog("Today, You Cannot transact fx remittance.");
+              cbbFIRT11_FX_CCY.value = '';
+              cedFIRT11_FX_HRT.value = 0.000000;
+              return;
+           }
+           cedFIRT11_FX_HRT.value = rValue[0];
+        }
+        f_calc_amt();
+     }
+    function f_calc_amt(){
+       var fx_info = new Array(2);
+       var info    = new Array(2);
+       if (cedFIRT11_FX_HRT.value == 0 ) return;
+       /*&& cedFIRT11_FAMT.value != '0.00'*/
+       if (cbbFIRT11_CCY.value  == "USD" ){
+          fx_info = find_ccyunit(cbbFIRT11_FX_CCY.value);
+          info    = find_ccyunit(cbbFIRT11_CCY.value);
+          //cedFIRT11_FX_FAMT.value  = (parseFloat(cedFIRT11_FAMT.value) * parseFloat(cedFIRT11_FX_HRT.value) /
+          //                                parseInt(info[0])).toString();
+          //cedFIRT11_FX_FAMT.value  = (format_Amt(cedFIRT11_FX_FAMT.value, info[1])).toString();
+          cedFIRT11_FAMT.value = (parseFloat(cedFIRT11_FX_FAMT.value) / parseFloat(cedFIRT11_FX_HRT.value) * parseInt(info[0])).toString();
+          cedFIRT11_FAMT.value = (format_Amt(cedFIRT11_FAMT.value, info[1])).toString();
+       }
+       else {
+          return;
+       }
+     }
+     function find_ccyunit(local_value){
+        var rValue                               = new Array(2);
+        SQLStmt = "SELECT UNIT, DIGIT FROM ACOM_COM_CCY WHERE CD = '" + local_value + "'";
+        wasSQLDSO.sql = SQLStmt;
+        var rsCount   = wasSQLDSO.recordset.recordCount;
+        if(rsCount > 0){
+           wasSQLDSO.recordset.moveFirst();
+           rValue[0] = wasSQLDSO.recordset.fields(0).value;
+           rValue[1] = wasSQLDSO.recordset.fields(1).value;
+           return rValue;
+        }else{
+           ShowInfoDialog(local_value + "currency does not exist.");
+        }
+     }
+     function format_Amt(local_value, digit){
+        var temp                                 = 0;
+        if(digit == 2){
+           temp                                  = Math.round(local_value*100)/100;
+           return temp;
+        }else if(digit == 0){
+           temp                                  = parseInt(local_value);
+           return temp;
+        }
+     }
+    //20140808 ljh add
+    function fChkFxAmt() {
+        var chkAmt = 0.00;
+        if (cedFIRT11_FX_HRT.value != 0  ||
+            cbbFIRT11_FX_CCY.value != "" ||
+            parseFloat(cedFIRT11_FX_FAMT.value) > 0 )
+        {
+            var chk_fx_info = new Array(2);
+            var chk_info    = new Array(2);
+            if (cbbFIRT11_CCY.value  == "USD" ){
+               chk_fx_info = find_ccyunit(cbbFIRT11_FX_CCY.value);
+               chk_info    = find_ccyunit(cbbFIRT11_CCY.value);
+               chkAmt = (parseFloat(cedFIRT11_FX_FAMT.value) / parseFloat(cedFIRT11_FX_HRT.value) * parseInt(chk_info[0])).toString();
+               chkAmt = (format_Amt(chkAmt, chk_info[1])).toString();
+               if (parseFloat(chkAmt) != parseFloat(cedFIRT11_FAMT.value)) {
+                  ShowInfoDialog("Check Amount (" + chkAmt + ") is different with " + cedFIRT11_FAMT.value);
+                  return false;
+               }
+            }
+        }
+    }
+    /*20140221_Agus_1 - LLD Report*/
+    function fAppIdentity(element)
+    {
+        if( element.checked )
+        {
+            cbbBENE_STS.value = cbbAPPL_STS.value;
+            cbbBENE_CAT.value = cbbAPPL_CAT.value;
+            cbbBENE_STS.disabled = true;
+            cbbBENE_CAT.disabled = true;
+        }
+        else
+        {
+            cbbBENE_STS.value = "";
+            cbbBENE_CAT.value = "";
+            cbbBENE_STS.disabled = false;
+            cbbBENE_CAT.disabled = false;
+        }
+    }
+     // 20150112_Stancent TAG59F
+     function fTAG59F(element)
+     {
+        if (element.value == "3/")
+        {
+            if (cbbFIRT11_SD_CTRY.value == "" || cbbFIRT11_SD_CTRY.value == null)
+            {
+                element.value = "";
+                ShowInfoDialog("Please Input Beneficiary Country First !!!");
+                return;
+            }
+            if (element.id == "cbbTAG59F_2")
+            {
+                txtRCV_NM2.value = cbbFIRT11_SD_CTRY.value + "/";
+            }
+            else
+            if (element.id == "cbbTAG59F_3")
+            {
+                RCV_ADDR1.value = cbbFIRT11_SD_CTRY.value + "/";
+            }
+            else
+            if (element.id == "cbbTAG59F_4")
+            {
+                RCV_ADDR2.value = cbbFIRT11_SD_CTRY.value + "/";
+            }
+        }
+        else if (element.value == "1/" || element.value == "2/")
+        {
+            if (element.id == "cbbTAG59F_2")
+            {
+                txtRCV_NM2.value = "";
+            }
+            else
+            if (element.id == "cbbTAG59F_3")
+            {
+                RCV_ADDR1.value = "";
+            }
+            else
+            if (element.id == "cbbTAG59F_4")
+            {
+                RCV_ADDR2.value = "";
+            }
+        }
+        else
+        {
+            element.value = "";
+            ShowInfoDialog("Please put the correct code !!!");
+        }
+     }
+     function fCheckField(element)
+     {
+        if (element.value == "") return;
+        if (isNaN(element.value))
+        {
+            if (element.id == "txtRCV_ACCT_NO")
+            {
+                if (element.value.search(/[0-9]/) == -1 )
+                {
+                    element.value = "";
+                    ShowInfoDialog("Cannot Insert All Characters");
+                }
+            }
+        }   
+        else
+        {
+            if (element.id == "txtRCV_NM1")
+            {
+                element.value = "";
+                ShowInfoDialog("Cannot Insert All Numbers");
+            }
+        }
+        return;
+     }
+     function fCheckDocument()
+     {
+        var ccy = "";
+        var amount = "";
+        if(cbbSTAT_CD.value != '2000'
+           && cbbSTAT_CD.value != '2902'
+           && cbbSTAT_CD.value != '2903'
+           && cbbSTAT_CD.value != '2904'
+           && cbbSTAT_CD.value != '2906'
+           && cbbSTAT_CD.value != '2907')
+        {
+            if(cbbAPPL_CAT.value == 'C1' || 
+              (cbbBENE_CAT.value == 'C1' && chkAPP_IDENTITY.checked == true))
+            {
+                cbbDOC_TP.value = '99';
+                gControlPerDisabled("cbbDOC_TP", true);
+                return;
+            }
+            else
+            {
+                cbbDOC_TP.value = '';
+                gControlPerDisabled("cbbDOC_TP", false);
+            }
+            if((cbbSTAT_CD.value == '2241'
+                || cbbSTAT_CD.value == '2242'
+                || cbbSTAT_CD.value == '2243')
+               && chkAPP_IDENTITY.checked == true)
+            {
+                cbbDOC_TP.value = '99';
+                gControlPerDisabled("cbbDOC_TP", true);
+                return;
+            }
+            else
+            {
+                cbbDOC_TP.value = '';
+                gControlPerDisabled("cbbDOC_TP", false);
+            }
+        }
+        else
+        {
+            cbbDOC_TP.value = '99';
+            gControlPerDisabled("cbbDOC_TP", true);
+            return;
+        }
+        return;
+     }
+    </script>
+    <script type="text/javascript"></script>
+</head>
+<body onload="fInitProc()">
+    <!-- Y[wai] : Generated : dataServices -->
+    <dataservices>
+        <dataservice id="ivkSqlQuery" map="/tis/RTO1400.xml" service="RTO1400" dso="prmDsoIn=SCR_INPUT;prmDsoOut=SCR_OUTPUT" onsuccess="Set_OutParam();"></dataservice>
+        <dataservice id="ivkSqlQuery18" map="/tis/RTO1800.xml" service="RTO1800" dso="prmDsoIn18=SCR_INPUT;null"></dataservice>
+    </dataservices>
+    <!-- Y[wai] : Generated : dataServices -->
+    <rmwvendor id="RepViewer">
+    </rmwvendor>
+    <!-- Action Manager -->
+    <actman id="AMan" onactive="ActionOnActive()">
+        <action name="ActEntry" execute="actExecute(1)">
+            <ctrl cid="txtREF_NO" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_FX_CCY" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_FX_FAMT" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_CCY" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_FAMT" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_FEE_RT_GB" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_OTHER_FEE_GB" enabled="true"></ctrl>
+            <!--                                                                       
+            <Ctrl cid="cbbFIRT11_CORR_GB"       enabled="true"   > </Ctrl>
+             -->
+            <ctrl cid="cbbFIRT11_AMOUNT_GB" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_FEE_AMT" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_OTHER_FEE_AMT" enabled="true"></ctrl>
+            <ctrl cid="cbbCALBE_CCY" enabled="true"></ctrl>
+            <ctrl cid="cbbFULL_AMT_CCY" enabled="true"></ctrl>
+            <ctrl cid="cedSAME_DAY_AMT" enabled="true"></ctrl>
+            <ctrl cid="cedFULL_AMT" enabled="true"></ctrl>
+            <!--                                                  
+            <Ctrl cid="cbbFIRT11_CORR_CCY"      enabled="true"   > </Ctrl>
+            <Ctrl cid="cedFIRT11_CORR_AMT"      enabled="true"   > </Ctrl>
+             -->
+            <ctrl cid="txtAPPL_CIX_NO" enabled="true"></ctrl>
+            <ctrl cid="cbbACCT_NO" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ID_NO" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_NM1" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_NM2" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ADDR1" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ADDR2" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ADDR3" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_APPL_NATION" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_POST_NO1" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_POST_NO2" enabled="true"></ctrl>
+            <ctrl cid="cbbOUTGOING" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_NM1" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_NM2" enabled="true"></ctrl>
+            <ctrl cid="RCV_ADDR1" enabled="true"></ctrl>
+            <ctrl cid="RCV_ADDR2" enabled="true"></ctrl>
+            <!--                                                  
+            <Ctrl cid="RCV_ADDR3"               enabled="true"   > </Ctrl>
+             -->
+            <ctrl cid="txtRCV_ACCT_NO" enabled="true"></ctrl>
+            <ctrl cid="rdoRCV_KIND_1" enabled="true"></ctrl>
+            <ctrl cid="rdoRCV_KIND_2" enabled="true"></ctrl>
+            <ctrl cid="txtSET_BKCD" enabled="true"></ctrl>
+            <ctrl cid="txtSET_BKNM" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_CABLE_GB" enabled="true"></ctrl>
+            <ctrl cid="mskRCV_BANK_BIC" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_BANK_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_BIC" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_ACNO" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_BIC_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR2" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR3" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR1" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR2" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME1" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME3" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME4" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME1" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME3" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME4" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME5" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME6" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_GEOJU_GB" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_SD_CTRY" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_CH_GB" enabled="true"></ctrl>
+            <ctrl cid="txtOP_NO" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_BIC" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_BIC_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_NAME3" enabled="true"></ctrl>
+            <ctrl cid="txtEMAIL_NM" enabled="true"></ctrl>
+            <ctrl cid="cbbRT_CD" enabled="false"></ctrl>
+            <ctrl cid="txtDD_NO" enabled="false"></ctrl>
+            <ctrl cid="cbbDD_TYPE" enabled="false"></ctrl>
+            <ctrl cid="btnRT0018" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC1" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC2" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC3" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC4" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC5" enabled="true"></ctrl>
+            <!--  20140221_Agus_1  -->
+            <ctrl cid="cbbSTAT_CD" enabled="true"></ctrl>
+            <ctrl cid="cbbAPPL_STS" enabled="true"></ctrl>
+            <ctrl cid="cbbBENE_STS" enabled="true"></ctrl>
+            <ctrl cid="cbbAPPL_CAT" enabled="true"></ctrl>
+            <ctrl cid="cbbBENE_CAT" enabled="true"></ctrl>
+            <ctrl cid="cbbBENE_AFIL" enabled="true"></ctrl>
+            <ctrl cid="chkAPP_IDENTITY" enabled="true"></ctrl>
+        </action>
+        <!--  20140930_rizky_1 
+        <CORE1:action name="ActSimulation" execute="actExecute(3)">
+            <Ctrl cid="txtREF_NO"               enabled="false"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_FX_CCY"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedFIRT11_FX_FAMT"       enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cbbFIRT11_CCY"           enabled="true"   clear="true" value=g_BaseCcy> </Ctrl>
+            <Ctrl cid="cedFIRT11_FAMT"          enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cbbFIRT11_FEE_RT_GB"     enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_OTHER_FEE_GB"  enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_AMOUNT_GB"     enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedFIRT11_FEE_AMT"       enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cedFIRT11_OTHER_FEE_AMT" enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cbbFIRT11_CABLE_GB"      enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbCALBE_CCY"            enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFULL_AMT_CCY"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedSAME_DAY_AMT"         enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cedFULL_AMT"             enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="txtAPPL_CIX_NO"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbACCT_NO"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ID_NO"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_NM1"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_NM2"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ADDR1"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ADDR2"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ADDR3"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_APPL_NATION"   enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_POST_NO1"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_POST_NO2"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbOUTGOING"             enabled="true"   clear="true" value="1"> </Ctrl>
+            <Ctrl cid="txtRCV_NM1"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_NM2"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="RCV_ADDR1"               enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="RCV_ADDR2"               enabled="true"   clear="true" value=""> </Ctrl>
+             -->
+        <!-- Ctrl cid="RCV_ADDR3"               enabled="true"   clear="true" value=""> </Ctrl -->
+        <!--   <Ctrl cid="txtRCV_ACCT_NO"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="rdoRCV_KIND_1"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="rdoRCV_KIND_2"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtSET_BKCD"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtSET_BKNM"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="mskRCV_BANK_BIC"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_BANK_NAME"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_BIC"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_NAME2"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_ACNO"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_BIC_NAME"     enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_BK_ADDR2"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_BK_ADDR3"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR_NAME"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR_ADDR1"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR_ADDR2"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME1"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME2"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME3"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME4"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME1"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME2"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME3"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME4"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME5"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME6"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_GEOJU_GB"      enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_SD_CTRY"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_CH_GB"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_BIC"            enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_BIC_NAME"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_NAME2"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_NAME3"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtEMAIL_NM"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbRT_CD"                enabled="false"  clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtDD_NO"                enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbDD_TYPE"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="btnRT0018"               enabled="false"  ></Ctrl>
+            <Ctrl cid="btnHQBIC1"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC2"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC3"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC4"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC5"               enabled="true"   ></Ctrl>    
+        </CORE1:action>
+         -->
+        <action name="ActMstInqry" execute="actExecute(5)">
+        </action>
+        <action name="ActExecute" execute="actExecute(6)">
+        </action>
+        <action name="ActCanCelJob" execute="actExecute(7)">
+            <ctrl cid="txtREF_NO" enabled="false" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_FX_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedFIRT11_FX_FAMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbFIRT11_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedFIRT11_FAMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbFIRT11_FEE_RT_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_OTHER_FEE_GB" enabled="true" clear="true" value=""></ctrl>
+            <!-- Ctrl cid="cbbFIRT11_CORR_GB"       enabled="true"   clear="true" value=""> </Ctrl -->
+            <ctrl cid="cbbFIRT11_AMOUNT_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedFIRT11_FEE_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cedFIRT11_OTHER_FEE_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbFIRT11_CABLE_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbCALBE_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFULL_AMT_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedSAME_DAY_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cedFULL_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <!-- Ctrl cid="cbbFIRT11_CORR_CCY"      enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedFIRT11_CORR_AMT"      enabled="true"   clear="true" value="0.00"> </Ctrl -->
+            <ctrl cid="txtAPPL_CIX_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbACCT_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ID_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_NM1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_NM2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ADDR1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ADDR3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_APPL_NATION" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_POST_NO1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_POST_NO2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbOUTGOING" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_NM1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_NM2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="RCV_ADDR1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="RCV_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <!-- Ctrl cid="RCV_ADDR3"               enabled="true"   clear="true" value=""> </Ctrl -->
+            <ctrl cid="txtRCV_ACCT_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="rdoRCV_KIND_1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="rdoRCV_KIND_2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtSET_BKCD" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtSET_BKNM" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="mskRCV_BANK_BIC" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_BANK_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_BIC" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_ACNO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_BIC_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME4" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME4" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME5" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME6" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_GEOJU_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_SD_CTRY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_CH_GB" enabled="true" clear="true" value=""></ctrl>
+            <!-- Ctrl cid="txtOP_NO"                enabled="true"   clear="true" value=""> </Ctrl -->
+            <ctrl cid="txtOWNER_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_BIC" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_BIC_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_NAME3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtEMAIL_NM" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="btnRT0018" enabled="false"></ctrl>
+            <ctrl cid="btnHQBIC1" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC2" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC3" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC4" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC5" enabled="true"></ctrl>
+        </action>
+        <!--  20120702_Park_1  -->
+        <action name="ActFXInfo" execute="parent.LinkREFNo = ''; parent.LinkCIFNo = txtAPPL_CIX_NO.value;">
+        </action>
+        <action name="ActScan" execute="fScan()">
+        </action>
+    </actman>
+    <div class="topbarDiv" id="div1" style="height:41px;">
+        <div class="topbarInblue">
+            <label class="search" lang="RefNo" style="left:13px;width:65px;position:absolute;top:9px;height:14px;">
+        Ref No
+        <input id="txtREF_NO" type="text" maxlength="16" size="1" onblur="fRefNoOnBlur();" title="Ref No" style="left:60px;width:120px;position:absolute;top:-3px;height:20px;text-transform:uppercase;">
+                <img border="0" class="button" height="22" hspace="0" id="btnRT0018" onclick="fRefSearchRT0018(); LIB().FindCBNMAll(document);" src="/biz/images/detail.gif" vspace="0" width="21" style="left:182px;width:21px;position:absolute;top:-3px;height:22px;">
+                <img id="imgBlackLst" height="22" width="71" hspace="0" src="/biz/images/BLACKLIST_s.gif" vspace="0" style="left:500px;top:-5px;position:absolute;">
+                <img id="imgDormant" height="22" width="71" hspace="0" src="/biz/images/BLACKLIST_s.gif" vspace="0" style="left:600px;top:-5px;position:absolute;">
+            </label>
+            <label class="search" style="left:700px;width:135px;position:absolute;top:9px;height:16px;">
+        One Trx  (with RT12)
+        <input height="0" id="chkONE_DEAL" size="1" type="checkbox" value="Y" width="0" tabindex="2" onclick="" style="left:3px;width:14px;position:absolute;top:-1px;">
+            </label>
+        </div>
+    </div>
+    <table border="0" cellpadding="0" cellspacing="0" style="margin-left:16px;width:876px;position:absolute;top:45px;height:410px;">
+        <tr height="20px">
+            <td>
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td id="Tab1" class="tabselecttitle" onclick="fDisPlay(1)">
+              Remittance Info
+            </td>
+                        <td width="5">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr height="10px">
+            <td background="/biz/images/tabbar_back.gif">
+            </td>
+        </tr>
+        <tr height="380px">
+            <td>
+                <div class="tabDiv" id="TABINFO1" style="display: block; left: 0px; width: 876px; position: relative; top: -1px; height: 680px;">
+                    <label class="Mtitle" style="left:27px;width:141px;top:3px;height:2px;">
+                        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:-18px;position:absolute;top:1px;">
+            
+            Remittance Information
+          </label>
+                    <div style="border-right:#c0c0c0 1px solid;border-top:#c0c0c0 1px solid;left:8px;border-left:#c0c0c0 1px solid;width:862px;border-bottom:#c0c0c0 1px solid;position:absolute;top:18px;height:133px;">
+                        <label class="search" lang="STS" style="left:-30px;width:104px;position:absolute;padding-top:5px;top:72px;height:15px;">
+              STS
+            </label>
+                        <codecombo id="cbbSTS" dsoName="dsoIN" fldName="LLG_TEMP_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 150px; height: 100%;" labelWidth="150px" url="/jsondb/F900.json" cbDisplayTextField="false" class="default" panelWidth="320px" panelHeight="105px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="9" onLoadError="cbbSTS.value = '';" style="left: 78px; width: 200px; position: absolute; top: 72px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                        <label class="search" lang="CifNo" style="left:284px;width:60px;position:absolute;top:75px;height:1px;">
+              Cif No
+              <edit id="txtAPPL_CIX_NO" dsoName="RTO1400.prmDsoIn" fldName="FXFIG_CIX_NO" type="MASK" mask="99999999" class="default" tabindex="6" maxlength="8" defaultValue="0" manalerttext="Cif No" onblur="f_acno();" style="left: 62px; width: 65px; position: absolute; top: -4px; text-transform: uppercase;"></edit>
+                            <img border="0" class="button" height="22" hspace="0" id="btnIQ11" onclick="fCifSearch();" src="/biz/images/detail.gif" vspace="0" width="21" style="left:127px;width:21px;position:absolute;top:-4px;height:22px;">
+                            <input height="0" id="txtCIF_NM" readonly size="1" type="text" width="0" style="left:148px;width:120px;position:absolute;top:-4px;background-color:#eaeaea;">
+                        </label>
+                        <label class="search" lang="ChargeType" style="left:-3px;width:79px;position:absolute;top:100px;height:1px;">
+              Charge Type
+              <codecombo id="cbbFIRT11_CH_GB" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 60px; height: 100%;" labelWidth="60px" value="2" url="/jsondb/F233.json" cbDisplayTextField="false" class="default" panelWidth="160px" panelHeight="85px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="36" manalerttext="Charge Type" onChange=";" onLoadError="cbbFIRT11_CH_GB.Value = '';" style="left: 80px; width: 100px; position: absolute; top: -4px; height: 20px;">
+                                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                "data":[]
+                            </codecombo>
+                            <edit id="cedFIRT11_CHARGE_AMT" type="CURRENCY" value="0.00" tabindex="-1" maxlength="20" style="display: none; left: 192px; width: 50px; position: absolute; top: -4px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" lang="BeneficiaryCtry" style="left:235px;width:108px;position:absolute;top:100px;height:20px;">
+              Beneficiary Ctry
+              <codecombo id="cbbFIRT11_SD_CTRY" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 110px; height: 100%;" labelWidth="110px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="Remittance Ctry" tabindex="37" manalerttext="Beneficiary Ctry" onLoadError="cbbFIRT11_SD_CTRY.Value = '';" style="left: 110px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                "data":[]
+                            </codecombo>
+                        </label>
+                        <label class="search" style="left:497px;width:150px;position:absolute;top:100px;height:20px;">
+              Applicant Nationality
+              <codecombo id="cbbFIRT11_APPL_NATION" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 110px; height: 100%;" labelWidth="110px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="160px" panelHeight="205px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="Nationality" tabindex="38" manalerttext="Applicant Nationality" onLoadError="cbbFIRT11_APPL_NATION.Value = '';" style="left: 145px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                "data":[]
+                            </codecombo>
+                        </label>
+                        <label class="Mtitle" lang="Applicant" style="left:20px;width:60px;top:138px;height:8px;">
+                            <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:-18px;position:absolute;top:1px;">
+              
+              Applicant
+            </label>
+                        <div style="border-right:#c0c0c0 1px solid;border-top:#c0c0c0 1px solid;left:0px;border-left:#c0c0c0 1px solid;width:425px;border-bottom:#c0c0c0 1px solid;position:absolute;top:155px;height:135px;">
+                            <label class="search" lang="Name" style="left:20px;vertical-align:middle;width:50px;position:absolute;top:8px;height:2px;text-align:right;">
+                Name
+                <input id="txtAPPL_NM1" type="text" class="default" maxlength="35" size="1" tabindex="40" title=" Applicant Name" manalerttext="Applicant Name Line 1" style="left:55px;width:260px;position:absolute;top:-4px;height:20px;text-transform:uppercase;">
+                            </label>
+                            <label class="search" style="left:0px;vertical-align:middle;width:100px;position:absolute;top:31px;height:15px;text-align:right;">
+                                <input id="txtAPPL_NM2" type="text" class="default" maxlength="25" size="1" tabindex="41" title=" Name(Or Acct #)" manalerttext="Applicant Name Line 2" style="left:75px;width:260px;position:absolute;top:-4px;height:20px;text-transform:uppercase;">
+                            </label>
+                            <label class="search" lang="Address" style="left:20px;vertical-align:middle;width:50px;position:absolute;top:52px;height:15px;text-align:right;">
+                Address
+                <input id="txtAPPL_ADDR1" type="text" maxlength="35" size="1" tabindex="42" title=" Applicant Address1" style="left:55px;width:260px;position:absolute;top:-4px;height:20px;text-transform:uppercase;">
+                                <input id="txtAPPL_ADDR2" type="text" maxlength="35" size="1" tabindex="43" title=" Applicant Address2" style="left:55px;width:260px;position:absolute;top:16px;height:20px;text-transform:uppercase;">
+                                <input id="txtAPPL_ADDR3" type="text" maxlength="35" size="1" tabindex="44" title=" Applicant Address3" style="left:55px;width:260px;position:absolute;top:36px;height:20px;text-transform:uppercase;">
+                                <input id="txtAPPL_ADDR4" type="text" maxlength="35" size="1" tabindex="45" title=" Applicant Address4" style="display:none;left:55px;width:260px;position:absolute;top:56px;height:20px;text-transform:uppercase;">
+                            </label>
+                        </div>
+                        <label class="Mtitle" lang="Beneficiary" style="left:447px;width:60px;top:138px;height:8px;">
+                            <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:-16px;position:absolute;top:1px;">
+              
+              Beneficiary
+            </label>
+                        <div style="border-right:#c0c0c0 1px solid;border-top:#c0c0c0 1px solid;left:431px;border-left:#c0c0c0 1px solid;width:429px;border-bottom:#c0c0c0 1px solid;position:absolute;top:155px;height:135px;">
+                            <label class="regist" style="display:none;left:10px;width:60px;position:absolute;top:8px;height:18px;">
+                Bene Kind
+                <div class="grayline" style="left:65px;width:200px;position:absolute;top:-3px;height:20px;">
+                                    <label class="search" lang="Corporation" style="left:30px;width:41px;position:absolute;top:3px;height:16px;">
+                    Corporation
+                    <input checked="" height="0" id="rdoRCV_KIND_1" name="rdoRcv_Kind" size="18" type="radio" value="1" width="0" tabindex="46" style="left:-20px;width:18px;position:absolute;top:0px;">
+                                    </label>
+                                    <label class="search" lang="Individual" style="left:130px;width:35px;position:absolute;top:3px;height:16px;">
+                    Individual
+                    <input checked="" height="0" id="rdoRCV_KIND_2" name="rdoRcv_Kind" size="18" type="radio" value="1" width="0" tabindex="47" style="left:-20px;width:18px;position:absolute;top:0px;">
+                                    </label>
+                                </div>
+                            </label>
+                            <label class="search" lang="AcctNo." style="left:20px;width:50px;position:absolute;top:8px;height:1px;">
+                Acct No.
+                <input id="txtRCV_ACCT_NO" type="text" class="default" maxlength="34" size="1" tabindex="45" title=" Beneficiary Acct #" manalerttext="Beneficiary Acct No." onblur="fCheckField(this);" style="left:55px;width:260px;position:absolute;top:-2px;height:20px;text-transform:uppercase;">
+                            </label>
+                            <label class="search" style="left:20px;vertical-align:middle;width:50px;position:absolute;top:31px;height:5px;text-align:right;">
+                                <codecombo id="cbbTAG59F_1" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="default" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_1" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_1.Value = '';" style="left: 0px; width: 55px; position: absolute; top: -5px; height: 20px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                                <input id="txtRCV_NM1" type="text" class="default" maxlength="33" size="1" tabindex="46" title=" Beneficiary Name" manalerttext="Beneficiary Name" onblur="fCheckField(this);" style="left:55px;width:260px;position:absolute;top:-5px;height:20px;text-transform:uppercase;">
+                                <codecombo id="cbbTAG59F_2" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="default" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_2" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_2.Value = '';" style="left: 0px; width: 55px; position: absolute; top: 16px; height: 20px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                                <input id="txtRCV_NM2" type="text" class="default" maxlength="33" size="1" tabindex="47" manalerttext="Beneficiary Information" style="left:55px;width:260px;position:absolute;top:16px;height:20px;text-transform:uppercase;">
+                            </label>
+                            <label class="search" style="left:20px;vertical-align:middle;width:50px;position:absolute;top:72px;height:15px;text-align:right;">
+                                <codecombo id="cbbTAG59F_3" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="default" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_3" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_3.Value = '';" style="left: 0px; width: 55px; position: absolute; top: -4px; height: 20px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                                <input id="RCV_ADDR1" type="text" class="default" maxlength="33" size="1" tabindex="47" manalerttext="Beneficiary Information" style="left:55px;width:260px;position:absolute;top:-4px;height:20px;text-transform:uppercase;">
+                                <codecombo id="cbbTAG59F_4" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="search" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_4" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_4.Value = '';" style="left: 0px; width: 55px; position: absolute; top: 16px; height: 20px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                                <input id="RCV_ADDR2" type="text" maxlength="33" size="1" tabindex="48" style="left:55px;width:260px;position:absolute;top:16px;height:20px;text-transform:uppercase;">
+                            </label>
+                            <label class="Mtitle" lang="BankInformation" style="left:-410px;width:141px;top:145px;height:2px;">
+                Bank Information
+                <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:-18px;position:absolute;top:1px;">
+                            </label>
+                            <div style="border-right:#c0c0c0 1px solid;border-top:#c0c0c0 1px solid;left:-430px;border-left:#c0c0c0 1px solid;width:862px;border-bottom:#c0c0c0 1px solid;position:absolute;top:160px;height:50px;">
+                                <label class="search" style="left:10px;width:100px;position:absolute;top:20px;height:16px;text-align:right;">
+                  Bank SWIFT Code
+                  <label class="search" style="left:31px;vertical-align:middle;width:85px;position:absolute;top:0px;height:1px;text-align:right;">
+                                        <edit id="txtRCVBANK_BIC" type="MASK" mask="AAAAAA&&&&&" class="default" tabindex="65" title="Receiving Bank" maxlength="11" defaultValue="0" onblur="f_onblur()" style="left: 85px; width: 84px; position: absolute; top: -3px; text-transform: uppercase;"></edit>
+                                        <img border="0" class="button" height="22" hspace="0" id="btnHQBIC3" onclick="fRefSearchHQBIC()" src="/biz/images/detail.gif" vspace="0" width="21" style="left:170px;width:21px;position:absolute;top:-3px;height:22px;">
+                                    </label>
+                                    <label class="search" id="div_57A_nm1" lang="ReceivingBankName" style="left:230px;vertical-align:middle;width:125px;position:absolute;top:0px;height:1px;text-align:right;">
+                    Receiving Bank Name
+                  </label>
+                                    <label class="search" id="div_57A_txt2" style="left:220px;vertical-align:middle;width:130px;position:absolute;top:0px;height:20px;text-align:right;">
+                                        <input id="txtRCVBANK_BIC_NAME" type="text" fldname="inter_name" dsoname="wasSqlDso" title="Receiving Bank Name" maxlength="35" size="317" value="" tabindex="66" style="left:137px;width:231px;position:absolute;top:-1px;height:19px;text-transform:uppercase;">
+                                    </label>
+                                </label>
+                            </div>
+                            <div style="left:0px;top:0px;position:absolute;">
+                                <label class="Mtitle" lang="Inform(TAG70)" style="left:10px;width:141px;top:40px;height:2px;">
+                  Inform (TAG70)
+                  <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:-18px;position:absolute;top:1px;">
+                                </label>
+                                <div style="border-right:#c0c0c0 1px solid;border-top:#c0c0c0 1px solid;left:8px;border-left:#c0c0c0 1px solid;width:862px;border-bottom:#c0c0c0 1px solid;position:absolute;top:60px;height:52px;left:-10px;">
+                                    <input id="txtINFO_NAME1" type="text" fldname="info_name1" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="90" style="left:7px;width:432px;position:absolute;top:5px;text-transform:uppercase;">
+                                    <input id="txtINFO_NAME2" type="text" fldname="info_name2" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="91" style="left:439px;width:414px;position:absolute;top:5px;text-transform:uppercase;">
+                                    <input id="txtINFO_NAME3" type="text" fldname="info_name3" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="92" style="left:7px;width:432px;position:absolute;top:26px;height:20px;text-transform:uppercase;">
+                                    <input id="txtINFO_NAME4" type="text" fldname="info_name4" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="93" style="left:439px;width:414px;position:absolute;top:26px;text-transform:uppercase;">
+                                </div>
+                            </div>
+                            <div id="divLLD" style="left:0px;top:120px;position:absolute;">
+                                <label class="Mtitle" style="left:8px;width:141px;top:3px;height:2px;">
+                                    <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:-18px;position:absolute;top:1px;">
+                  
+                  LLD Declaration
+                </label>
+                                <div style="border-right:#c0c0c0 1px solid;border-top:#c0c0c0 1px solid;left:-12px;border-left:#c0c0c0 1px solid;width:862px;border-bottom:#c0c0c0 1px solid;position:absolute;top:18px;height:160px;">
+                                    <label lang="Applicant" style="left:3px;top:0px;position:absolute;">
+                                        <img height="20" hspace="0" src="/biz/images/icon0.gif" vspace="0" width="14" style="left:0px;top:6px;position:relative;">
+                                        <b>
+                      Applicant
+                    </b>
+                                    </label>
+                                    <label style="left:3px;width:108px;top:25px;height:20px;position:absolute;">
+                    Resident Country
+                    <codecombo id="cbbAPPL_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Applicant Resident Ctry" onLoadError="cbbAPPL_STS.Value = '';" style="left: 110px; width: 250px; position: relative; top: -20px; height: 20px;">
+                                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                            "data":[]
+                                        </codecombo>
+                                    </label>
+                                    <label style="left:3px;width:108px;top:50px;height:20px;position:absolute;">
+                    Category
+                    <codecombo id="cbbAPPL_CAT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Applicant Category" onblur="fCheckDocument()" onLoadError="cbbAPPL_CAT.Value = '';" style="left: 110px; width: 250px; position: relative; top: -20px; height: 20px;">
+                                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                            "data":[]
+                                        </codecombo>
+                                    </label>
+                                    <label style="left:-500px;width:125px;position:relative;top:70px;height:16px;">
+                    Identity
+                    <input height="0" id="chkAPP_IDENTITY" size="280" type="checkbox" value="checkbox" width="0" tabindex="2" onclick="fAppIdentity(this);fCheckDocument()" style="left:2px;width:14px;position:relative;top:0px;">
+                                    </label>
+                                    <label style="left:-500px;width:225px;position:relative;top:70px;height:16px;">
+                    I0 - Applicant is identical with Beneficiary
+                  </label>
+                                    <label lang="Beneficiary" style="left:431px;top:0px;position:absolute;">
+                                        <img height="20" hspace="0" src="/biz/images/icon0.gif" vspace="0" width="14" style="left:0px;top:6px;position:relative;">
+                                        <b>
+                      Beneficiary
+                    </b>
+                                    </label>
+                                    <label style="left:431px;width:108px;top:25px;height:20px;position:absolute;">
+                    Resident Country
+                    <codecombo id="cbbBENE_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Beneficiary Resident Ctry" onLoadError="cbbBENE_STS.Value = '';" style="left: 110px; width: 250px; position: relative; top: -20px; height: 20px;">
+                                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                            "data":[]
+                                        </codecombo>
+                                    </label>
+                                    <label style="left:431px;width:108px;top:50px;height:20px;position:absolute;">
+                    Category
+                    <codecombo id="cbbBENE_CAT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Beneficiary Category" onblur="fCheckDocument()" onLoadError="cbbBENE_CAT.Value = '';" style="left: 110px; width: 250px; position: relative; top: -20px; height: 20px;">
+                                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                            "data":[]
+                                        </codecombo>
+                                    </label>
+                                    <label style="left:431px;width:108px;top:75px;height:20px;position:absolute;">
+                    Affiliation
+                    <codecombo id="cbbBENE_AFIL" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="90px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Affiliation" onLoadError="cbbBENE_AFIL.Value = '';" style="left: 110px; width: 250px; position: relative; top: -20px; height: 20px;">
+                                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                            "data":[]
+                                        </codecombo>
+                                    </label>
+                                    <label style="left:431px;width:108px;top:100px;height:20px;position:absolute;">
+                    Document
+                    <codecombo id="cbbDOC_TP" dsoName="RTO1400.prmDsoIn" fldName="FIRT11_LLD_DOCUMENT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F1006.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="90px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Document" onLoadError="cbbDOC_TP.Value = '';" style="left: 110px; width: 250px; position: relative; top: -20px; height: 20px;">
+                                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                            "data":[]
+                                        </codecombo>
+                                    </label>
+                                    <label style="left:3px;top:100px;position:absolute;">
+                                        <img height="20" hspace="0" src="/biz/images/icon0.gif" vspace="0" width="14" style="left:0px;top:6px;position:relative;">
+                                        <b>
+                      Transaction Purpose
+                    </b>
+                                    </label>
+                                    <label class="search" style="left:3px;width:108px;position:absolute;top:127px;height:20px;">
+                    Statistic Code
+                    <codecombo id="cbbSTAT_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 302px; height: 100%;" labelWidth="302px" url="/jsondb/F2041.json" cbDisplayTextField="false" class="default" panelWidth="610px" panelHeight="300px" dropdownkeycode="145" manalerttext="LLD Statistic Code" onblur="if (chkONE_DEAL.checked == true) fDisPlay(2);fCheckDocument()" onLoadError="cbbSTAT_CD.Value = '';" style="left: 110px; width: 372px; position: absolute; top: -2px; height: 20px;">
+                                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                            "data":[]
+                                        </codecombo>
+                                    </label>
+                                    <img border="0" class="button" height="21" hspace="0" id="btnAdd" name="AddBtn" onclick="fDataInsert();" onmouseout="this.src='/biz/images/add.gif'" onmouseover="this.src='/biz/images/addover.gif'" src="/biz/images/add.gif" vspace="0" width="65" style="display:none;left:770px;width:80px;position:absolute;top:165px;height:21px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

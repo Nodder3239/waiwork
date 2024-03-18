@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GBS Menu</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/menu.css" />
+    <link rel="stylesheet" href="./css/menustyle.css" />
+    <script type="text/javascript">
+        let menuData = [];
+        let favData = [];
+        let favProgObj = null;
+        let scnroData = [];
+        let scnroProgObj = null;
+
+        function menuInit() {
+            DrawFavorite();
+            DrawScnro();
+            DrawMenu();
+
+            const tabLinkElems = document.getElementsByClassName('tab-link');
+            Array.prototype.forEach.call(document.getElementsByClassName('tab-link'), elem => {
+                elem.onclick = () => {
+                    Array.prototype.forEach.call(tabLinkElems, linkElem => {
+                        if (linkElem == elem) {
+                            linkElem.classList.add('current');
+                        } else {
+                            linkElem.classList.remove('current');
+                        }
+                    });
+
+                    const tabId = elem.getAttribute('data-tab');
+                    Array.prototype.forEach.call(document.getElementsByClassName('tab-content'), tabElem => {
+                        if (tabElem.id == tabId) {
+                            tabElem.classList.add('current');
+                        } else{
+                            tabElem.classList.remove('current');
+                        }
+                    });
+                }
+            });
+
+            $('.searchInp').on('search', function () {
+                if (!this.value) clearSearchValue();
+            });
+        }
+
+        // Move to Screen
+        function Work(mCode) {
+            //top.LIB.popMENU.hide();
+            
+            top.MAIN.GoWork(mCode, "EMPTY");
+        }
+
+        // Draw Menu
+        function DrawMenu() {
+            const mData = top.LIB.CDO.MenuData ?? [];
+
+            mData.forEach(elem => {
+                elem.menuPath = elem.menuId;
+                const parentMenu = mData.find(menuElem => menuElem.menuId == elem.parentMenuId);
+                if (parentMenu) {
+                    if (parentMenu.sts == '9') {
+                        elem.sts = '9';
+                    }
+                    elem.menuPath = `${parentMenu.menuId}|${elem.menuPath}`;
+                    const p_parentMenu = mData.find(menuElem => menuElem.menuId == parentMenu.parentMenuId);
+                    if (p_parentMenu) {
+                        if (p_parentMenu.sts == '9') {
+                            elem.sts = '9';
+                        }
+                        elem.menuPath = `${p_parentMenu.menuId}|${elem.menuPath}`;
+                    }
+                }
+            });
+
+            menuData = mData.filter(elem => elem.sts == '0' && !elem.upmuCode?.startsWith('AA'));
+            
+            /*
+            menuData.sort((a, b) => {
+                return a.menuPath.length - b.menuPath.length;
+            }).sort((a, b) => {
+                if (a.parentMenuId == '00000' && b.parentMenuId == '00000') {
+                    if (a.menuName < b.menuName) {
+                        return -1;
+                    }
+                    if (a.menuName > b.menuName) {
+                        return 1;
+                    }
+                }
+
+                if (a.parentMenuId != '00000' && b.parentMenuId != '00000') {
+                    return a.sortSeq - b.sortSeq;
+                }
+            });
+            */
+            const menuData_L = menuData.filter(elem => {
+                return elem.parentMenuId == '00000'
+            }).sort((a, b) => {
+                if (a.menuName < b.menuName) {
+                    return -1;
+                }
+                if (a.menuName > b.menuName) {
+                    return 1;
+                }
+            });
+
+            const menuData_M = menuData.filter(elem => {
+                if (elem.menuPath) {
+                    const mPaths = elem.menuPath.split('|');
+                    if (mPaths.length > 1) {
+                        const lnk = elem.srcUrl.trim().replace(/\./g,'');
+                        return lnk == '';
+                    }
+                }
+            }).sort((a, b) => {
+                return a.sortSeq - b.sortSeq;
+            });
+
+            const menuData_S = menuData.filter(elem => {
+                if (elem.menuPath) {
+                    const mPaths = elem.menuPath.split('|');
+                    if (mPaths.length > 1) {
+                        const lnk = elem.srcUrl.trim().replace(/\./g,'');
+                        return lnk != '';
+                    }
+                }
+            }).sort((a, b) => {
+                return a.sortSeq - b.sortSeq;
+            });
+
+            // menuData = [...(mData.filter(elem => elem.upmuCode?.startsWith('AA'))), ...menuData];
+            menuData = [...(mData.filter(elem => elem.upmuCode?.startsWith('AA'))), ...menuData_L, ...menuData_M, ...menuData_S];
+            // console.log(menuData_L, menuData_M, menuData_S);
+
+            var mRoot = $('#menuRoot');
+            drawMenuList(mRoot, menuData);
+        }
+
+        function searchItem() {
+            $("#search_name").val('');
+            $("#search_code").val('');
+            clearSearchValue();
+
+            let items = document.getElementById("searchItem");
+            let selItemTxt = items.options[items.selectedIndex].text
+            let selItemVal = items.options[items.selectedIndex].value
+            if (selItemVal == "name") {
+                $("#search_name").css("display", "");
+                $("#search_code").css("display", "none");
+            }
+            else if (selItemVal == "code") {
+                $("#search_name").css("display", "none");
+                $("#search_code").css("display", "");
+            }
+        }
+
+        function clearSearchValue() {
+            //$('#menuRoot').html('');
+            drawMenuList($("#menuRoot"), menuData);
+        }
+
+        function findData(value) {
+            let items = document.getElementById("searchItem");
+            let _val = value.trim().toUpperCase();
+            let filterData = [];
+            if (_val == "") {
+                clearSearchValue();
+                return;
+            }
+
+            menuData.forEach(menuObj => {
+                //const itemVal = (selItemVal == 'name' ? menuObj.menuName : menuObj.upmuCode).toUpperCase();
+                const itemVal = `${menuObj.upmuCode} ${menuObj.menuName}`.toUpperCase();
+                if (itemVal.indexOf(_val) > -1) {
+                    filterData.push({...menuObj});
+                }
+            });
+
+            const mData = menuData.filter(menuObj => filterData.findIndex(filterObj => filterObj.menuPath.indexOf(menuObj.menuId) > -1) > -1);
+
+            drawMenuList($("#menuRoot"), mData, mData[0]?.menuId);
+        }
+
+        function drawMenuList(mRoot, mData, menuId) {
+            // console.log("mData:",mData);
+            mRoot.html('');
+            for (var i=0;i<mData.length;i++) {
+                var mi = mData[i];
+                if (mi.menuId == '') continue;
+
+                var mPaths = mi.menuPath.split('|');
+                if( mPaths.length == 0 ) continue;
+
+                if (mPaths.length == 1) {
+                    mRoot.append("<li class='has-sub'><a href='#'>"+mi.menuName+"</a><ul id='mi"+mi.menuId+"'></ul></li>");
+                    //console.log('ROOT',mi.menuName+' = '+mi.menuId);
+                } else {
+                    var lnk = mi.srcUrl.trim().replace(/\./g,'');
+                    var prt = mi.parentMenuId.trim();
+                    //console.log('"'+lnk+'" , "'+prt+'"');
+                    if (lnk == '') {
+                        // Sub.Category
+                        $('#mi'+prt).append("<li class='has-sub'><a href='#'>"+mi.menuName+"</a><ul id='mi"+mi.menuId+"'></ul></li>");
+                    } else {
+                        // Biz.Item
+                        //var txt = "<font style='color:#8080FF'>"+mi.upmuCode+"</font>"+mi.menuName;
+                        var txt = "<span class='is-item-code'>"+mi.upmuCode+"</span>"+mi.menuName;
+                        var hrf = "javascript:Work(\""+mi.upmuCode+"\")";
+                        $('#mi'+prt).append("<li class='is-item' id='mi"+mi.menuId+"'><a href='"+hrf+"'>"+txt+"</a></li>");
+                    }
+                }
+            }
+
+            $('#cssmenu li.active').addClass('open').children('ul').show();
+            $('#cssmenu li.has-sub>a').on('click', function(){
+                $(this).removeAttr('href');
+                var element = $(this).parent('li');
+                if (element.hasClass('open')) {
+                    element.removeClass('open');
+                    element.find('li').removeClass('open');
+                    element.find('ul').slideUp(200);
+                }
+                else {
+                    element.addClass('open');
+                    element.children('ul').slideDown(200);
+                    element.siblings('li').children('ul').slideUp(200);
+                    element.siblings('li').removeClass('open');
+                    element.siblings('li').find('li').removeClass('open');
+                    element.siblings('li').find('ul').slideUp(200);
+                }
+            });
+
+            if (menuId) {
+                let menuRootElem = document.getElementById('menuRoot').querySelector(`li #mi${menuId}`);
+                //console.log(`#mi${menuId}`, menuRootElem);
+                if (menuRootElem) {
+                    if (menuRootElem.tagName == 'UL' && menuRootElem.children.length > 0){
+                        const menuItem = menuRootElem.querySelector('.is-item');
+                        if (menuItem) {
+                            menuRootElem = menuItem;
+                        } else {
+                            menuRootElem = menuRootElem.children[0];
+                        }
+                    }
+                    menuRootElem.parentElement.style.display = 'block';
+                    menuRootElem.parentElement.parentElement.classList.add('open');
+                    menuRootElem.parentElement.parentElement.parentElement.style.display = 'block';
+                    menuRootElem.parentElement.parentElement.parentElement.parentElement.classList.add('open');
+                }
+            }
+        }
+
+        function DrawScnro() { // Scenario List
+            scnroProgObj = ShowProgress_tab(2);
+            comCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {"dvCd": "25"},
+                function(outputData) { // Success
+                    // console.log('[25] outputData --> ', outputData.output25);
+                    HideProgress_tab(scnroProgObj, 2);
+                    scnroData = outputData.output25.grid01 ?? [];
+                    drawScnroList($('#scnroRoot'), scnroData);
+                },
+                function (outputData) { // Error
+                    HideProgress_tab(scnroProgObj, 2);
+                    onSvcErrorDialog(outputData);
+                },
+                {skipProg: true}
+            );
+        }
+
+        function drawScnroList(sRoot, sData) {
+            sRoot.html('');
+            for (var i=0;i<sData.length;i++) {
+                var si = sData[i];
+                sRoot.append(`<li class="has-sub"><a href="#" id="_${si.scnroId}">${si.scnroNm}</a><ul id="si${si.scnroId}"></ul></li>`);
+            }
+            $('#scnroConts li.active').addClass('open').children('ul').show();
+            $('#scnroConts li.has-sub>a').on('click', function(){
+                $(this).removeAttr('href');
+                let sId = $(this).attr('id').substring(1, $(this).attr('id').length);
+
+                // Detail List
+                let _this = this;
+                var element = $(_this).parent('li');
+                if (element.hasClass('open')) {
+                    element.removeClass('open');
+                    element.find('li').removeClass('open');
+                    element.find('ul').slideUp(200);
+                }
+                else { // 닫혀있을때만 재조회
+                    scnroProgObj = ShowProgress_tab(2);
+                    let inputData = {"dvCd": "26", "param1": sId};
+                    comCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData,
+                        function (outputData) { // Success
+                            // console.log('[26] outputData --> ', outputData.output26);
+                            HideProgress_tab(scnroProgObj, 2);
+                            const detailData = outputData.output26.grid01 ?? [];
+                            drawScnroDetailList(_this, detailData);
+                        },
+                        function (outputData) { // Error
+                            HideProgress_tab(scnroProgObj, 2);
+                            onSvcErrorDialog(outputData);
+                        },
+                        {skipProg: true}
+                    );
+                }
+            });
+        }
+
+        function drawScnroDetailList(_this, sdData) {
+            let sId = $(_this).attr('id').substring(1, $(_this).attr('id').length);
+            let sdRoot = $(`#scnroConts li.has-sub>ul#si${sId}`)[0];
+            $(sdRoot).html('');
+            for (var i=0;i<sdData.length;i++) {
+                var sdi = sdData[i];
+                if (!sdi.upmuCode) continue;
+                var txt = `<span class="is-item-code">${sdi.upmuCode}</span><span class="is-item-name">${sdi.cnntNm}</span>`;
+                var hrf = `javascript:Work('${sdi.upmuCode}')`;
+                $(sdRoot).append(`<li class="is-item" id="sdi${sdi.cnntId}"><a href="${hrf}">${txt}</a></li>`);
+            }
+
+            var element = $(_this).parent('li');
+            if (element.hasClass('open')) {
+                element.removeClass('open');
+                element.find('li').removeClass('open');
+                element.find('ul').slideUp(200);
+            }
+            else {
+                element.addClass('open');
+                element.children('ul').slideDown(200);
+                element.siblings('li').children('ul').slideUp(200);
+                element.siblings('li').removeClass('open');
+                element.siblings('li').find('li').removeClass('open');
+                element.siblings('li').find('ul').slideUp(200);
+            }
+        }
+
+        function DrawFavorite() {
+            let inputData = {"procType": "R", "readIncYn": "Y", "opNo": LIB().CDO.SysInfo.userId,  "seqNo": 0, "menuId": "", "fvrtNm": ""};
+            favProgObj = ShowProgress_tab(3);
+            comCallService('/HANABANK/V1/COM/CG/COMCGO1600I.SVC', inputData,
+                function (outputData) { // Success
+                    HideProgress_tab(favProgObj, 3);
+                    favData = outputData.grid01 ?? [];
+                    drawFavList($('#favRoot'), favData);
+                },
+                function (outputData) { // Error
+                    HideProgress_tab(favProgObj, 3);
+                    onSvcErrorDialog(outputData);
+                },
+                {skipProg: true}
+            );
+        }
+
+        function drawFavList(fRoot, fData, menuId) {
+            fRoot.html('');
+            for (var i=0;i<fData.length;i++) {
+                var fi = fData[i];
+                if (!fi.menuId) continue;
+                if (!fi.trscDvCd) continue;
+                var txt = `<span class="is-item-code">${fi.trscDvCd}</span><span class="is-item-name">${fi.fvrtNm}</span>`;
+                var hrf = `javascript:Work('${fi.trscDvCd}')`;
+                fRoot.append(`<li class="is-item" id="fi${fi.menuId}"><a href="${hrf}">${txt}</a></li>`);
+            }
+
+            const $favItem = $('#favRoot li');
+            $favItem.on('click', function(e) {
+                $(this).stop().toggleClass('active').siblings().stop().removeClass('active');
+            });
+
+            if (menuId) {
+                var actLI = Array.from($favItem).find(elem => elem.id == "fi"+menuId);
+                $(actLI).addClass('active');
+            }
+        }
+
+        function getSelectItem(obj) {
+            let item = Array.from(obj).find(elem => elem.className.indexOf('active') > -1);
+            return item;
+        }
+
+        function getSelectItemIdx(obj) {
+            let idx = Array.from(obj).findIndex(elem => elem.className.indexOf('active') > -1);
+            return idx;
+        }
+
+        function getSelectItemMenuId(obj) {
+            let item = Array.from(obj).find(elem => elem.className.indexOf('active') > -1);
+            let id = item.id.substring(2, item.id.length);
+            return id;
+        }
+
+        function clickFavBtns(act) {
+            switch(act) {
+                case "C":
+                    var curTab = top.MAIN.tabCtrl.getCurrentTab();
+                    if (!curTab) { ShowInfoDialog("Please open the work screen you want to add to favorites."); return; }
+                    openFavPopUp(act);
+                    break;
+                case "U":
+                    if (!getSelectItem($('#favRoot li'))) { ShowInfoDialog("There are no favorites selected."); return; }
+                    openFavPopUp(act);
+                    break;
+                case "D":
+                    if (getSelectItem($('#favRoot li'))) {
+                        let inputData = {
+                            procType: act,
+                            readIncYn: "Y",
+                            opNo: LIB().CDO.SysInfo.userId,
+                            seqNo: getSelectItemIdx($('#favRoot li')) + 1,
+                            menuId: "",
+                            fvrtNm: "",
+                        };
+                        favoriteAct(inputData);
+                    } else {
+                        ShowInfoDialog("There are no favorites selected.");
+                    }
+                    break;
+            }
+        }
+
+        function openFavPopUp(act) {
+            var DArg  = new DArgument();
+            DArg.Args = {};
+            var curTab = top.MAIN.tabCtrl.getCurrentTab();
+            switch(act) {
+                case "C":
+                    DArg.Args["org_trCd"] = '';
+                    DArg.Args["org_fvNm"] = '';
+                    DArg.Args["new_trCd"] = curTab.id;
+                    DArg.Args["new_fvNm"] = curTab.data.job_nm;
+                    break;
+                case "U":
+                    var item = getSelectItem($('#favRoot li'));
+                    DArg.Args["org_trCd"] = $(item).find('a span.is-item-code').text();
+                    DArg.Args["org_fvNm"] = $(item).find('a span.is-item-name').text();
+                    DArg.Args["new_trCd"] = $(item).find('a span.is-item-code').text();
+                    DArg.Args["new_fvNm"] = $(item).find('a span.is-item-name').text();
+                    break;
+            }
+
+            /************************************************************
+             * INPUT DATA
+             * procType   C:INSERT / U:UPDATE / D:DELETE / R:SELECT
+             * readIncYn  Y:With Select / N:None
+             * opNo       Employee number
+             * seqNo      Sequence number
+             * menuId     Menu id number
+             * fvrtNm     Favorite Name
+             *************************************************************/
+            var lnkSrc = "/frame/favoriteEdit.html";
+            var options = "status:no; resizable:no; scroll:no; center:yes; dialogHeight:160px; dialogWidth:470px;";
+            openPopup(lnkSrc, DArg, options, function(result) {
+                if (result) {
+                    // console.log("result -->", result);
+                    var inputData = {
+                        procType: act,
+                        readIncYn: "Y",
+                        opNo: LIB().CDO.SysInfo.userId,
+                        seqNo: (act == "C") ? 0 : getSelectItemIdx($('#favRoot li')) + 1,
+                        menuId: (act == "C") ? curTab.data.job_nm_cd : getSelectItemMenuId($('#favRoot li')),
+                        trscDvCd: DArg.Args["new_trCd"],
+                        fvrtNm: result[0],
+                    };
+                    favoriteAct(inputData);
+                }
+            });
+        }
+
+        function favoriteAct(inpData) {
+            favProgObj = ShowProgress_tab(3);
+            comCallService('/HANABANK/V1/COM/CG/COMCGO1600A.SVC', inpData,
+                function (outputData) { // Success
+                    HideProgress_tab(favProgObj, 3);
+                    // console.log("outputData -->",outputData);
+                    // if (outputData.result == "00") {}
+                    let mId = undefined;
+                    // console.log("inpData.procType:",inpData.procType);
+                    switch(inpData.procType) {
+                        case "C": //  select item after active add
+                            favData.push({"opNo":inpData.opNo,"seqNo":inpData.seqNo,"menuId":inpData.menuId,"trscDvCd":inpData.trscDvCd,"fvrtNm":inpData.fvrtNm});
+                            mId = inpData.menuId;
+                            break;
+                        case "U":
+                            var el = favData.find(elem => elem.menuId == inpData.menuId);
+                            el.fvrtNm = inpData.fvrtNm;
+                            mId = favData[getSelectItemIdx($('#favRoot li'))].menuId;
+                            break;
+                        case "D": // delete item
+                            var el = favData.find(elem => elem.menuId == inpData.menuId);
+                            let idx = getSelectItemIdx($('#favRoot li'));
+                            favData.splice(idx, 1);
+                            break;
+                    }
+                    drawFavList($('#favRoot'), favData, mId); // Redraw
+                },
+                function (outputData) { // Error
+                    HideProgress_tab(favProgObj, 3);
+                    onSvcErrorDialog(outputData);
+                },
+                {skipProg: true}
+            );
+        }
+
+        function ShowProgress_tab(tabIdx) {
+            const doc = document;
+            let progDiv = doc.createElement('div');
+            let tabObj = doc.getElementById('tab-'+tabIdx);
+            progDiv.style.display = "";
+            progDiv.classList.add('gProgressDiv');
+            let loaderDiv = doc.createElement('div');
+            loaderDiv.style.display = "";
+            loaderDiv.classList.add('gLoaderDiv');
+            tabObj.appendChild(progDiv);
+            tabObj.appendChild(loaderDiv);
+            return {progDiv, loaderDiv};
+        }
+
+        function HideProgress_tab(progObj, tabIdx) {
+            let tabObj = document.getElementById('tab-'+tabIdx);
+            // console.log("["+tabIdx+"]",tabObj);
+            if (progObj?.progDiv) {
+                tabObj.removeChild(progObj.progDiv);
+            }
+            if (progObj?.loaderDiv) {
+                tabObj.removeChild(progObj.loaderDiv);
+            }
+        }
+
+        function onSvcErrorDialog(recv) {
+            let errMsg = '';
+            // const errOutput = outputData?.output;
+            const errOutput = recv.xhr?.responseJSON?.output;
+            if (errOutput) {
+                // let subMsg = (errOutput.subMessage ?? [])[0];
+				// errMsg = `${errOutput.message ?? 'Error'}${subMsg ? '\n' + subMsg : ''}\n\n${errOutput.error ?? ''}`;
+                errMsg = `${errOutput.message ?? 'Error'}\n\n${errOutput.error ?? ''}`;
+            } else {
+                errMsg = (recv.errThrown?.message ?? recv.errThrown) || "Service Error";
+            }
+            ShowErrorDialog(errMsg);
+        }
+
+    </script>
+</head>
+<body onload="menuInit()" style="overflow-y: hidden;">
+    <div id="aside" style="overflow-y: hidden;">
+        <nav id="nav">
+            <div class="nav_container">
+                <ul class="tabs">
+                    <li class="tab-link current" data-tab="tab-1">Menu</li>
+                    <li class="tab-link" data-tab="tab-2">Scenario</li>
+                    <li class="tab-link" data-tab="tab-3">Favorite</li>
+                </ul>
+                <div id="tab-1" class="tab-content current">
+                    <div id="searchItemDiv">
+                        <input id="search_name" class="searchInp" type="search" placeholder="Search TRX CODE / NAME" autocomplete="off" onkeyup="findData(this.value); event.stopPropagation();" onkeydown="event.stopPropagation();" >
+                    </div>
+                    <div id="cssmenu">
+                        <ul id="menuRoot">
+                            <!--
+                            <li class='has-sub'><a href='#'>Common</a>
+                                <ul>
+                                    <li class='has-sub'><a href='#'>a-1</a>
+                                        <ul>
+                                            <li class='is-item'><a href='#'>a-1-1</a></li>
+                                            <li class='is-item'><a href='#'>a-1-2</a></li>
+                                            <li class='is-item'><a href='#'>a-1-2</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class='has-sub'><a href='#'>a-2</a>
+                                        <ul>
+                                            <li class='is-item'><a href='#'>a-2-1</a></li>
+                                            <li class='is-item'><a href='#'>a-2-2</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class='has-sub'><a href='#'>International Banking</a>
+                                <ul>
+                                    <li class='has-sub'><a href='#'>Advice of L/C</a>
+                                        <ul>
+                                            <li class='is-item'><a href='#'><span class="is-item-code">AD01</span>Ledger detail inquiry</a></li>
+                                            <li class='is-item'><a href='#'><span class="is-item-code">AD09</span>Ledger modify</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class='has-sub'><a href='#'>Purchase of foreign check</a>
+                                        <ul>
+                                            <li class='is-item'><a href='#'>b-2-1</a></li>
+                                            <li class='is-item'><a href='#'>b-2-2</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            -->
+                        </ul>
+                    </div>
+                </div>
+                <div id="tab-2" class="tab-content">
+                    <div id="scnroConts">
+                        <ul id="scnroRoot">
+<!--                            <li class='has-sub'><a href='#'>Common</a>-->
+<!--                                <ul>-->
+<!--                                    <li class='is-item'><a href='#'><span class="is-item-code">AD01</span>Ledger detail inquiry</a></li>-->
+<!--                                    <li class='is-item'><a href='#'><span class="is-item-code">AD09</span>Ledger modify</a></li>-->
+<!--                                </ul>-->
+<!--                            </li>-->
+<!--                            <li class='has-sub'><a href='#'>International Banking</a>-->
+<!--                                <ul>-->
+<!--                                    <li class='is-item'><a href='#'><span class="is-item-code">AD01</span>Ledger detail inquiry</a></li>-->
+<!--                                    <li class='is-item'><a href='#'><span class="is-item-code">AD09</span>Ledger modify</a></li>-->
+<!--                                </ul>-->
+<!--                            </li>-->
+                        </ul>
+                    </div>
+                </div>
+                <div id="tab-3" class="tab-content">
+                    <div id="favBtns">
+                        <button class="add" onclick="clickFavBtns('C')">Add
+                            <img src="./images/add.png" alt="#" class="off">
+                            <img src="./images/add_hover.png" alt="#" class="on">
+                            </button>
+                        <button class="edit" onclick="clickFavBtns('U')">Edit
+                            <img src="./images/edit.png" alt="#" class="off">
+                            <img src="./images/edit_hover.png" alt="#" class="on">
+                        </button>
+                        <button class="del" onclick="clickFavBtns('D')">Delete
+                            <img src="./images/input_close.png" alt="#" class="off">
+                            <img src="./images/close_hover.png" alt="#" class="on">
+                            
+                        </button>
+                    </div>
+                    <div id="favConts">
+                        <ul id="favRoot"></ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="shadow">
+        <button type="button" class="btnclose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+</body>
+</html>

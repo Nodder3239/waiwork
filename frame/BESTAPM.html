@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Approval Control Module</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript">
+        /*------------------------------------------------------------------------
+        // GBS Approval Processing Page             COREBANK / CoreTechnical Lab
+        //
+        // [ GBSAPM.html ]
+        -----------------------------------------------------------------------*/
+        var MGRReplyY      = null;
+        var MGRReplyN      = null;
+        var MGRNotRespond  = null;
+
+        var MGRListWnd     = {};
+        // var MGRListWndStat = "no";
+        var MGRMessage     = null;
+        var MGRMessages    = new Array();
+        var PBMsgWnd       = {};
+        var APM_ReqIP   = "";
+        var APM_ReqData = "";
+
+        function InitAPM() {
+            /*
+            try {
+                //prmInDSO.recordset.addNew();
+            } catch(E) {
+                alert(E.message);
+            }
+            */
+        }
+
+        function ShowAPMStatus() {
+
+        }
+      
+        /*
+        // gRPC
+        function connector(ServerAddr, UserId) {
+            console.log("connector str --------------------------");
+            waiBrowser_Approval.start(ServerAddr, UserId , function(msg) {
+                ProcMessage(msg);
+            }, false);
+        }
+        */
+
+        // webSocket
+        let ws = null;
+        let retry = true;
+        function connector(ServerAddr , UserId) {
+            console.log("connector str --------------------------", ws);
+            if((ws == null) || (ws.readyState !== WebSocket.OPEN)){
+                var url = ServerAddr;
+
+                ws = new WebSocket(url);
+
+                ws.binaryType="arraybuffer";
+
+                ws.onopen = function(){
+                    console.log("connector onopen ----------------------", new Date().toLocaleString());
+                    var sendMsg = {
+                        Type : "LOGIN",
+                        SrcOP : UserId
+                    };
+
+                    send(sendMsg);
+                };
+
+                ws.onmessage = function(msg){
+                    console.log("connector onmessage -------------------");
+                    ProcMessage(msg.data);
+                };
+
+                ws.onclose = function() {
+                    console.log("connector close -----------------------", new Date().toLocaleString());
+                    if(retry == true){
+                        setTimeout(function() {
+                        connector(ServerAddr , UserId);
+                     }, 1000);
+                    }
+                    
+                };
+
+                ws.onerror = function(e) {
+                    console.log("connector error : ",e);
+                    ws.close();
+                }
+            }
+
+            console.log("connector end --------------------------");
+        }
+
+        function send(sendMsg){
+            if((ws != null) && (ws.readyState == WebSocket.OPEN)){
+                ws.send(JSON.stringify(sendMsg));
+            }else{
+                LIB().ShowErrorDialog("manager approval not connected");
+            }
+      
+        }
+
+        //connector("223.223.1.16" ,UserId);
+  
+        //----------------------------------------------
+        // APPROVAL Functions - REQUEST PART (Teller)
+        //----------------------------------------------
+        var APD_DstIP, APD_DstOP, APD_SrcIP, APD_SrcOP, APD_ScreenNO, APD_RefNo, APD_OVRDInfo, APD_CaptureImg;
+
+        function APM_Request(DstIP, DstOP, SrcIP, SrcOP, ScreenNO, RefNo, OVRDInfo, CaptureImg) {
+            APD_DstIP = DstIP;
+            APD_DstOP = DstOP;
+            APD_SrcIP = SrcIP;
+            APD_SrcOP = SrcOP;
+            APD_ScreenNO = ScreenNO;
+            APD_RefNo = RefNo;
+            APD_OVRDInfo = OVRDInfo;
+            APD_CaptureImg = CaptureImg;
+
+            SendMGROPRequest();
+        }
+
+        /*
+        function MakeOVRDInfoStr(OVRDInfo) {
+            var ret = "";
+            ret += OVRDInfo.ovrd_msg + ";";
+            ret += OVRDInfo.ovrd_gb  + ";";
+            ret += OVRDInfo.ovrd_cc  + ";";
+            for (var i = 0; i < 9; i++){
+                if (i < OVRDInfo.ovrd_detail_array.length){
+                    ret += OVRDInfo.ovrd_detail_array[i].ovrd_cd + ";";
+                    ret += OVRDInfo.ovrd_detail_array[i].ovrd_nm + ";";
+                }
+                else{
+                    ret += "" + ";";
+                    ret += "" + ";";
+                }
+            }
+
+            return ret;
+        }
+        */
+
+        /* 책임자승인 요청 메세지 조합 */
+        function SendMGROPRequest() {
+            var jsonMsg = {
+                Type: "REQU",
+                DstIP: APD_DstIP       /* Manager IP */ ,
+                DstOP: APD_DstOP       /* Manager OP */ ,
+                SrcIP: APD_SrcIP       /* Request IP */ ,
+                SrcOP: APD_SrcOP       /* Request OP */ ,
+                Ack: "R"               /* Request    */ ,
+                ScreenNo: APD_ScreenNO /* Screen NO  */ ,
+                RefNo: APD_RefNo       /* REF_NO     */ ,
+                Etc: JSON.stringify(APD_OVRDInfo), // MakeOVRDInfoStr(APD_OVRDInfo),
+                CaptureImg: APD_CaptureImg + ""
+            };
+            // console.log('SendMGROPRequest --> ', APD_OVRDInfo, jsonMsg);
+            // waiBrowser_Approval.approvalRequest(JSON.stringify(jsonMsg));
+            send(jsonMsg);
+        }
+
+        /* 책임자승인 요청 취소 메세지 조합 */
+        function SendMGROPReqCancelMessage(DstIP, DstOP, SrcIP, SrcOP, ScreenNO, RefNo) {
+            var jsonMsg = {
+                Type: "REQU",
+                DstIP: DstIP       /* Manager IP */ ,
+                DstOP: DstOP       /* Manager OP */ ,
+                SrcIP: SrcIP       /* Request IP */ ,
+                SrcOP: SrcOP       /* Request OP */ ,
+                Ack: "C"           /* Request    */ ,
+                ScreenNo: ScreenNO /* Screen NO  */ ,
+                RefNo: RefNo       /* REF_NO     */
+            }
+
+            // waiBrowser_Approval.approvalRequest(JSON.stringify(jsonMsg));
+            send(jsonMsg);
+        }
+
+        /* 책임자승인 요청 승인 메세지 조합 */
+        function SendMGRRespYMessage( DstIP, DstOP, SrcIP, SrcOP, ScreenNO, RefNo) {
+            var jsonMsg = {
+                Type: "RESP",
+                DstIP: DstIP /* Manager IP */ ,
+                DstOP: DstOP /* Manager OP */ ,
+                SrcIP: SrcIP /* Request IP */ ,
+                SrcOP: SrcOP /* Request OP */ ,
+                Ack: "A" /* Request    */ ,
+                ScreenNo: ScreenNO /* Screen NO  */ ,
+                RefNo: RefNo /* REF_NO     */ ,
+                Etc: "Y"
+            }
+
+            // waiBrowser_Approval.approvalRequest(JSON.stringify(jsonMsg));
+            send(jsonMsg);
+        }
+
+        /* 책임자승인 요청 부결 메세지 조합 */
+        function SendMGRRespNMessage(DstIP, DstOP, SrcIP, SrcOP, ScreenNO, RefNo) {
+
+            var jsonMsg = {
+                Type: "RESP",
+                DstIP: DstIP /* Manager IP */ ,
+                DstOP: DstOP /* Manager OP */ ,
+                SrcIP: SrcIP /* Request IP */ ,
+                SrcOP: SrcOP /* Request OP */ ,
+                Ack: "A" /* Request    */ ,
+                ScreenNo: ScreenNO /* Screen NO  */ ,
+                RefNo: RefNo /* REF_NO     */ ,
+                Etc: "N"
+            }
+
+            // waiBrowser_Approval.approvalRequest(JSON.stringify(jsonMsg));
+            send(jsonMsg);
+        }
+
+        //----------------------------------------------
+        // APPROVAL Functions - RESPONSE PART (Manager)
+        //----------------------------------------------
+        function ProcMessage(RMSG) {
+            try {
+                SockMessageChk(RMSG);
+            } catch (e) {};
+        }
+
+        //----------------------------------------------
+        // APPROVAL Functions - COMMON PART  (DATA Ctrl)
+        //----------------------------------------------
+        function AddMGRDataRow(MGRMessage) {
+            // MGRMessages[MGRMessages.length] = MGRMessage;
+            MGRMessages.push(MGRMessage);
+            if (MGRListWnd.targetWin) {
+                // MGRListWnd.targetWin.AddMGRDataRow(MGRMessage);
+                MGRListWnd.targetWin.updateMGRData();
+            }
+
+            updateReqAlert();
+        }
+
+        function RemoveMGRDataRow(MGRMessage) {
+            var i = 0;
+            
+            while (MGRMessages.length > 0) {
+
+                if (MGRMessages[i].srcIp == MGRMessage.srcIp &&
+                    MGRMessages[i].srcOp == MGRMessage.srcOp) {
+                    // if (MGRListWnd.targetWin) {
+                    //     MGRListWnd.targetWin.RemoveMGRDataRow(i);
+                    // }
+                    MGRMessages.splice(i, 1);
+                    break;
+                }
+                else
+                    i++;
+            }
+
+            if (MGRListWnd.targetWin) {
+                MGRListWnd.targetWin.updateMGRData();
+            }
+
+            updateReqAlert();
+        }
+
+        function updateReqAlert() {
+            const APMReqAlert = top.MAIN.APMReqAlert;
+            if (APMReqAlert) {
+                if (MGRMessages.length > 0) {
+                    APMReqAlert.style.display = '';
+                } else {
+                    APMReqAlert.style.display = 'none';
+                }
+            }
+        }
+
+        function SockMessageChk(ReadData) {
+            try {
+                MGRMessage = new MessageParser(ReadData);
+                console.log('MGRMessage --> ', MGRMessage);
+
+                /* 책임자 승인 요청 */
+                if (MGRMessage.msgType == "REQU" && MGRMessage.RC == "R"){
+                    AddMGRDataRow(MGRMessage);
+                    try { LIB().PlayMGRRequest(); } catch(E) { }
+                    MGRListWndShow(MGRMessage);
+                }
+                /* 책임자 승인 요청 취소 */
+                else if (MGRMessage.msgType == "REQU" && MGRMessage.RC == "C"){
+                    RemoveMGRDataRow(MGRMessage);
+                }
+                /* 책임자 응답 (승인) */
+                else if (MGRMessage.msgType == "RESP" && MGRMessage.YN == "Y") {
+                    if (MGRReplyY) MGRReplyY();
+                }
+                /* 책임자 응답 (부결) */
+                else if (MGRMessage.msgType == "RESP" && MGRMessage.YN == "N") {
+                    if (MGRReplyN) MGRReplyN();
+                }
+                /* NOTIFY Message */
+                else if (MGRMessage.msgType == "NTF") {
+                    window.status = MGRMessage.msg;
+                }
+                /* Broadcast Popup Message */
+                else if (MGRMessage.msgType == "BRDP") {
+                    ShowInfoDialog("       <Notice Message>    \r\n"+MGRMessage.msg);
+                }
+                /* Reject Log */
+                else if (MGRMessage.msgType == "RJL") {
+                    LIB().MGRReject = true;
+                    LIB().ShowInfoDialog("<Reject Message>\r\n"+MGRMessage.msg);
+                    LIB().Logout();
+                }
+                /* Reject Log ALL*/
+                else if (MGRMessage.msgType == "RJLALL") {
+                    LIB().ShowInfoDialog("<Reject Message>\r\n"+MGRMessage.msg);
+                    LIB().Logout();
+                }
+                /* 책임자 승인 요청 무응답 */
+                else if (MGRMessage.msgType == "REQU" && MGRMessage.RC == "N"){
+                    if (MGRNotRespond) MGRNotRespond();
+                }
+                else if (MGRMessage.msgType == "REQPAPER" ||
+                            MGRMessage.msgType == "PAPERIN"  ||
+                            MGRMessage.msgType == "END"  ){
+                    PBPrinterRet(MGRMessage.msgType, MGRMessage.Stream);
+                } 
+                else if (MGRMessage.msgType == "Error" ){
+
+                    console.log("Error :" + MGRMessage.msg);
+                }
+                else if (MGRMessage.msgType == "LOGIN" ){
+                    if(MGRMessage.msg == "duplicate"){
+                        retry= false;
+                        LIB().ShowErrorDialog("Duplicate login with manager approval");
+                    }
+                 
+                } 
+
+            }
+            catch (e){
+// 					LIB().ShowInfoDialog("[LIB:SockRead] " + e.description);
+                console.log("[LIB:SockRead]", ReadData);
+            }
+        }
+
+        function PBPrinterRet(cmd, title) {
+            if ( cmd == 'REQPAPER') {
+                ShowPBMessage(title);
+            }
+            else if ( (cmd == 'PAPERIN') || (cmd == 'END')) {
+                HidePBMessage();
+            }
+        }
+
+        function ShowPBMessage(title) {
+            // if (PBMsgWnd == null || PBMsgWnd.closed) {
+            if (!PBMsgWnd.targetWin) {
+                var DArg     = new DArgument();
+                DArg.Args    = new Array(2);
+                DArg.Args[0] = title;
+                // PBMsgWnd =
+                //     window.showModelessDialog("/common/PBPRTMessage.html",
+                //                                 DArg,
+                //                                 "dialogHeight: 150px; dialogWidth: 440px;center: yes;" +
+                //                                 "edge: raised; help: no; resizable: no; status: off; scroll: no");
+                openPopup("/common/PBPRTMessage.html", DArg, "dialogHeight: 150px; dialogWidth: 440px;center: yes;" +
+                                                    "edge: raised; help: no; resizable: no; status: off; scroll: no", null, PBMsgWnd);
+            }
+        }
+
+        function HidePBMessage() {
+            // if (PBMsgWnd != null && !PBMsgWnd.closed) {
+            if (PBMsgWnd.targetWin) {
+                PBMsgWnd.targetWin.close();
+            }else{
+                setTimeout(function() {
+                    HidePBMessage();
+                }, 1000);
+            }
+        }
+
+        function DArgument() {
+            if (!window.dialogArguments)
+                this.topWindow = window.top;
+            else
+                this.topWindow = window.dialogArguments.topWindow;
+            this.openWindow = window;
+            this.Args = null;
+        }
+
+        function MGRListWndShow(MGRMessage) {
+            // MGRListWndStat = "showing";
+
+            if (!MGRListWnd.targetWin) {
+                openPopup("/frame/APMConfirmList.html", new DArgument(), "dialogHeight: 660px; dialogWidth: 1132px;center: yes; edge: raised; help: no; resizable: no; status: no", undefined, MGRListWnd);
+            }
+        }
+
+        function MessageParser(msg) {
+            /*-------------------------------------------------------------------------*/
+            /*                                                                         */
+            /*   1. 메세지 구성                                                         */
+            /*      Type                                                               */
+            /*      DestIP                                                             */
+            /*      DestOP                                                             */
+            /*      SrcIP                                                              */
+            /*      SrcOP                                                              */
+            /*      RC                                                                 */
+            /*      Screen                                                             */
+            /*      RefNo                                                              */
+            /*      ETC                                                                */
+            /*      CaptureImg                                                         */
+            /*                                                                         */
+            /*   2. 승인요청                                                            */
+            /*      "REQU|목적지IP|이름|소스IP|이름|R|화면번호|Reference번호|             */
+            /*       승인요청내역|정보"                                                  */
+            /*                                                                         */
+            /*   3. 승인요청취소                                                        */
+            /*      "REQU|목적지IP|이름|소스IP|이름|C|화면번호|Reference번호"             */
+            /*                                                                         */
+            /*   4. 승인여부                                                            */
+            /*      "RESP|목적지IP|이름|소스IP|이름|N|화면번호|Reference번호|Bin 이미지   */
+            /*      "응답결과(승인(Y) 또는 거절(N))"                                     */
+            /*                                                                         */
+            /*   5. Nofify, Broadcast                                                  */
+            /*      "NTF|목적지IP|이름|소스IP|이름|N|메세지"                             */
+            /*                                                                         */
+            /*   7. Reject Log                                                         */
+            /*      "RJL|목적지IP|이름|소스IP|이름|N|메세지"                             */
+            /*                                                                         */
+            /*   8. Reject Log All                                                     */
+            /*      "RJLALL|목적지IP|이름|소스IP|이름|N|메세지"                          */
+            /*                                                                         */
+            /*-------------------------------------------------------------------------*/
+
+            var token = JSON.parse(msg);
+
+            this.msgType = token.Type;
+            this.dstIp = token.DstIP;
+            this.dstOp = token.DstOP;
+            this.srcIp = token.SrcIP;
+            this.srcOp = token.SrcOP;
+            this.RC = token.Ack;
+            switch (token.Type) {
+                case "REQU" :
+                    if (token.Ack == "R") {
+                        this.screenNum = token.ScreenNo;
+                        this.refNum    = token.RefNo;
+                        this.contents  = JSON.parse(token.Etc);
+                    } else {
+                        this.screenNum = token.ScreenNo;
+                        this.refNum    = token.RefNo;
+                    }
+                    break;
+                case "RESP" :
+                    this.screenNum = token.ScreenNo;
+                    this.refNum    = token.RefNo;
+                    this.YN        = token.Etc;
+                    break;
+                case "KILL" :
+                    break;
+                case "NTF" :
+                    this.msg = token.Etc;
+                    break;
+                case "BRDP" :
+                    this.msg = token.Etc;
+                    break;
+                case "RJL" :
+                    this.msg = token.Etc;
+                    break;
+                case "RJLALL" :
+                    this.msg = token.Etc;
+                    break;
+                default :
+                    this.msg = token.Etc;
+                    break;
+            }
+            this.Stream = null;
+            if (token.CaptureImg) {
+                this.Stream = new Uint8Array(token.CaptureImg.split(","));
+            }
+        }
+
+    </script>
+</head>
+<body onload="InitAPM()">
+    <!-- Y[wai] : Generated : dataServices -->
+    <!--
+    <dataservices>
+        <dataservice id="ivkChkPasswd" map="/tis/CMO0100.xml" service="CMO0100" dso="prmInDSO=SCR_INPUT;prmOutDSO=SCR_OUTPUT"></dataservice>
+    </dataservices>
+    -->
+    <!-- Y[wai] : Generated : dataServices -->
+</body>
+</html>

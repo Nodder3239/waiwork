@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html style="width: 905px; height: 733px;">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Info.</title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/css/Base_old.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script id="bodyScript1" type="text/javascript">
+            /********************************************************/
+            /* global variable set                                  */
+            /********************************************************/
+            var gBizDate = GET_COMM_DATA("FXFIG_COM","FXFIG_IBIL", 0);
+            var g_sBizDate = LIB().Util.DateToLocal(gBizDate, "YYYY/MM/DD", "S");
+            /******************************************************/
+            /* Document Initialize                                */
+            /******************************************************/
+            function fInitProc(){
+                LIB().InitCB(cboCUR_CD );
+                //LIB().InitCB(cboBR_CD );                
+                fClear();
+                if (window.dialogArguments) return;
+            }
+            /* 20170927_Stancent */
+            function fDialogInit() {
+                if (!window.dialogArguments) return;
+                LIB().InitCB(cboCUR_CD );
+                //LIB().InitCB(cboBR_CD );                
+                fClear();
+                txtMOM_ACCT_NO.value = window.dialogArguments.Args[0];
+                txtPRODUCT_NO.value = window.dialogArguments.Args[1];
+                dtpBASC_DT1.value = window.dialogArguments.Args[2];
+                dtpBASC_DT2.value = window.dialogArguments.Args[2];
+                fOnClick(1);
+            }
+            /******************************************************/
+            /* Clear                                              */
+            /******************************************************/
+            function fClear() {
+                txtMOM_ACCT_NO.value        = "";
+                txtMOM_ACCT_NM.value        = "";
+                dtpBASC_DT1.value = LIB().AddMonthsOvbr(g_sBizDate,-1);
+                dtpBASC_DT2.value = g_sBizDate;                         
+                txtCIF.value                = "";   
+                txtSID.value                = "";
+                txtCNTY_CD.value            = "";
+                txtCNTY_NM.value            = "";
+                txtCUST_ENM.value           = "";
+                txtADDR_ENM.value           = "";
+                dtpNEW_DT.value             = "";
+                dtpTRMN_DT.value            = "";
+                txtFRC_CNNT_ACCT_NO.value   = "";
+                cboCUR_CD.value             = "";
+                txtACCT_NM.value            = "";
+                //cboBR_CD.value              = "";   
+                //txtSALE_EMP_NO.value        = "";
+                //txtSALE_EMP_NM.value        = "";                               
+                prmDSOOut2.clear();
+                prmDSOOut2.recordset.addNew();                    
+                prmDSOSearch2.clear();
+                prmDSOSearch2.recordset.addNew();               
+                prmDSOSearch.clear();
+                prmDSOSearch.recordset.addNew();  
+                prmDSOOutLstsRel.clear();
+                prmDSOOutLstsRel.recordset.addNew();    
+                prmDSOSearchDtl.clear();
+                prmDSOSearchDtl.recordset.addNew();  
+                prmDSOOutDtlRel.clear();
+                prmDSOOutDtlRel.recordset.addNew();                   
+                gridBase.setRecordset(null);                    
+                fDisPlay(0);
+                txtMOM_ACCT_NO.focus();           
+            }    
+            /********************************************************/
+            /* 거래내역 조회                                        */
+            /*      idx : 1 - 채권거래 리스트 조회                  */
+            /*            2 - 채권 거래상세(매수/매도) 내역 조회    */            
+            /********************************************************/            
+            function fOnClick(idx){  
+                if ( txtMOM_ACCT_NO.value == "" ){
+                    ShowInfoDialog("Input the Account Number.");
+                    txtMOM_ACCT_NO.focus();
+                    return;
+                }
+                if ( idx == 1 ) {
+                    fCustInfoSch();
+                    var tmpBasDt    = dtpBASC_DT1.value;
+                    var tmpBasDt2   = dtpBASC_DT2.value;
+                    var basDt       = strReplaceOfDate(tmpBasDt);
+                    var basDt2      = strReplaceOfDate(tmpBasDt2);
+                    prmDSOSearch.recordset.fields("FIBD04_JOB_GB").value        = "S";
+                    prmDSOSearch.recordset.fields("FIBD04_MOM_ACCT_NO").value   = txtMOM_ACCT_NO.value;
+                    prmDSOSearch.recordset.fields("FIBD04_PRODUCT_NO").value    = txtPRODUCT_NO.value;
+                    prmDSOSearch.recordset.fields("FIBD04_INQUIRYFRDATE").value = basDt;
+                    prmDSOSearch.recordset.fields("FIBD04_INQUIRYTODATE").value = basDt2;
+                    prmDSOOutLstsRel.clear();
+                    ivkSearch.call(); 
+                    /* 데이타 바인딩 */
+                    if(prmDSOOutLstsRel.recordset.recordCount == 0){
+                       gridBase.setRecordset(null);    
+                    }
+                    else {
+                        /////////////// convert date type   //////////////////
+                        var ii, strTemp;
+                        prmDSOOutLstsRel.recordset.moveFirst();
+                        for (ii=0; ii < prmDSOOutLstsRel.recordset.recordCount; ii++) {
+                            strTemp = LIB().Util.DateToLocal(prmDSOOutLstsRel.recordset.fields("FOBD04_TRSC_DATE").value, "YYYY/MM/DD","S");
+                            prmDSOOutLstsRel.recordset.fields("FOBD04_TRSC_DATE").value = strTemp;
+                            prmDSOOutLstsRel.recordset.moveNext();
+                        }
+                        ///////////////////////////////////////////////                            
+                        gridBase.setRecordset(prmDSOOutLstsRel.recordset);
+                        gridBase.syncToDSO();
+                    }
+                }
+                else if ( idx == 2 ) {
+                    var job_gb = "";
+                    // 상세정보 dataset 초기화
+                    prmDSOSearchDtl.clear();
+                    prmDSOSearchDtl.recordset.addNew();  
+                    prmDSOOutDtlRel.clear();
+                    // 취소 거래 조회 안함
+                    var can_dv_cd = "";
+                        can_dv_cd = prmDSOOutLstsRel.recordset.fields("FOBD04_CAN_DV_CD").value;                    
+                    if ( can_dv_cd == "1" ) {
+                        return;   
+                    }
+                    // 거래종류에 따른 분기처리 
+                    var trsc_kind_cd = "";
+                        trsc_kind_cd = prmDSOOutLstsRel.recordset.fields("FOBD04_TRSC_KIND_CD").value;
+                    if ( trsc_kind_cd == "11" || trsc_kind_cd == "20" ) {
+                        job_gb = "B";
+                        fDisPlay(1);
+                    }
+                    else if ( trsc_kind_cd == "30" ){
+                        job_gb = "S";
+                        fDisPlay(2);
+                    }
+                    else if ( trsc_kind_cd == "51" || trsc_kind_cd == "52" ) {
+                        job_gb = "C";
+                        fDisPlay(3);
+                    }
+                    else {
+                        return;   
+                    }
+                    prmDSOSearchDtl.recordset.fields("FIBD04_1_JOB_GB").value         = job_gb;
+                    prmDSOSearchDtl.recordset.fields("FIBD04_1_ACCT_NO").value        = prmDSOOutLstsRel.recordset.fields("FOBD04_ACCT_NO").value;
+                    prmDSOSearchDtl.recordset.fields("FIBD04_1_TRSC_DT").value        = prmDSOOutLstsRel.recordset.fields("FOBD04_TRSC_DT").value;
+                    prmDSOSearchDtl.recordset.fields("FIBD04_1_TRSC_SEQ_NO").value    = prmDSOOutLstsRel.recordset.fields("FOBD04_TRSC_SEQ_NO").value;
+                    prmDSOSearchDtl.recordset.fields("FIBD04_1_TRSC_KIND_CD").value   = prmDSOOutLstsRel.recordset.fields("FOBD04_TRSC_KIND_CD").value;
+                    if (job_gb == "C") {
+                        prmDSOSearchDtl.recordset.fields("FIBD04_1_TRSC_DT").value    = prmDSOOutLstsRel.recordset.fields("FOBD04_APC_TRSC_DT").value;
+                        prmDSOSearchDtl.recordset.fields("FIBD04_1_TRSC_SEQ_NO").value= prmDSOOutLstsRel.recordset.fields("FOBD04_APC_TRSC_SEQ_NO").value;
+                    }                        
+                    ivkSearchdtl.call(); 
+                    /* 데이타 바인딩 */
+                    if(prmDSOOutDtlRel.recordset.recordCount > 0){
+                        if ( job_gb == "B" ) {
+                            // 매수 상세 정보        
+                            txtFOBD04_1_PRODUCT_NO.value        = prmDSOOutDtlRel.recordset.fields("FOBD04_1_PRODUCT_NO").value;
+                            txtFOBD04_1_PRODUCT_NAME.value      = prmDSOOutDtlRel.recordset.fields("FOBD04_1_PRODUCT_NAME").value;
+                            cedFOBD04_1_CUST_PRICE.value        = prmDSOOutDtlRel.recordset.fields("FOBD04_1_CUST_PRICE").value;
+                            cedFOBD04_1_BROKER_PRICE.value      = prmDSOOutDtlRel.recordset.fields("FOBD04_1_BROKER_PRICE").value;
+                            cedFOBD04_1_TRSC_FACE_VAL_AMT.value = prmDSOOutDtlRel.recordset.fields("FOBD04_1_TRSC_FACE_VAL_AMT").value;
+                            cedFOBD04_1_FEE_AMOUNT.value        = prmDSOOutDtlRel.recordset.fields("FOBD04_1_FEE_AMOUNT").value;
+                            cedFOBD04_1_YTM.value               = prmDSOOutDtlRel.recordset.fields("FOBD04_1_YTM").value;
+                            cedFOBD04_1_ACCR_DAYS.value         = prmDSOOutDtlRel.recordset.fields("FOBD04_1_ACCR_DAYS").value;
+                            cedFOBD04_1_ACCR_INT.value          = prmDSOOutDtlRel.recordset.fields("FOBD04_1_ACCR_INT").value;
+                            cedFOBD04_1_BOND_PRIN_AMT.value     = prmDSOOutDtlRel.recordset.fields("FOBD04_1_BOND_PRIN_AMT").value;
+                            cedFOBD04_1_BOND_SETL_AMT.value     = prmDSOOutDtlRel.recordset.fields("FOBD04_1_BOND_SETL_AMT").value;
+                        }
+                        else if (  job_gb == "S" ) {
+                            //매도상세정보
+                            txtFOBD04_1_PRODUCT_NO2.value       = prmDSOOutDtlRel.recordset.fields("FOBD04_1_PRODUCT_NO").value;
+                            txtFOBD04_1_PRODUCT_NAME2.value     = prmDSOOutDtlRel.recordset.fields("FOBD04_1_PRODUCT_NAME").value;
+                            cedFOBD04_1_CUST_PRICE2.value       = prmDSOOutDtlRel.recordset.fields("FOBD04_1_CUST_PRICE").value;
+                            cedFOBD04_1_BROKER_PRICE2.value     = prmDSOOutDtlRel.recordset.fields("FOBD04_1_BROKER_PRICE").value;
+                            cedFOBD04_1_TRSC_FACE_VAL_AMT2.value= prmDSOOutDtlRel.recordset.fields("FOBD04_1_TRSC_FACE_VAL_AMT").value;
+                            cedFOBD04_1_FEE_AMOUNT2.value       = prmDSOOutDtlRel.recordset.fields("FOBD04_1_FEE_AMOUNT").value;
+                            cedFOBD04_1_CAPT_GAIN2.value        = prmDSOOutDtlRel.recordset.fields("FOBD04_1_CAPT_GAIN").value;
+                            cedFOBD04_1_CAPT_GAIN_TAX2.value    = prmDSOOutDtlRel.recordset.fields("FOBD04_1_CAPT_GAIN_TAX").value;
+                            cedFOBD04_1_ACCR_INT2.value         = prmDSOOutDtlRel.recordset.fields("FOBD04_1_ACCR_INT").value;
+                            cedFOBD04_1_ACCR_INT_TAX2.value     = prmDSOOutDtlRel.recordset.fields("FOBD04_1_ACCR_INT_TAX").value;
+                            cedFOBD04_1_BOND_PRIN_AMT2.value    = prmDSOOutDtlRel.recordset.fields("FOBD04_1_BOND_PRIN_AMT").value;
+                            cedFOBD04_1_BOND_SETL_AMT2.value    = prmDSOOutDtlRel.recordset.fields("FOBD04_1_BOND_SETL_AMT").value;
+                        }
+                        else if ( job_gb == "C" ) {
+                            // 쿠폰상세정보
+                            txtFOBD04_1_PRODUCT_NO3.value       = prmDSOOutDtlRel.recordset.fields("FOBD04_1_PRODUCT_NO").value;
+                            txtFOBD04_1_PRODUCT_NAME3.value     = prmDSOOutDtlRel.recordset.fields("FOBD04_1_PRODUCT_NAME").value;
+                            cedFOBD04_1_BOND_FACE_VAL_BAL3.value= prmDSOOutDtlRel.recordset.fields("FOBD04_1_BOND_FACE_VAL_BAL").value;
+                            cedFOBD04_1_BOND_SETL_AMT3.value    = prmDSOOutDtlRel.recordset.fields("FOBD04_1_BOND_SETL_AMT").value;
+                            cedFOBD04_1_TAX_AMT3.value          = prmDSOOutDtlRel.recordset.fields("FOBD04_1_TAX_AMT").value;
+                            cedFOBD04_1_BOND_SETL_NET_AMT3.value= prmDSOOutDtlRel.recordset.fields("FOBD04_1_BOND_SETL_NET_AMT").value;
+                            dtpFOBD04_1_TRADE_DT3.value         = LIB().Util.DateToLocal(prmDSOOutDtlRel.recordset.fields("FOBD04_1_TRADE_DT").value, "YYYYMMDD", "S");
+                            dtpFOBD04_1_DUE_DT3.value           = LIB().Util.DateToLocal(prmDSOOutDtlRel.recordset.fields("FOBD04_1_DUE_DT").value, "YYYYMMDD", "S");
+                        }
+                    }
+                }  // End Of else if ( idx == 2 )  
+            }
+            /********************************************************/
+            /* Grid Double Click Event                              */
+            /*      매수/매도 상세 내역 조회                        */
+            /********************************************************/  
+            function fGridDblClick() {
+                if(prmDSOOutLstsRel.recordset.recordCount == 0){
+                   return;    
+                }
+                // 상세정보 탭 초기화 
+                fDisPlay();
+                //조회 호출 
+                fOnClick(2);
+            }            
+            /********************************************************/
+            /*  EnterKey 입력 시  팝업 호출                         */
+            /********************************************************/ 
+            function fOnKeyDown() {
+                var rec;
+                var eventObj;
+                eventObj = window.event.srcElement;
+                if (window.event.keyCode == 13) {
+                   if (txtMOM_ACCT_NO.value.length > 0) {
+                        fPopUp(1);
+                    } 
+                    else if (txtPRODUCT_NO.value.length > 0) {
+                        fPopUp(2);
+                    }
+                }
+            }
+            /********************************************************/
+            /* 고객정보 조회                                        */
+            /********************************************************/            
+            function fCustInfoSch(){  
+                prmDSOSearch2.recordset.fields("FIBD12_1_MOM_ACCT_NO").value = txtMOM_ACCT_NO.value;
+                ivkSearch2.call();
+                if (prmDSOOut2.recordset.recordCount > 0) {
+                    txtMOM_ACCT_NM.value        = prmDSOOut2.recordset.fields("FOBD12_1_MOM_ACCT_NM").value;
+                    txtCIF.value                = prmDSOOut2.recordset.fields("FOBD12_1_CIF").value;
+                    txtSID.value                = prmDSOOut2.recordset.fields("FOBD12_1_SID").value;
+                    txtCNTY_CD.value            = prmDSOOut2.recordset.fields("FOBD12_1_CNTY_CD").value;
+                    txtCNTY_NM.value            = prmDSOOut2.recordset.fields("FOBD12_1_CNTY_NM").value;
+                    txtCUST_ENM.value           = prmDSOOut2.recordset.fields("FOBD12_1_CIF_NM").value;
+                    txtADDR_ENM.value           = prmDSOOut2.recordset.fields("FOBD12_1_ADDR_ENM").value;
+                    dtpNEW_DT.value             = prmDSOOut2.recordset.fields("FOBD12_1_NEW_DT").value;
+                    dtpTRMN_DT.value            = prmDSOOut2.recordset.fields("FOBD12_1_TRMN_DT").value;
+                    txtFRC_CNNT_ACCT_NO.value   = prmDSOOut2.recordset.fields("FOBD12_1_CNNT_ACCT_NO").value;
+                    cboCUR_CD.value             = prmDSOOut2.recordset.fields("FOBD12_1_CUR_CD").value;
+                    txtACCT_NM.value            = prmDSOOut2.recordset.fields("FOBD12_1_MOM_ACCT_NM").value;
+                    //cboBR_CD.value              = prmDSOOut2.recordset.fields("FOBD12_1_MGNT_BR_NO").value;
+                    //txtSALE_EMP_NO.value        = prmDSOOut2.recordset.fields("FOBD12_1_SALE_EMP_NO").value;
+                    //txtSALE_EMP_NM.value        = prmDSOOut2.recordset.fields("FOBD12_1_SALE_EMP_NM").value;    
+                }                 
+            }
+            /********************************************************/
+            /* 팝업 호출 및 팝업 리턴 정보 처리                     */
+            /********************************************************/             
+            function fPopUp(idx) {
+                var DArg        = new DArgument();
+                    DArg.Args   = new Array(3);          
+                var arrOut      = new Array(2);
+                var gMainDialog;  
+                if(idx == 1){  
+                    DArg.Args[0] = "a";
+                    DArg.Args[1] = txtMOM_ACCT_NO.value;
+                    var strWindowStatus = "status:no; resizable:no; scroll:no; center:yes; dialogHeight:530px; dialogWidth:900px;";
+                    gMainDialog = window.showModalDialog("/bd/BD07.html",DArg,strWindowStatus);   
+                    if( gMainDialog != null ) {
+                        txtMOM_ACCT_NO.value        = gMainDialog[1];
+                        txtMOM_ACCT_NM.value        = gMainDialog[2];
+                        fCustInfoSch(); 
+                        /*
+                        txtCIF.value                = gMainDialog[0];   
+                        txtCNTY_CD.value            = gMainDialog[10];
+                        txtCNTY_NM.value            = gMainDialog[27];
+                        txtCUST_ENM.value           = gMainDialog[11];
+                        txtADDR_ENM.value           = gMainDialog[12];
+                        dtpNEW_DT.value             = gMainDialog[13];
+                        dtpTRMN_DT.value            = gMainDialog[14];
+                        txtFRC_CNNT_ACCT_NO.value   = gMainDialog[15];
+                        cboCUR_CD.value             = gMainDialog[6];
+                        txtACCT_NM.value            = gMainDialog[2];
+                        cboBR_CD.value              = gMainDialog[29];   
+                        txtSALE_EMP_NO.value        = gMainDialog[18];
+                        txtSALE_EMP_NM.value        = gMainDialog[28];  
+                        */                          
+                    }
+                }
+                else if (idx == 2) {
+                    DArg.Args[0] = "";
+                    DArg.Args[1] = "";
+                    var strWindowStatus = "status:no; resizable:no; scroll:no; center:yes; dialogHeight:530px; dialogWidth:648px;";
+                    gMainDialog = window.showModalDialog("/bd/BD08.html",DArg,strWindowStatus);   
+                    if( gMainDialog != null ) {
+                        txtPRODUCT_NO.value = gMainDialog[2];
+                        txtPRODUCT_NM.value = gMainDialog[3];
+                    }                   
+                }       
+            }          
+            /******************************************************/
+            /* Tab Div Init                                       */
+            /*      strTab : 1 - 매수정보 상세                    */
+            /*               2 - 매도정보 상세                    */
+            /*               3 - 이자상환 상세                    */
+            /******************************************************/
+            function fDisPlay(strTab) {
+                divTab1.style.display = "none";
+                divTab2.style.display = "none";
+                divTab3.style.display = "none";
+                Tab1.className = "tabnormaltitle_big";
+                Tab2.className = "tabnormaltitle_big";
+                Tab3.className = "tabnormaltitle_big";
+                // 매수상세정보
+                txtFOBD04_1_PRODUCT_NO.value        ="";     
+                txtFOBD04_1_PRODUCT_NAME.value      ="";
+                cedFOBD04_1_CUST_PRICE.value        ="";
+                cedFOBD04_1_BROKER_PRICE.value      ="";
+                cedFOBD04_1_TRSC_FACE_VAL_AMT.value ="";
+                cedFOBD04_1_FEE_AMOUNT.value        ="";
+                cedFOBD04_1_YTM.value               ="";
+                cedFOBD04_1_ACCR_DAYS.value         ="";
+                cedFOBD04_1_ACCR_INT.value          ="";
+                cedFOBD04_1_BOND_PRIN_AMT.value     ="";
+                cedFOBD04_1_BOND_SETL_AMT.value     ="";
+                // 매도상세정보
+                txtFOBD04_1_PRODUCT_NO2.value       ="";
+                txtFOBD04_1_PRODUCT_NAME2.value     ="";
+                cedFOBD04_1_CUST_PRICE2.value       ="";
+                cedFOBD04_1_BROKER_PRICE2.value     ="";
+                cedFOBD04_1_TRSC_FACE_VAL_AMT2.value="";
+                cedFOBD04_1_FEE_AMOUNT2.value       ="";
+                cedFOBD04_1_CAPT_GAIN2.value        ="";
+                cedFOBD04_1_CAPT_GAIN_TAX2.value    ="";
+                cedFOBD04_1_ACCR_INT2.value         ="";
+                cedFOBD04_1_ACCR_INT_TAX2.value     ="";
+                cedFOBD04_1_BOND_PRIN_AMT2.value    ="";
+                cedFOBD04_1_BOND_SETL_AMT2.value    ="";
+                // 쿠폰상세정보
+                txtFOBD04_1_PRODUCT_NO3.value       = "";
+                txtFOBD04_1_PRODUCT_NAME3.value     = "";
+                cedFOBD04_1_BOND_FACE_VAL_BAL3.value= "";
+                cedFOBD04_1_BOND_SETL_AMT3.value    = "";
+                cedFOBD04_1_TAX_AMT3.value          = "";
+                cedFOBD04_1_BOND_SETL_NET_AMT3.value= "";
+                dtpFOBD04_1_TRADE_DT3.value         = "";
+                dtpFOBD04_1_DUE_DT3.value           = "";
+                if (strTab == 1) {
+                    divTab1.style.display = "";
+                    Tab1.className        = "tabselecttitle_big";
+                } 
+                else if (strTab == 2) {
+                    divTab2.style.display = "";
+                    Tab2.className        = "tabselecttitle_big";
+                } 
+                else if (strTab == 3) {
+                    divTab3.style.display = "";
+                    Tab3.className        = "tabselecttitle_big";
+                }
+            }
+            /********************************************************/
+            /* 입력 key : 영문자 소문자 -> 대문자 처리              */
+            /********************************************************/               
+            function upperCase() {
+                var keyCode = event.keyCode;
+                if(keyCode>96 && keyCode<123) event.keyCode -=32;
+                event.returnValue=true;
+            }      
+            /********************************************************/
+            /* 일자 구분자 제거 처리                                */
+            /********************************************************/                 
+            function strReplaceOfDate(obj) {
+                var tmpDt = "";
+                var baseDt = "";
+                tmpDt = LIB().Util.LocalToDate(obj);
+                tmpDt  = tmpDt.replace(/\//g, "");   
+                baseDt  = tmpDt.replace (/-/g, "");
+                return baseDt;
+            } 
+    </script>
+    <script type="text/javascript"></script>
+</head>
+<body onload="fInitProc()">
+    <!-- Y[wai] : Generated : dataServices -->
+    <dataservices>
+        <dataservice id="ivkSearch2" map="/tis/BDO1201.xml" service="BDO1201" dso="prmDSOSearch2=SCR_INPUT;prmDSOOut2=SCR_OUTPUT" onerror="//alert(ivkSearch.RawResult.xml);"></dataservice>
+        <dataservice id="ivkSearch" map="/tis/BDO0400.xml" service="BDO0400" dso="prmDSOSearch=SCR_INPUT;prmDSOOutLstsRel=SCR_DTLSREL" onerror="//alert(ivkSearch.RawResult.xml);"></dataservice>
+        <dataservice id="ivkSearchdtl" map="/tis/BDO0401.xml" service="BDO0401" dso="prmDSOSearchDtl=SCR_INPUT;prmDSOOutDtlRel=SCR_DTLSREL" onerror="//alert(ivkSearch.RawResult.xml);"></dataservice>
+    </dataservices>
+    <!-- Y[wai] : Generated : dataServices -->
+    <div class="topbarDiv" style="margin-top: 10px; top: 10px; height: 72px; left: 24px;">
+        <div class="topbarIngreen">
+            <label class="regist" style="left:-8px;width:120px;padding-top:3px;position:absolute;top:6px;height:20px;">
+        Investment Account
+      </label>
+            <input class="default" name="MomAcctNo" size="16" type="text" width="0" maxlength="16" onkeypress="upperCase()" onkeydown="fOnKeyDown();" id="txtMOM_ACCT_NO" style="left:120px;width:120px;position:absolute;top:7px;">
+            <input height="22" hspace="0" name="MOM_ACCT_NO" type="image" vspace="0" tabindex="-1" onclick="fPopUp(1)" src="/biz/images/detail.gif" id="btnMOM_ACCT_NO" style="left:240px;width:20px;position:absolute;top:7px;height:22px;">
+            <input height="0" maxlength="50" class="readonly" readonly size="50" type="text" width="0" tabindex="-1" id="txtMOM_ACCT_NM" style="left:260px;width:200px;position:absolute;top:7px;">
+            <label class="regist" style="left:-8px;width:120px;padding-top:3px;position:absolute;top:37px;height:20px;">
+        Product Code
+      </label>
+            <input name="ProductNo" size="16" type="text" width="0" maxlength="20" onkeydown="fOnKeyDown();" onkeypress="upperCase()" id="txtPRODUCT_NO" style="left:120px;width:120px;position:absolute;top:37px;">
+            <input height="22" hspace="0" name="ProductNo" onclick="fPopUp(2)" src="/biz/images/detail.gif" type="image" vspace="0" width="21" tabindex="-1" id="btnPRODUCT_NO" style="left:240px;width:20px;position:absolute;top:37px;height:22px;">
+            <input height="0" maxlength="50" class="readonly" readonly size="50" type="text" width="0" tabindex="-1" disabled id="txtPRODUCT_NM" style="left:260px;width:200px;position:absolute;top:37px;">
+            <label class="regist" lang="InquiryDate" style="left:450px;width:102px;padding-top:3px;position:absolute;top:37px;height:20px;">
+        Inquiry Date
+      </label>
+            <dateedit id="dtpBASC_DT1" class="default" tabindex="2" title="Apply start date" dateOrder="yyyymmdd" style="left: 557px; width: 100px; position: absolute; top: 37px; height: 20px;"></dateedit>
+            <label class="regist" style="left:656px;width:10px;padding-top:3px;position:absolute;top:37px;height:20px;">
+        ~
+      </label>
+            <dateedit id="dtpBASC_DT2" class="default" tabindex="2" title="Apply end date" dateOrder="yyyymmdd" style="left: 671px; width: 100px; position: absolute; top: 37px; height: 20px;"></dateedit>
+            <input type="image" name="imgSearch" height="21" hspace="0" size="1" src="/biz/images/search.gif" onmouseout="this.src='/biz/images/search.gif'" onmouseover="this.src='/biz/images/searchover.gif'" vspace="0" width="90" onclick="fOnClick(1)" tabindex="-1" id="imgSEARCH" style="left:784px;width:80px;position:absolute;top:37px;height:21px;">
+        </div>
+        <div class="conditiontitle" style="left:-5px;top:80px;">
+            <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+            <label class="Mtitle" lang="CustomerInformation">
+        Customer Information
+      </label>
+        </div>
+        <div class="infoDiv" style="left:-20px;width:875px;top:100px;height:100px;">
+            <div class="infoIngray" style="width:875px;height:100px;">
+                <label class="search" lang="CifNo" style="left:5px;width:200px;position:absolute;top:10px;height:18px;">
+          Cif No
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCIF" style="left:210px;width:100px;position:absolute;top:-2px;">
+                </label>
+                <label class="search" lang="Nationality" style="left:435px;width:130px;position:absolute;top:10px;height:18px;">
+          Nationality
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCNTY_CD" style="left:140px;width:50px;position:absolute;top:-2px;">
+                    <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCNTY_NM" style="left:190px;width:225px;position:absolute;top:-2px;">
+                </label>
+                <label class="search" lang="Name" style="left:5px;width:200px;position:absolute;top:40px;height:18px;">
+          Name
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtCUST_ENM" style="left:210px;width:200px;position:absolute;top:-2px;text-align:left;">
+                </label>
+                <label class="search" style="left:435px;top:40px;height:18px;width:130px;position:absolute;">
+          SID
+          <input type="text" class="readonly" readonly maxlength="16" id="txtSID" style="left:140px;top:-2px;width:193px;position:absolute;">
+                </label>
+                <label class="search" lang="Address" style="left:5px;width:200px;position:absolute;top:70px;height:18px;">
+          Address
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtADDR_ENM" style="left:210px;width:630px;position:absolute;top:-2px;text-align:left;">
+                </label>
+            </div>
+        </div>
+        <div class="conditiontitle" style="left:-5px;top:210px;">
+            <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+            <label class="Mtitle">
+        Investment Account Info.
+      </label>
+        </div>
+        <div class="infoDiv" style="left:-20px;width:875px;top:230px;height:130px;">
+            <div class="infoIngray" style="width:875px;height:130px;">
+                <label class="search" lang="OpeningDate" style="left:5px;width:200px;position:absolute;top:10px;height:20px;">
+          Opening Date
+          <dateedit id="dtpNEW_DT" class="readonly" tabindex="-1" title="Apply start date" readonly dateOrder="yyyymmdd" style="left: 210px; width: 100px; position: absolute; top: -2px; height: 20px;"></dateedit>
+                </label>
+                <label class="search" lang="ClosingDate" style="left:435px;width:130px;position:absolute;top:10px;height:20px;">
+          Closing Date
+          <dateedit id="dtpTRMN_DT" class="readonly" tabindex="-1" title="Apply close date" readonly dateOrder="yyyymmdd" style="left: 140px; width: 100px; position: absolute; top: -2px; height: 20px;"></dateedit>
+                </label>
+                <label class="search" style="left:5px;width:200px;position:absolute;top:40px;height:18px;">
+          Settlement Account
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtFRC_CNNT_ACCT_NO" style="left:210px;width:200px;position:absolute;top:-2px;">
+                </label>
+                <label class="search" lang="Currency" style="left:435px;width:130px;position:absolute;top:40px;height:18px;">
+          Currency
+          <codecombo id="cboCUR_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 145px; height: 100%;" labelWidth="145px" url="/jsondb/F2.json" cbDisplayTextField="false" class="readonly" readonly panelWidth="230px" panelHeight="110px" dropdownkeycode="145" tabindex="-1" style="left: 140px; width: 200px; position: absolute; top: -2px; height: 20px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":45.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":183.2}],
+                        "data":[]
+                    </codecombo>
+                </label>
+                <label class="search" lang="AccountName" style="left:5px;width:200px;position:absolute;top:70px;height:18px;">
+          Account Name
+          <input fldname="" dsoname="" maxlength="16" class="readonly" readonly type="text" tabindex="-1" id="txtACCT_NM" style="left:210px;width:560px;position:absolute;top:-2px;">
+                </label>
+            </div>
+        </div>
+        <div class="conditiontitle" style="left:-5px;top:370px;">
+            <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+            <label class="Mtitle" lang="TransactionInformation">
+        Transaction Information
+      </label>
+        </div>
+        <div class="infoDiv" style="left:-20px;width:875px;top:390px;height:160px;">
+            <div class="infoIngray" style="width:875px;height:160px;">
+                <grid id="gridBase" dsoName="BDO0400.prmDSOOutLstsRel" oncelldblclick="fGridDblClick(1)" style="font-size: 8pt; color: rgb(48, 48, 48); position: absolute; top: 0px; left: 10px; width: 850px; height: 150px;">
+                    "options" : {
+                      "fixColumn":0
+                      ,"columns" : [
+                        {"text":"No.","field":"FOBD04_SEQ_NO","alignment":"center","width":30,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right"},"lang":"No.","style":"custSty1"}
+                        ,{"text":"Dt","field":"FOBD04_TRSC_DT","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":"!9999-99-99;0;_","editor":{"type":"MaskEdit","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"Date","field":"FOBD04_TRSC_DATE","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"lang":"Date","style":"custSty1"}
+                        ,{"text":"Tr_No.","field":"FOBD04_TRSC_SEQ_NO","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right"},"style":"custSty1"}
+                        ,{"text":"Hold Bond","field":"FOBD04_PRODUCT_NO","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"Hold Bond Name","field":"FOBD04_PRODUCT_NAME","alignment":"center","width":180,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1"}
+                        ,{"text":"Transaction Name","field":"FOBD04_TRSC_DV_NM","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"lang":"TransactionName","style":"custSty1"}
+                        ,{"text":"Trading Status","field":"FOBD04_TRAD_PROCSS_STA_NM","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1"}
+                        ,{"text":"Cancel","field":"FOBD04_CAN_DV_NM","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"lang":"Cancel","style":"custSty1"}
+                        ,{"text":"Transaction Amount","field":"FOBD04_TRSC_FACE_VAL_AMT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right"},"style":"custSty1"}
+                        ,{"text":"Approved Employee","field":"FOBD04_OPTR_EMP_NO","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"Transaction Account","field":"FOBD04_ACCT_NO","alignment":"center","width":140,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"Process Time","field":"FOBD04_PROC_LST_TM","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"Process Branch","field":"FOBD04_TRT_BR_NO","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"Process Branch Name","field":"FOBD04_TRT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1"}
+                        ,{"text":"Process User","field":"FOBD04_OPTR_EMP_NO","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"Process User Name","field":"FOBD04_OPTR_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left"},"style":"custSty1"}
+                        ,{"text":"TRSC_KIND_CD","field":"FOBD04_TRSC_KIND_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"TRAD_PROCSS_STA_CD","field":"FOBD04_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                        ,{"text":"CAN_DV_CD ","field":"FOBD04_CAN_DV_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center"},"style":"custSty1"}
+                      ]
+                      ,"style":{"custSty1":{"header":{"color":"#289088","font":"normal 8px Arial white"},"cell":{"color":"white","font":"normal 8px Arial #666666"}}}
+                    }
+                </grid>
+            </div>
+        </div>
+        <table border="0" cellpadding="0" cellspacing="0" style="margin-left:0px;width:876px;position:absolute;top:570px;height:150px;">
+            <tr height="20px">
+                <td>
+                    <table border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td class="tabnormaltitle_big" onclick="fDisPlay(1)" id="Tab1">
+                Buy Information
+              </td>
+                            <td width="5">
+                            </td>
+                            <td class="tabnormaltitle_big" onclick="fDisPlay(2)" id="Tab2">
+                Sell Information
+              </td>
+                            <td width="5">
+                            </td>
+                            <td class="tabnormaltitle_big" onclick="fDisPlay(3)" id="Tab3">
+                Coupon Information
+              </td>
+                            <td width="5">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr height="10px">
+                <td background="/biz/images/tabbar_back.gif">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="tabDiv" id="divTab1" style="display:none;left:0px;width:875px;position:relative;top:-4px;height:190px;">
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:10px;height:18px;">
+              Product No
+              <input fldname="" dsoname="" maxlength="20" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NO" style="left:190px;width:200px;position:absolute;top:-2px;">
+                        </label>
+                        <label class="search" lang="ProductName" style="left:400px;width:180px;position:absolute;top:10px;height:18px;">
+              Product Name
+              <input fldname="" dsoname="" maxlength="60" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NAME" style="left:190px;width:200px;position:absolute;top:-2px;">
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:40px;height:18px;">
+              Customer Price
+              <edit id="cedFOBD04_1_CUST_PRICE" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:40px;height:18px;">
+              Broker Price
+              <edit id="cedFOBD04_1_BROKER_PRICE" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:70px;height:18px;">
+              Face Value
+              <edit id="cedFOBD04_1_TRSC_FACE_VAL_AMT" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:70px;height:18px;">
+              P/L of Sale Retail Bond
+              <edit id="cedFOBD04_1_FEE_AMOUNT" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:100px;height:18px;">
+              YTM
+              <edit id="cedFOBD04_1_YTM" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:130px;height:18px;">
+              Accured Days
+              <edit id="cedFOBD04_1_ACCR_DAYS" type="CURRENCY" value="0" class="readonly" readonly digits="0" style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:130px;height:18px;">
+              Accured Interest
+              <edit id="cedFOBD04_1_ACCR_INT" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:160px;height:18px;">
+              Principal Amount
+              <edit id="cedFOBD04_1_BOND_PRIN_AMT" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:160px;height:18px;">
+              Settlement Amount
+              <edit id="cedFOBD04_1_BOND_SETL_AMT" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                    </div>
+                    <div class="tabDiv" id="divTab2" style="display:none;left:0px;width:875px;position:relative;top:-4px;height:190px;">
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:10px;height:18px;">
+              Product No
+              <input fldname="" dsoname="" maxlength="20" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NO2" style="left:190px;width:200px;position:absolute;top:-2px;">
+                        </label>
+                        <label class="search" lang="ProductName" style="left:400px;width:180px;position:absolute;top:10px;height:18px;">
+              Product Name
+              <input fldname="" dsoname="" maxlength="60" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NAME2" style="left:190px;width:200px;position:absolute;top:-2px;">
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:40px;height:18px;">
+              Customer Price
+              <edit id="cedFOBD04_1_CUST_PRICE2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:40px;height:18px;">
+              Broker Price
+              <edit id="cedFOBD04_1_BROKER_PRICE2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:70px;height:18px;">
+              Face Value
+              <edit id="cedFOBD04_1_TRSC_FACE_VAL_AMT2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:70px;height:18px;">
+              P/L of Sale Retail Bond
+              <edit id="cedFOBD04_1_FEE_AMOUNT2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:100px;height:18px;">
+              Capital Gain
+              <edit id="cedFOBD04_1_CAPT_GAIN2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:100px;height:18px;">
+              Capital Gain Tax
+              <edit id="cedFOBD04_1_CAPT_GAIN_TAX2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:130px;height:18px;">
+              Accured Interest
+              <edit id="cedFOBD04_1_ACCR_INT2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:130px;height:18px;">
+              Accured Interest Tax
+              <edit id="cedFOBD04_1_ACCR_INT_TAX2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:160px;height:18px;">
+              Principal Amount
+              <edit id="cedFOBD04_1_BOND_PRIN_AMT2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:160px;height:18px;">
+              Settlement Amount
+              <edit id="cedFOBD04_1_BOND_SETL_AMT2" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                    </div>
+                    <div class="tabDiv" id="divTab3" style="display:none;left:0px;width:875px;position:relative;top:-4px;height:190px;">
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:10px;height:18px;">
+              Product No
+              <input fldname="" dsoname="" maxlength="20" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NO3" style="left:190px;width:200px;position:absolute;top:-2px;">
+                        </label>
+                        <label class="search" lang="ProductName" style="left:400px;width:180px;position:absolute;top:10px;height:18px;">
+              Product Name
+              <input fldname="" dsoname="" maxlength="60" type="text" tabindex="-1" class="readonly" readonly id="txtFOBD04_1_PRODUCT_NAME3" style="left:190px;width:200px;position:absolute;top:-2px;">
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:40px;height:18px;">
+              Face Value Balance
+              <edit id="cedFOBD04_1_BOND_FACE_VAL_BAL3" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:40px;height:18px;">
+              Payment Amount
+              <edit id="cedFOBD04_1_BOND_SETL_AMT3" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:70px;height:18px;">
+              Tax Amount
+              <edit id="cedFOBD04_1_TAX_AMT3" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:400px;width:180px;position:absolute;top:70px;height:18px;">
+              Payment Net Amount
+              <edit id="cedFOBD04_1_BOND_SETL_NET_AMT3" type="CURRENCY" value="0.00" class="readonly" readonly style="left: 190px; width: 130px; position: absolute; top: 0px; text-align: right;"></edit>
+                        </label>
+                        <label class="search" style="left:3px;width:180px;position:absolute;top:100px;height:18px;">
+              Trading Date
+              <dateedit id="dtpFOBD04_1_TRADE_DT3" class="readonly" tabindex="-1" readonly style="left: 190px; width: 100px; position: absolute; top: 0px; height: 20px;"></dateedit>
+                        </label>
+                        <label class="search" lang="DueDate" style="left:400px;width:180px;position:absolute;top:100px;height:18px;">
+              Due Date
+              <dateedit id="dtpFOBD04_1_DUE_DT3" class="readonly" tabindex="-1" readonly style="left: 190px; width: 100px; position: absolute; top: 0px; height: 20px;"></dateedit>
+                        </label>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

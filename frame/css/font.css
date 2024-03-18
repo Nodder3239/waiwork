@@ -1,0 +1,13 @@
+/* font-face */
+@font-face {
+    font-family: 'HanaB';
+    src: url('/font/HanaB.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'HanaM';
+    src: url('/font/HanaM.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'HanaL';
+    src: url('/font/HanaL.ttf') format('truetype');
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko" style="width: 650px; height: 460px;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu List</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="/wai/default.css">
+    <link rel="stylesheet" href="/css/Base.css">
+    <script type="text/javascript">
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                var upmuCode = window.dialogArguments.Args[0];
+                const mList = topWindow().LIB.CDO.MenuData.filter(elem => (elem.upmuCode ?? '').startsWith(upmuCode) && !['.', ''].includes(elem.srcUrl) && elem.sts == '0');
+                mList.sort(function(a, b) {
+                    var compA = a.upmuCode;
+                    var compB = b.upmuCode;
+                    if(compA < compB) return -1;
+                    if(compA > compB) return 1;
+                    if(compA === compB) return 0;
+                });
+                menuGrid.setData(mList);
+            }
+        }
+        function Work(event) {
+            var retArr = new Array(2);
+            retArr[0] = menuGrid.getValue('upmuCode');
+            retArr[1] = "EMPTY";
+            window.returnValue = retArr;
+            window.close();
+        }
+    </script>
+</head>
+<body>
+    <grid id="menuGrid" oncelldblclick="Work(event);" style="width: 636px; height: 412px; left: 7px; top: 5px; position: absolute;">
+        "options" : {
+          "editable":false
+          ,"columnHeight":20
+          ,"cellHeight":20
+          ,"fixColumn":0
+          ,"aggregate":""
+          ,"appendmode":false
+          ,"autohiddencols":false
+          ,"autofit":false
+          ,"contextmenu":true
+          ,"indicator":{"show":true,"width":30, "text":"No"}
+          ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+          ,"group":[]
+          ,"columns" : [
+            {"text":"Trx Code","field":"upmuCode","alignment":"center","width":111,"editor":{"type":"text","alignment":"center","equalBlank":""},"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","style":"","filter":""}
+            ,{"text":"Trx Name","field":"menuName","alignment":"center","width":492,"editor":{"type":"text","alignment":"left","equalBlank":""},"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","style":"","filter":""}
+          ]
+          ,"style":{}
+          ,"effect":{"columnHighlight":true}
+          ,"size":{"vertScrollWidth":19}
+          ,"footer":{"show":false,"height":24}
+          ,"conditionalstyle":[]
+        }
+    </grid>
+    <button id="close" class="greenBtn" onclick="window.close()" style="position:absolute;left: 264px; top: 424px;width: 98px;height: 27px;">Close</button>
+</body>
+</html>

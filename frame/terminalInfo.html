@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Information</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="/wai/default.css">
+    <link rel="stylesheet" href="/css/Base.css">
+    <link rel="stylesheet" href="css/Terminal_Info.css" />
+    <script type="text/javascript">
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                window.returnValue = false;
+                // FXFIG_COM, FMGRINFO : getMainCommData('SysInfo'), getMainCommData('EtcInfo')
+                // else : getBizCommData('SysInfo'), getMainCommData('EtcInfo')
+                let inputData = {
+                    "opTp": "2", 
+                    "ipAddr": getMainCommData('EtcInfo').thid ?? ""
+                };
+                callService('/HANABANK/V1/COM/CM/COMCMO0500I.SVC', inputData, function (outputData) { // TODO : 쿼리아니고 무슨정보(?)에서 가져옴
+                    console.log("outputData -->", outputData);
+                    // var ouputData = {
+                    //     "pbPrtYn": "string",
+                    //     "pbDevNo": 0,
+                    //     "pbPortNo": "string",
+                    //     "linePrt1": "string",
+                    //     "linePrt2": "string",
+                    //     "linePrt3": "string"
+                    // };
+                    txtLinePrt1.value = outputData?.linePrt1 || "";
+                    txtLinePrt2.value = outputData?.linePrt2 || "";
+                });
+            }
+        }
+
+        function fConfirm() {
+            let inputData = {
+                "opTp": "0", 
+                "ipAddr": getMainCommData('EtcInfo').thid ?? "", 
+                "ownerOpNo": getMainCommData('SysInfo').opNo,
+                "linePrt1": txtLinePrt1.value,
+                "linePrt2": txtLinePrt2.value
+            };
+            // inputData = {
+            //     "opTp": "string",
+            //     "ipAddr": "string",
+            //     "ownerOpNo": "string",
+            //     "pbPrtYn": "string",
+            //     "pbDevNo": 0,
+            //     "pbPortNo": "string",
+            //     "linePrt1": "string",
+            //     "linePrt2": "string",
+            //     "linePrt3": "string"
+            // };
+            callService('/HANABANK/V1/COM/CM/COMCMO0500A.SVC', inputData, function (outputData) {
+                // console.log("outputData -->", outputData);
+                // var ouputData = {"result": "string"};
+                window.returnValue = true;
+                window.close();
+            });
+        }
+
+        function fCancel() {
+            window.returnValue = false;
+            window.close();
+        }
+    </script>
+</head>
+<body>
+    <h1> <img src="./images/information.png" alt="#"> <span>Terminal Information</span></h1>
+    <div id="container">
+        <div class="input-box">
+            <div class="box">
+                <p>Line Printer1</p>
+                <input type="text" id="txtLinePrt1" maxlength="20">
+            </div>
+            <div class="box">
+                <p>Line Printer2</p>
+                <input type="text" id="txtLinePrt2" maxlength="20">
+            </div>
+        </div>
+    </div>
+    <div id="btn">
+        <button class="confirm" onclick="fConfirm()">Confirm</button>
+        <button class="cancel" onclick="fCancel()">Cancel</button>
+    </div>
+</body>
+</html> 

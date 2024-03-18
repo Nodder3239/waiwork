@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html style="width: 620px; height: 475px;">
+<head>
+    <meta charset="UTF-8">
+    <title>APMO Request Approval to manager</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <link href="./css/APM.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript">
+        var TimerID  = null;
+        var TimerCnt = 0;
+        let imgStream = null;
+
+        function UnloadCheck() {
+            if (TimerID != null) Cancel();
+        }
+
+        window.onunload = UnloadCheck;
+
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                Initialize();
+                imgStream = window.dialogArguments.Args?.imgData;
+            }
+        }
+
+        function OVRDInfo(ovrd_msg, ovrd_gb, ovrd_cc, ovrd_detail_array) {
+            this.ovrd_msg = ovrd_msg;
+            this.ovrd_gb = ovrd_gb;
+            this.ovrd_cc = ovrd_cc.toString();
+            this.ovrd_detail_array = ovrd_detail_array;
+        }
+
+        /*
+        function OVRDDetail() {
+            this.ovrd_cd = "";
+            this.ovrd_nm = "";
+            this.ovrd_rm = "";
+        }
+
+        function OVRDDetailArray() {
+            // var Details = new Array(9);
+            // for (var i = 0; i < Details.length; i++){
+            //     Details[i] = new OVRDDetail();
+            // }
+            // return Details;
+            return new Array(9).fill(new OVRDDetail());
+        }
+        */
+
+        function Initialize() {
+            APM().MGRReplyY     = ReplyY;
+            APM().MGRReplyN     = ReplyN;
+            APM().MGRNotRespond = NotRespond;
+
+            const MgrList = getMainCommData('OvrdInfo')?.mngrList ?? [];
+            /*
+            const MgrList = [
+                {
+                    "userId": "ONEQ005",
+                    "brNo": "0888",
+                    "userNm": "Jun",
+                    "ipAdr": "",
+                    "mngrFind": ""
+                },
+                {
+                    "userId": "0003120",
+                    "brNo": "0888",
+                    "userNm": "FENNYTA WIJAYA",
+                    "ipAdr": "",
+                    "mngrFind": ""
+                },
+                {
+                    "userId": "0000333",
+                    "brNo": "0888",
+                    "userNm": "CAECILIA ENGGELINA",
+                    "ipAdr": "",
+                    "mngrFind": ""
+                }
+            ];
+            */
+
+            const mgrData = MgrList.map(elem => {
+                return {
+                    mgr_id: elem.userId ?? '', // FMGRINFO_MNID
+                    mgr_nm: elem.userNm ?? '', // FMGRINFO_MNNM
+                    mgr_ip: elem.ipAdr ?? ''   // FMGRINFO_MNIP
+                };
+            });
+
+            cmbMGRID.setData(mgrData);
+
+            if (mgrData.length > 0) {
+                cmbMGRID.setSelectIndex(0);
+            }
+            
+            const OvrdInfo = getBizCommData('OvrdInfo');
+            const ovrdData = OvrdInfo.ovrdItm.map(elem => {
+                return {
+                    code: elem.ovrdCd,
+                    nm: elem.ovrdNm
+                };
+            });
+
+            grdMGRInfo.setData(ovrdData);
+
+            txtOVCC.value = OvrdInfo.ovrdItm.length;
+            txtOPIP.value = getMainCommData('EtcInfo').thid ?? ''; // GET_COMM_DATA("FXFIG_COM", "FXFIG_THID");
+            txtOVGB.value = "1";
+        }
+
+        function Request() {
+            if (TimerID != null) {
+                // alert("It is approval request middle.");
+                showInfoDialog('It is approval request middle.');
+                return;
+            }
+
+            // const ovrdDetail = new OVRDDetailArray();
+
+            const OvrdInfo = getBizCommData('OvrdInfo');
+            const ovrd_cnt = OvrdInfo.ovrdItm.length;
+
+            const mgrData = grdMGRInfo.getData();
+            // mgrData.forEach((elem, idx) => {
+            //     ovrdDetail[idx].ovrd_cd = elem.code;
+            //     ovrdDetail[idx].ovrd_nm = elem.nm;
+            // });
+            const ovrdDetail = mgrData.map(elem => {
+                return {
+                    ovrdCd: elem.code,
+                    ovrdNm: elem.nm,
+                    ovrdRm: ''
+                };
+            });
+            
+            const ovrdInfo = new OVRDInfo("", "", ovrd_cnt, ovrdDetail);
+
+            const curMgrInfo = cmbMGRID.getSelected();
+            if (!curMgrInfo) {
+                showInfoDialog('Please select a manager.');
+                return;
+            }
+            
+            APM().APM_Request(
+                curMgrInfo.mgr_ip, // MGR IP
+                curMgrInfo.mgr_id, // MGR ID
+                getMainCommData('EtcInfo').thid,   // GET_COMM_DATA("FXFIG_COM", "FXFIG_THID"),   // OP IP
+                getMainCommData('SysInfo').userId, // GET_COMM_DATA("FXFIG_COM", "FXFIG_OPNO"),   // OP ID
+                getBizCommData('SysInfo').orgScrnId ?? '',  // GET_COMM_DATA("FXFIG_SCR", "FXFIG_IBCD"), // scrnId -> orgScrnId
+                getBizCommData('SysInfo').refNo ?? '',   // GET_COMM_DATA("FXFIG_SCR", "FXFIG_REF_NO"),
+                ovrdInfo,
+                imgStream
+            );
+
+            txtCount.value = 0;
+
+            TimerID = window.setInterval(CountTime, 1000);
+        }
+
+        function Cancel() {
+            if (TimerID != null) {
+                window.clearInterval(TimerID);
+                txtCount.value = "";
+                TimerID = null;
+                TimerCnt = 0;
+
+                const curMgrInfo = cmbMGRID.getSelected();
+
+                APM().SendMGROPReqCancelMessage(
+                    curMgrInfo.mgr_ip, // MGR IP
+                    curMgrInfo.mgr_id, // MGR ID
+                    getMainCommData('EtcInfo').thid,   // GET_COMM_DATA("FXFIG_COM", "FXFIG_THID"),   // OP IP
+                    getMainCommData('SysInfo').userId, // GET_COMM_DATA("FXFIG_COM", "FXFIG_OPNO"),   // OP ID
+                    getBizCommData('SysInfo').orgScrnId ?? '',  // GET_COMM_DATA("FXFIG_SCR", "FXFIG_IBCD"), // scrnId -> orgScrnId
+                    getBizCommData('SysInfo').refNo ?? ''    // GET_COMM_DATA("FXFIG_SCR", "FXFIG_REF_NO"),
+                );
+            } else {
+                window.returnValue = false;
+                window.close();
+            }
+        }
+
+        function ReplyY() {
+            window.clearInterval(TimerID);
+            txtCount.value = "";
+            TimerID = null;
+            TimerCnt = 0;
+
+            const curMgrInfo = cmbMGRID.getSelected();
+
+            LIB().CDO.EtcInfo.mnNo = curMgrInfo.mgr_id; // LIB().HNDC.SetItemValue("FXFIG_MNNO", cmbMGRID.XMLData.recordset.Fields(0).Value);
+            LIB().CDO.SysInfo.rsprEmpNo = curMgrInfo.mgr_id; // LIB().HNDC.SetItemValue("FXFIG_MNTN", "");
+            LIB().CDO.EtcInfo.mnCm = ''; // LIB().HNDC.SetItemValue("FXFIG_MNCM", "");
+
+            window.returnValue = true;
+            window.close();
+        }
+
+        function ReplyN() {
+            window.clearInterval(TimerID);
+            txtCount.value = "";
+            TimerID = null;
+            TimerCnt = 0;
+
+            window.returnValue = false;
+
+            // alert('Reject..');
+            showInfoDialog('Reject..', function() {
+                window.close();
+            });
+        }
+
+        function NotRespond() {
+            window.clearInterval(TimerID);
+            txtCount.value = "";
+            TimerID = null;
+            TimerCnt = 0;
+
+            // alert('Not Respond..');
+            showInfoDialog('Not Respond..');
+        }
+
+        function CountTime() {
+            TimerCnt++;
+            txtCount.value = TimerCnt;
+        }
+    </script>
+</head>
+<body>
+    <div id="container" style="left: 0px; top: 0px; width: 620px; height: 475px;">
+        <div id="div1" style="position: absolute; left: 13px; top: 8px; width: 600px; height: 40px;">
+            <div id="topTxt">Would you like request approval to manager?</div>
+        </div>
+        <div id="div2" class="topbarDiv" style="position: absolute; left: 13px; top: 56px; width: 600px; height: 40px;">
+            <label id="label1" class="registTop" style="position: absolute; left: 32px; top: 6px; width: 80px; height: 24px;">Manager</label>
+            <codecombo id="cmbMGRID" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" idField="mgr_id" textField="mgr_nm" panelWidth="360px" style="position: absolute; left: 120px; top: 6px; width: 160px; height: 24px;">
+                "columns":[{"field":"mgr_id","title":"ID","sortable":true,"align":"center","width":50},{"field":"mgr_nm","title":"Name","sortable":true,"align":"center","width":100},{"field":"mgr_ip","title":"IP","sortable":true,"align":"center","width":80}],
+                "data":[]
+            </codecombo>
+            <label class="registTop" id="label2" style="position: absolute; left: 312px; top: 6px; width: 80px; height: 24px;">IP Address</label>
+            <input id="txtOPIP" readonly style="position: absolute; left: 400px; top: 6px; width: 150px; height: 24px;">
+        </div>
+        <div class="" id="div3" style="position: absolute; left: 13px; top: 104px; width: 600px; height: 40px; background-color: rgb(211, 211, 211); border: 1px solid rgb(190, 190, 190);">
+            <label id="label3" style="position: absolute; left: 48px; top: 7px; width: 80px; height: 24px; font-weight: bold;">Request Type</label>
+            <input id="txtOVGB" readonly style="position: absolute; left: 136px; top: 7px; width: 96px; height: 24px;">
+            <label id="label4" style="position: absolute; left: 305px; top: 7px; width: 88px; height: 24px; font-weight: bold;">Request count</label>
+            <input id="txtOVCC" readonly style="position: absolute; left: 401px; top: 7px; width: 96px; height: 24px;">
+        </div>
+        <grid id="grdMGRInfo" style="position: absolute; left: 13px; top: 152px; width: 600px; height: 280px;">
+            "options" : {
+              "editable":false
+              ,"columnHeight":20
+              ,"cellHeight":20
+              ,"fixColumn":0
+              ,"aggregate":""
+              ,"appendmode":false
+              ,"autohiddencols":false
+              ,"autofit":true
+              ,"contextmenu":true
+              ,"indicator":{"show":false,"width":30}
+              ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+              ,"group":[]
+              ,"columns" : [
+                {"text":"Code","alignment":"center","width":70,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"center","equalBlank":""},"style":"","filter":"","field":"code"}
+                ,{"text":"Name","alignment":"center","width":300,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"center","equalBlank":""},"style":"","filter":"","field":"nm"}
+              ]
+              ,"style":{}
+              ,"effect":{"columnHighlight":true}
+              ,"size":{"vertScrollWidth":19}
+              ,"footer":{"show":true,"height":24}
+              ,"conditionalstyle":[]
+            }
+        </grid>
+        <div id="btn" style="position: absolute; left: 389px; top: 440px; width: 224px; height: 28px;">
+            <button class="confirm" onclick="Request()" id="btnOK" style="width: 104px; height: 24px;">OK</button>
+            <button class="cancel" onclick="Cancel()" id="btnCancel" style="width: 104px; height: 24px;">Cancel</button>
+        </div>
+        <label id="label5" style="position: absolute; left: 14px; top: 440px; width: 80px; height: 24px;">Waiting time</label>
+        <input id="txtCount" style="position: absolute; left: 98px; top: 440px; width: 48px; height: 24px;" readonly>
+        <label id="label6" style="position: absolute; left: 145px; top: 440px; width: 32px; height: 24px;">sec's</label>
+    </div>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1300px;">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+</head>
+<body onload="fInitProc()">
+    <!-- Action Manager -->
+    <actman id="AMan">
+        <!--  Insert  -->
+        <action name="ActEntry">
+        </action>
+        <action name="ActExecute">
+        </action>
+        <action name="ActCancelJob">
+            <ctrl cid="txtREF_NO" clear="true" value=""></ctrl>
+            <ctrl cid="txtPRMO_NM_RD" clear="true" value=""></ctrl>
+            <ctrl cid="cbbACTION_TP" clear="true" value=""></ctrl>
+            <ctrl cid="txtPRMO_NM" clear="true" value=""></ctrl>
+            <ctrl cid="cbbCRED_TP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbTRX_SRC" clear="true" value=""></ctrl>
+            <ctrl cid="cbbBENE_TP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbNOTIFICATION" clear="true" value=""></ctrl>
+            <ctrl cid="dtpSTR_DT" clear="true" value=""></ctrl>
+            <ctrl cid="dtpEND_DT" clear="true" value=""></ctrl>
+            <ctrl cid="cbbSTS" clear="true" value=""></ctrl>
+            <ctrl cid="txtPROMO_AMT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtMAX_AMT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbUSAGE_TP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbDAY_TP" clear="true" value=""></ctrl>
+            <ctrl cid="txtSPC_DT" clear="true" value=""></ctrl>
+            <ctrl cid="txtSTR_TM" clear="true" value=""></ctrl>
+            <ctrl cid="txtEND_TM" clear="true" value=""></ctrl>
+            <ctrl cid="txtGROUP_NO" clear="true" value=""></ctrl>
+            <ctrl cid="cbbGROUP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbLIMIT_TP" clear="true" value=""></ctrl>
+            <ctrl cid="txtDAILY_LIMIT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtDAILY_FREQ" clear="true" value="0"></ctrl>
+            <ctrl cid="txtMONTHLY_LIMIT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtMONTHLY_FREQ" clear="true" value="0"></ctrl>
+            <ctrl cid="txtYEARLY_LIMIT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtYEARLY_FREQ" clear="true" value="0"></ctrl>
+            <ctrl cid="txtACCT_BAL" clear="true" value=""></ctrl>
+            <ctrl cid="cbbACCT_BAL_FLAG" clear="true" value=""></ctrl>
+            <ctrl cid="txtUSAGE_DUE_DATE" clear="true" value="0"></ctrl>
+            <ctrl cid="txtUSAGE_DUE_TO" clear="true" value="0"></ctrl>
+            <ctrl cid="txtCONTRACTED_DUE_DATE" clear="true" value="0"></ctrl>
+            <ctrl cid="txtCONTRACTED_DUE_TO" clear="true" value="0"></ctrl>
+        </action>
+    </actman>
+    <div class="topbarDiv" style="left: 24px; width: 1228px; font-family: arial, helvetica, sans-serif; position: absolute; top: 24px; height: 37px;">
+        <label class="searchTop" style="left: 5px; width: 104px;  position: absolute; top: 5px; height: 24px;">
+        Promo Ref No
+      </label>
+        <input id="txtREF_NO" dsoname="DSO2900.prmQueryCheckOut" class="readonly" readonly fldname="FODS29_REF_NO" maxlength="20" onkeydown="ftxtREF_NO_ENTER()" style="left: 113px; width: 150px; position: absolute; top: 5px; height: 24px;">
+        <input id="btnDS22" onclick="fSearchDS22();" tabindex="-1" src="/biz/images/detail.gif" type="image" style="left: 267px; width: 24px; position: absolute; top: 5px; height: 24px;">
+        <input id="txtPRMO_NM_RD" class="readonly" readonly tabindex="-1" type="text" style="left: 295px; width: 280px; position: absolute; top: 5px; height: 24px;">
+        <label class="searchTop" style="left: 579px; width: 104px; position: absolute; top: 5px; height: 24px;">
+        Action Type
+      </label>
+        <codecombo id="cbbACTION_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_ACTION_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS01.json" cbDisplayTextField="false" class="default" panelWidth="180px" panelHeight="100px" dropdownkeycode="145" title="Action Type" tabindex="5" onChange="cbbACTION_TP_Change();" onLoadError="cbbACTION_TP.value = '';" style="left: 687px; width: 150px; position: absolute; top: 5px; height: 24px;">
+            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":35.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":143.2}],
+            "data":[]
+        </codecombo>
+    </div>
+    <div class="infoIngray" style="left: 24px; top: 100px; width: 1228px; height: 150px; position: absolute;">
+        <label class="search" style="position: absolute; width: 80px; height: 24px; left: 47px; top: 5px;">
+        Promo Name
+        <input id="txtPRMO_NM" clientleft="2" clienttop="2" height="0" class="default" maxlength="50" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_PROMO_NM" style="position: absolute; width: 280px; height: 24px; left: 84px; top: 0px;">
+        </label>
+        <label class="search" style="position: absolute; width: 80px; height: 24px; left: 936px; top: 6px;">
+        Trx Source
+        <codecombo id="cbbTRX_SRC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_TRX_SRC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS41.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbTRX_SRC_Change();" style="position: absolute; width: 160px; height: 24px; left: 84px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 80px; height: 24px; left: 47px; top: 33px;">
+        Benefit Type
+        <codecombo id="cbbBENE_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_BENE_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS42.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbBENE_TP_Change();" style="position: absolute; width: 160px; height: 24px; left: 84px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" lang="CreditType" style="position: absolute; width: 80px; height: 22px; left: 489px; top: 34px;">
+        Credit Type
+        <codecombo id="cbbCRED_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_CRED_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 150px; height: 100%;" labelWidth="150px" url="/jsondb/DS43.json" cbDisplayTextField="false" class="default" panelWidth="250px" panelHeight="100px" dropdownkeycode="145" onChange="cbbCRED_TP_Change();" style="position: absolute; width: 220px; height: 24px; left: 85px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 80px; height: 24px; left: 936px; top: 34px;">
+        Notification
+        <codecombo id="cbbNOTIFICATION" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_NOTIFICATION" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS12.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbNOTIFICATION_Change();" style="position: absolute; width: 160px; height: 24px; left: 84px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 80px; height: 24px; left: 47px; top: 61px;">
+        Start Date
+        <dateedit id="dtpSTR_DT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_STR_DT" class="default" style="position: absolute; width: 110px; height: 24px; left: 84px; top: 0px;"></dateedit>
+        </label>
+        <label class="search" lang="EndDate" style="position: absolute; width: 80px; height: 26px; left: 489px; top: 62px;">
+        End Date
+        <dateedit id="dtpEND_DT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_END_DT" class="default" style="position: absolute; width: 110px; height: 24px; left: 85px; top: 0px;"></dateedit>
+        </label>
+        <label class="search" lang="Status" style="position: absolute; width: 80px; height: 26px; left: 489px; top: 6px;">
+        Status
+        <codecombo id="cbbSTS" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS02.json" cbDisplayTextField="false" class="default" panelWidth="180px" panelHeight="100px" dropdownkeycode="145" tabindex="5" onLoadError="cbbSTS.value = '';" style="position: absolute; width: 160px; height: 24px; left: 85px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":35.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":143.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 152px; height: 24px; left: 864px; top: 62px;">
+        Promo Amount
+        <edit id="txtPROMO_AMT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PROMO_AMT" type="CURRENCY" value="0.00" class="default" maxlength="50" style="position: absolute; width: 120px; left: 156px; top: 0px; height: 24px;"></edit>
+        </label>
+        <label class="search" style="position: absolute; width: 152px; height: 24px; left: 864px; top: 90px;">
+        Maximum Amount
+        <edit id="txtMAX_AMT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PERC_AMT_MAXIMAL" type="CURRENCY" value="0.00" class="default" maxlength="50" style="position: absolute; width: 120px; left: 156px; top: 0px; height: 24px;"></edit>
+        </label>
+        <label class="search" style="position: absolute; width: 120px; height: 24px; left: 7px; top: 89px;">
+        Remark Internal
+        <input id="txtREMARK_FOR_INTERNAL" clientleft="2" clienttop="2" height="0" class="default" maxlength="70" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_REMARK_FOR_INTERNAL" style="position: absolute; width: 140px; left: 124px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 120px; height: 22px; left: 449px; top: 90px;">
+        Remark Customer
+        <input id="txtREMARK_FOR_CUSTOMER" clientleft="2" clienttop="2" height="0" class="default" maxlength="70" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_REMARK_FOR_CUSTOMER" style="position: absolute; width: 140px; left: 125px; top: 0px; height: 24px;">
+        </label>
+        <label class="search" style="position: absolute; width: 120px; height: 24px; left: 7px; top: 117px;">
+        Expense Code
+        <codecombo id="cbbEXPENSE_CD" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_EXPENSE_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS35.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="position: absolute; width: 180px; height: 24px; left: 124px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 110px; height: 26px; left: 459px; top: 118px;">
+        Channel
+        <codecombo id="cbbCHANNEL_TYPE" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_CHANNEL_TYPE" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS45.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="position: absolute; width: 160px; height: 24px; left: 114px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+        <label class="search" style="position: absolute; width: 110px; height: 24px; left: 906px; top: 118px;">
+        Disburstment
+        <codecombo id="cbbDISB_DAY" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DISB_DAY" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS46.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbDISB_DAY_Change();" style="position: absolute; width: 160px; height: 24px; left: 114px; top: 0px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                "data":[]
+            </codecombo>
+        </label>
+    </div>
+    <div class="conditiontitle" style="top:225px;left:12px;">
+        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+        <div class="conditiontitle" style="top:333px;left:12px;">
+            <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+            <label class="Mtitle" style="position: absolute; left: 40px; top: 400px;">
+      Promo Target
+    </label>
+            <div class="conditiontitle" style="top: 592px; left: 0px; width: 1280px; height: 24px; position: absolute;">
+                <div class="infoIngray" style="left: 24px; top: -308px; width: 1228px; height: 110px; position: absolute;">
+                    <label class="search" lang="Usage" style="left: 7px; width: 80px; position: absolute; top: 6px; height: 24px;">
+        Usage
+        <codecombo id="cbbUSAGE_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_USAGE_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS05.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbUSAGE_TP_Change();" onLoadError="cbbUSAGE_TP.value = 'NN';" style="left: 85px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" lang="Day" style="left: 7px; width: 80px; position: absolute; top: 34px; height: 24px;">
+        Day
+        <codecombo id="cbbDAY_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DAY_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/F483.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 85px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" lang="Date" style="left: 456px; width: 80px; position: absolute; top: 34px; height: 24px;">
+        Date
+        <input id="txtSPC_DT" clientleft="2" clienttop="2" height="0" maxlength="50" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_SPC_DT" style="left: 85px; overflow: hidden; width: 50px; position: absolute; top: 0px; height: 24px;">
+                    </label>
+                    <label class="search" lang="StartTime" style="left: 7px; width: 80px; position: absolute; top: 62px; height: 24px;">
+        Start Time
+        <input id="txtSTR_TM" clientleft="2" clienttop="2" height="0" maxlength="4" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_STR_TM" style="left: 85px; overflow: hidden; width: 110px; position: absolute; top: 0px; height: 24px;">
+                    </label>
+                    <label class="search" lang="EndTime" style="left: 456px; width: 80px; position: absolute; top: 62px; height: 24px;">
+        End Time
+        <input id="txtEND_TM" clientleft="2" clienttop="2" height="0" maxlength="4" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_END_TM" style="left: 85px; overflow: hidden; width: 110px; position: absolute; top: 0px; height: 24px;">
+                    </label>
+                </div>
+                <div class="infoIngray" style="left: 24px; top: -164px; width: 1228px; height: 54px; position: absolute;">
+                    <label class="search" lang="GroupNo" style="left: 5px; width: 80px; position: absolute; top: 5px; height: 24px;">
+        Group No
+        <input id="txtGROUP_NO" class="readonly" readonly tabindex="-1" clientleft="2" clienttop="2" height="0" maxlength="20" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_GROUP_NO" style="left: 85px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                    </label>
+                    <label class="search" style="left: 456px; width: 80px; position: absolute; top: 5px; height: 24px;">
+        Enable?
+        <codecombo id="cbbGROUP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_GROUP_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS13.json" cbDisplayTextField="false" class="readonly" readonly panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 85px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <label class="Mtitle" style="position: absolute; left: 40px; top: 256px;">
+      Special Day/Time
+    </label>
+    </div>
+    <label class="Mtitle" style="left: 40px; top: 68px; width: 544px; height: 28px; position: absolute;">
+      Basic Promo Information
+    </label>
+    <div id="infoDiv" class="infoDiv" style="position:absolute;top:88px;height:130px;">
+    </div>
+    <div id="infoDiv1" class="infoDiv" oldid="infoDiv" style="position:absolute;top:245px;height:84px;">
+    </div>
+    <div id="infoDiv2" class="infoDiv" oldid="infoDiv" style="position:absolute;top:350px;height:45px;">
+    </div>
+    <label class="Mtitle" style="height: 24px; position: absolute; left: 40px; top: 488px;">
+      Parameters
+    </label>
+    <tabControl id="tabControl1" index="0" onTabChange="tabOnChange( event )" style="display: none; position: absolute; left: 24px; top: 520px; width: 1228px; height: 464px;">
+        <tabPage id="tabPage1" title="Limit User" style="width: 100%; height: 100%; display: block;">
+            <label class="default" style="left: 7px; width: 150px; position: absolute; top: 35px; height: 24px;">
+                <b>
+              Limitation Level
+            </b>
+                <codecombo id="cbbLIMIT_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_LIMIT_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS47.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 63px;">
+            Daily Amount Limit
+            <edit id="txtDAILY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DAILY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 91px;">
+            Daily Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_DAILY_FREQ" id="txtDAILY_FREQ" style="left: 155px; overflow: hidden; width: 40px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 119px;">
+            Weekly Amount Limit
+            <edit id="txtWEEKLY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_WEEKLY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 147px;">
+            Weekly Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_WEEKLY_FREQ" id="txtWEEKLY_FREQ" style="left: 155px; overflow: hidden; width: 40px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 175px;">
+            Monthly Amount Limit
+            <edit id="txtMONTHLY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MONTHLY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 203px;">
+            Monthly Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_MONTHLY_FREQ" id="txtMONTHLY_FREQ" style="left: 155px; overflow: hidden; width: 40px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="left: 7px; width: 150px; position: absolute; top: 231px; height: 24px;">
+            Yearly Amount Limit
+            <edit id="txtYEARLY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_YEARLY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" style="left: 7px; width: 150px; position: absolute; top: 259px; height: 24px;">
+            Yearly Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_YEARLY_FREQ" id="txtYEARLY_FREQ" style="left: 155px; overflow: hidden; width: 77px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="left: 5px; width: 500px; position: absolute; top: 235px; height: 30px;">
+                <i style="font-size: 8pt; color: rgb(255, 0, 0); position: absolute; left: -4px; top: 53px; height: 24px; width: 504px;">
+              * Please Set 99 For Unlimited Frequency Limit And 99,999,999 For Unlimited Amount Limit
+            </i>
+            </label>
+        </tabPage>
+        <tabPage id="tabPage2" title="Limit Campaign" style="width: 100%; height: 100%; display: none;">
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 35px;">
+            Enable?
+            <codecombo id="cbbCAMPAIGN_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_CAMPAIGN_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 155px; top: 0px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 63px;">
+            Daily Amount Limit
+            <edit id="txtDAILY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DAILY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="position: absolute; width: 120px; left: 155px; top: 0px; height: 24px;"></edit>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 91px;">
+            Daily Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_DAILY_FREQ_CAMPAIGN" id="txtDAILY_FREQ_CAMPAIGN" style="position: absolute; width: 40px; left: 155px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 119px;">
+            Weekly Amount Limit
+            <edit id="txtWEEKLY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_WEEKLY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="position: absolute; width: 120px; left: 155px; top: 0px; height: 24px;"></edit>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 147px;">
+            Weekly Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_WEEKLY_FREQ_CAMPAIGN" id="txtWEEKLY_FREQ_CAMPAIGN" style="position: absolute; width: 40px; left: 155px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 175px;">
+            Monthly Amount Limit
+            <edit id="txtMONTHLY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MONTHLY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="position: absolute; width: 120px; left: 155px; top: 0px; height: 24px;"></edit>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 203px;">
+            Monthly Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_MONTHLY_FREQ_CAMPAIGN" id="txtMONTHLY_FREQ_CAMPAIGN" style="position: absolute; width: 40px; left: 155px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 231px;">
+            Yearly Amount Limit
+            <edit id="txtYEARLY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_YEARLY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="position: absolute; width: 120px; left: 155px; top: 0px; height: 24px;"></edit>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 7px; top: 259px;">
+            Yearly Frequency Limit
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_YEARLY_FREQ_CAMPAIGN" id="txtYEARLY_FREQ_CAMPAIGN" style="position: absolute; width: 40px; left: 155px; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="position: absolute; width: 500px; height: 24px; left: 5px; top: 287px;">
+                <i style="font-size: 8pt; color: rgb(255, 0, 0);">
+              * Please Set 99 For Unlimited Frequency Limit And 99,999,999 For Unlimited Amount Limit
+            </i>
+            </label>
+        </tabPage>
+        <tabPage id="tabPage3" title="Loan" style="width: 100%; height: 100%; display: none;">
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 5px; top: 60px;">
+            Enable?
+            <codecombo id="cbbLOAN_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_LOAN_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="width: 150px; position: absolute; top: 0px; height: 24px; left: 154px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 5px; top: 88px;">
+            Costumer Type
+            <codecombo id="cbbCOSTUMER_TYPE_LN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_COSTUMER_TYPE" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS48.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 154px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left: 526px; width: 150px; position: absolute; top: 88px; height: 24px;">
+            New CIF?
+            <codecombo id="cbbNEW_CIF" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_NEW_CIF" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 154px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 5px; top: 116px;">
+            Loan Status
+            <codecombo id="cbbLOAN_STATUS" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_LOAN_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS49.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 154px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left: 526px; width: 150px; position: absolute; top: 144px; height: 24px;">
+            Enable?
+            <codecombo id="cbbPARTNER_DESTINATION_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PARTNER_DESTINATION_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 154px; width: 150px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 150px; height: 24px; left: 5px; top: 144px;">
+            Partner Destination
+            <input onclick="fLoadLOANExcel();" src="" tabindex="-1" type="button" onmouseout="" onmouseover="" id="btnPARTNER_DESTINATIONUpload" value="Excel" class="greenBtn" style="left: 154px; overflow: hidden; position: absolute; top: 0px; height: 24px; width: 104px;">
+            </label>
+            <div class="conditiontitle" style="top: 35px; left: 24px; display: block; height: 24px; position: absolute; width: 64px;">
+                <label class="Mtitle" lang="Loan" style="position: absolute; left: 0px; top: 0px; height: 24px;">
+              Loan
+            </label>
+            </div>
+            <grid id="ExcelGridLOAN" dsoName="prmExcelQR" style="display: none; top: 172px; left: 5px; width: 1208px; height: 376px; position: absolute;">
+                "options" : {
+                  "editable":false
+                  ,"columnHeight":20
+                  ,"cellHeight":20
+                  ,"fixColumn":0
+                  ,"aggregate":""
+                  ,"appendmode":false
+                  ,"autohiddencols":false
+                  ,"autofit":false
+                  ,"contextmenu":true
+                  ,"indicator":{"show":false,"width":30}
+                  ,"selector":{"show":false,"width":20,"checked":"none","type":"check"}
+                  ,"group":[]
+                  ,"columns" : [
+                    {"text":"MID","field":"FODS291_LN_MERCHANT_ID","alignment":"center","width":80,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true}
+                    ,{"text":"Merchant Name","field":"FODS291_LN_MERCHANT_NM","alignment":"center","width":120,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true}
+                    ,{"text":"Terminal ID","field":"FODS291_LN_TERMINAL_ID","alignment":"center","width":80,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true}
+                    ,{"text":"Terminal Name","field":"FODS291_LN_TERMINAL_NM","alignment":"center","width":200,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true}
+                    ,{"text":"Location","field":"FODS291_LOCATION","alignment":"center","width":200,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Location","style":"custSty1","type":"column","height":20,"visible":true}
+                    ,{"text":"Reg dt","field":"FODS291_REG_DT","alignment":"center","width":200,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1","type":"column","height":20,"visible":true}
+                  ]
+                  ,"style":{}
+                  ,"effect":{"columnHighlight":true}
+                  ,"size":{"vertScrollWidth":19}
+                  ,"footer":{"show":true,"height":24}
+                  ,"conditionalstyle":[]
+                }
+            </grid>
+        </tabPage>
+        <tabPage id="tabPage4" title="Quick Credit" style="width: 100%; height: 100%; display: none;">
+            <label class="search" style="position: absolute; width: 194px; height: 24px; left: 5px; top: 60px;">
+            Enable?
+            <codecombo id="cbbQUICK_CREDIT_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_QUICK_CREDIT_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 198px; width: 150px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left: 570px; width: 150px; position: absolute; top: 60px; height: 24px;">
+            Usage Date
+            <input clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_USAGE_DUE_DATE" id="txtUSAGE_DUE_DATE" style="left: 200px; overflow: hidden; width: 43px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="left: 525px; width: 194px; position: absolute; top: 60px; height: 24px;">
+                <input clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_USAGE_DUE_TO" id="txtUSAGE_DUE_TO" style="left: 198px; overflow: hidden; width: 43px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="left: 5px; width: 194px; position: absolute; top: 88px; height: 24px;">
+            Minimum limit amount
+            <edit id="txtMIN_LIMIT_AMT_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_LIMIT_AMT_QC" type="CURRENCY" value="0.00" maxlength="50" style="left: 198px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" style="left: 525px; width: 194px; position: absolute; top: 88px; height: 24px;">
+            Minimum Tenor Limit
+            <codecombo id="cbbMIN_TENOR_LIMIT_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_TENOR_LIMIT_QC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS50.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 197px; top: 0px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 194px; height: 24px; left: 5px; top: 116px;">
+            Minimum Usage
+            <edit id="txtMIN_USAGE_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_USAGE_QC" type="CURRENCY" value="0.00" maxlength="50" style="left: 198px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" lang="RepaymentType" style="left: 525px; width: 194px; position: absolute; top: 116px; height: 24px;">
+            Repayment Type
+            <codecombo id="cbbREPAYMENT_TYPE" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_REPAYMENT_TYPE_QC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS51.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 197px; top: 0px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 194px; height: 24px; left: 525px; top: 144px;">
+            Minimum Tenor Installment
+            <codecombo id="cbbMIN_TENOR_INS_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_TENOR_INS_QC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS52.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="position: absolute; width: 150px; height: 24px; left: 197px; top: 0px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="position: absolute; width: 194px; height: 24px; left: 5px; top: 144px;">
+            Minimum installment Converted
+            <input clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_MIN_INS_CVT_QC" id="txtMIN_INS_CVT_QC" style="left: 198px; overflow: hidden; width: 40px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <div class="conditiontitle" style="top: 34px; left: 24px; position: absolute; width: 216px; height: 24px;">
+                <label class="Mtitle" style="position: absolute; left: -1px; height: 24px; width: 122px; top: 0px;">
+              Quick Credit
+            </label>
+            </div>
+        </tabPage>
+        <tabPage id="tabPage5" title="KTA" style="width: 100%; height: 100%; display: none;">
+            <div class="conditiontitle" style="top: 34px; left: 24px; position: absolute; height: 24px; width: 448px;">
+                <label class="Mtitle" style="position: absolute; left: 0px; top: 0px; height: 24px;">
+              KTA
+            </label>
+            </div>
+            <label class="search" style="left: 5px; width: 150px; position: absolute; top: 117px; height: 24px;">
+            Enable?
+            <codecombo id="cbbKTA_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_KTA_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 154px; width: 150px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left: 5px; width: 150px; position: absolute; top: 61px; height: 24px;">
+            Minimum Loan Amount
+            <edit id="txtMIN_LOAN_AMT_KTA" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_LOAN_AMT_KTA" type="CURRENCY" value="0.00" maxlength="50" style="left: 154px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" style="left: 5px; width: 150px; position: absolute; top: 89px; height: 24px;">
+            Minimum Tenor
+            <codecombo id="cbbMIN_TENOR_KTA" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_TENOR_KTA" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS53.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 154px; width: 160px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+        </tabPage>
+        <tabPage id="tabPage6" title="Portofolio" style="width: 100%; height: 100%; display: none;">
+            <div class="conditiontitle" style="top: 34px; left: 24px; width: 1192px; height: 24px; position: absolute; display: block;">
+                <label class="Mtitle" style="left: 0px; top: 0px; position: absolute; height: 24px;">
+              Portofolio
+            </label>
+            </div>
+            <label class="search" style="left: 5px; width: 150px; position: absolute; top: 62px; height: 24px;">
+            Enable?
+            <codecombo id="cbbPORTOFOLIO_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PORTOFOLIO_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 154px; width: 150px; position: absolute; top: 0px; height: 24px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left: 5px; width: 150px; position: absolute; top: 90px; height: 24px;">
+            Minimum Loan Amount
+            <edit id="txtMIN_LOAN_AMT_PFP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MINIMUM_LOAN_AMT_PFP" type="CURRENCY" value="0.00" maxlength="50" style="left: 154px; overflow: hidden; width: 120px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+            </label>
+            <label class="search" style="left: 392px; width: 150px; position: absolute; top: 90px; height: 24px;">
+            Contracted Date
+            <input clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_CONTRACTED_DUE_DATE" id="txtCONTRACTED_DUE_DATE" style="left: 154px; overflow: hidden; width: 43px; position: absolute; top: 0px; height: 24px;">
+            </label>
+            <label class="search" style="left: 392px; width: 150px; position: absolute; top: 90px; height: 24px;">
+                <input clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_CONTRACTED_DUE_TO" id="txtCONTRACTED_DUE_TO" style="left: 201px; overflow: hidden; width: 43px; position: absolute; top: 0px; height: 24px;">
+            </label>
+        </tabPage>
+    </tabControl>
+</body>
+</html>

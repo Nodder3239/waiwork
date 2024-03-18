@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html style="width: 400px; height: 120px;">
+<!-- <html style="width: 450px; height: 300px;"> -->
+<head>
+    <meta charset="UTF-8">
+    <title>Scan Choice</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <script>
+        /**
+         * A function that is called after all required functionality on the page is loaded
+         * 페이지에서 필요한 모든 기능이 로드된 후 호출되는 함수
+         * @param {boolean} isPopup - Whether it opened as a pop-up screen
+         */
+        function onLoadPage(isPopup) {
+            /*
+            * Handling when opened as a pop-up screen
+            * 팝업 화면으로 열린 경우 처리
+            */
+            if (isPopup) {
+                var sScanCD = window.dialogArguments.Args[0];
+                var sMenuID = window.dialogArguments.Args[1];
+                /* 20130515_Cho_1 */
+                SET_CBB_SCAN_CD(cbbSCAN_CD, sMenuID);
+                /*
+                var sCdList = "code";
+                LIB().InitCB(cbbSCAN_CD,"F994");
+                if (sMenuID == "DP21"
+                ||  sMenuID == "DP41"
+                ||  sMenuID == "DT11"
+                ||  sMenuID == "DT13")
+                {
+                    sCdList = "2;3;4;5;6;7;A;B;C;D;E;F;G;";
+                }
+                else if (sMenuID == "DP31")
+                {
+                    sCdList = "3;4;5;6;7;A;B;C;D;E;F;G;";
+                }
+                else if (sMenuID == "CH11")
+                {
+                    sCdList = "1;2;3;4;5;6;7;B;D;E;F;G;";
+                }
+                else if (sMenuID == "EC11")
+                {
+                    sCdList = "1;2;3;4;5;6;7;A;B;C;D;E;F;";
+                }
+                else if (sMenuID == "DP11")
+                {
+                    sCdList = "1;2;3;4;5;6;7;A;B;C;D;F;G;";
+                }
+                else if (sMenuID == "AT11")
+                {
+                    sCdList = "1;2;3;4;5;6;7;A;B;C;D;E;G;";
+                }
+                else if (sMenuID == "RT11")
+                {
+                    sCdList = "1;2;4;5;6;7;A;B;C;D;E;F;G;";
+                }
+                else if (sMenuID == "RT31")
+                {
+                    sCdList = "1;2;3;5;6;7;A;B;C;D;E;F;G;";                                                
+                }
+                else if (sMenuID == "CK31")
+                {
+                    sCdList = "2;3;4;5;6;A;B;C;D;E;F;G;";                                                
+                }
+                else if (sMenuID == "CK41")
+                {
+                    sCdList = "2;3;4;5;6;A;B;C;D;E;F;G;";                                                
+                }
+                else
+                {
+                    alert("Wrong code");
+                }
+                var RealList = sCdList.split(";");
+                var i = cbbSCAN_CD.ItemCount;
+                while(i > 0) {
+                    for(var j = RealList.length - 1;j >= 0;j--)
+                    {
+                        if (cbbSCAN_CD.ItemValue(i-1) == RealList[j]) {
+                            cbbSCAN_CD.DeleteItem(i-1);
+                        }
+                    }
+                    i--;
+                }
+                */
+                cbbSCAN_CD.value = sScanCD;
+                cbbSCAN_CD.focus();
+            }
+        }
+        /****************************************************/
+        /* Execute                                          */
+        /****************************************************/
+        function fExecute() {
+            var strInput = new Array(1);
+            strInput[0] = cbbSCAN_CD.value;
+            window.onBeforeClose = null;
+            window.returnValue = strInput;
+            window.close();
+        }
+        /****************************************************/
+        /* Exit                                             */
+        /****************************************************/
+        function fExitClick(option) {
+            window.returnValue = null;
+            window.close();
+        }
+
+        function onBeforeClose() {
+            fExitClick();
+        }
+    </script>
+</head>
+<body>
+    <codecombo id="cbbSCAN_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 280px; height: 100%;" labelWidth="280px" url="/jsondb/F994.json" cbDisplayTextField="false" panelWidth="348px" panelHeight="78px" dropdownkeycode="145" onLoadError="cbbSCAN_CD.Value = '';" style="left: 24px; width: 350px; position: absolute; top: 24px; height: 24px;">
+        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":59.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":239.2}],
+        "data":[]
+    </codecombo>
+    <input id="execute_div" class="greenBtn" tabindex="-1" onclick="fExecute();" value="Execute" type="button" style="left: 162px; width: 104px; position: absolute; top: 108px; height: 24px;">
+    <input id="exit_div" class="redBtn" tabindex="-1" onclick="fExitClick('exit');" value="Exit" type="button" style="left: 270px; width: 104px; position: absolute; top: 108px; height: 24px;">
+</body>
+</html>

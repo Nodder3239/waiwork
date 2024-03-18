@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko" style="width: 480px; height: 480px;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FTP File List</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="css/dialogFileList.css">
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript">
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                if (!window.dialogArguments) return;
+                const fileList = window.dialogArguments.Args?.fileList ?? [];
+                const fileData = fileList.map(elem => {
+                    let folderName = elem.Folder.indexOf('/') == 0 ? elem.Folder.substring(1) : elem.Folder;
+                    if (folderName.length > 0) {
+                        folderName = folderName.at(-1) != '/' ? folderName + '/' : folderName;
+                    }
+                    return folderName + elem.File;
+                });
+                console.log('fileData --> ', fileData);
+                const treeData = parse(fileData);
+                console.log('treeData --> ', treeData);
+                pathTree.loadData(treeData);
+            }
+        }
+        function createNode(path, tree, pName) {
+            var name = path.shift();
+            var idx = tree.findIndex(function (e) {
+                return e.text == name;
+            });
+            if (idx < 0) {
+                const data = {
+                    text: name,
+                    children: [],
+                    path: pName ?? '/'
+                };
+                tree.push(data);
+                if (path.length !== 0) {
+                    createNode(path, tree[tree.length - 1].children, data.path + name + '/');
+                    data.state = 'closed';
+                }
+            }
+            else {
+                createNode(path, tree[idx].children, (pName ?? '/') + name + '/');
+            }
+        }
+        function parse(data) {
+            var tree = [];
+            for (var i = 0; i < data.length; i++) {
+                var path = data[i];
+                var split = path.split('/');
+                createNode(split, tree);
+            }
+            return tree;
+        }
+
+        function pathTreeDblClick() {
+            fn_fileSelect();
+        }
+
+        function fn_fileSelect() {
+            const selElem = pathTree.getSelected();
+            if (selElem.children.length == 0) {
+                window.returnValue = selElem.path + selElem.text;
+                window.close();
+            } else {
+                if (selElem.state == 'open') {
+
+                } else {
+
+                }
+            }
+        }
+
+        function fn_close(){
+            window.close();
+        }
+    </script>
+</head>
+<body style="overflow: hidden;">
+    <label class="Mtitle" style="position: absolute; left: 32px; top: 13px;">File List</label>
+    <div id="container" style="left: 16px; top: 40px; position: absolute; width: 447px; height: 392px;">
+        <treeview id="pathTree" dnd="" onDblClick="pathTreeDblClick(event);" style="position: absolute; width: 442px; height: 386px; left: 1px; top: 1px;">
+            "data":[]
+        </treeview>
+    </div>
+    <div id="btn" style="position: absolute; left: 240px; top: 441px; width: 224px; height: 28px;">
+        <button class="confirm" onclick="fn_fileSelect()" style="position: absolute; left: 8px; top: 4px; width: 104px; height: 20px;">Select</button>
+        <button class="cancel" onclick="fn_close()" style="position: absolute; left: 120px; top: 4px; width: 100px; height: 20px;">Close</button>
+    </div>
+</body>
+</html>

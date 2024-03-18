@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 800px;">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/css/Base_old.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="/biz/sd/commonSD.js"></script>
+    <script type="text/javascript">
+    // Dynamic-SQL Components generate
+    var wasSQLBase = new $wai.classes.DSQLService(); //{"transcode":"SD01"}
+    var wasSQLDSO = new $wai.classes.DSQLService(); //{"transcode":"SD01"}
+    </script>
+    <script id="bodyScript1" type="text/javascript">
+         <!--//
+         var TBL_NM="";
+         var gPRM_NO=1;
+         var ServiceName = null;
+         var MethodName = null;
+         /*-------- 화면초기화 --------*/
+         function fInitProc() {
+            btnREF_NOINQ.disabled = false;
+            divBase.style.display = "block";
+            Tab1.className        = "tabselecttitle";
+            TBL_NM                = "sdh_base";
+            prmDSOQuery.recordset.addNew();
+         }
+         function fDialogInit(){
+            if(!window.dialogArguments) return;
+            btnREF_NOINQ.disabled = true;
+            divBase.style.display = "block";
+            Tab1.className        = "tabselecttitle";
+            TBL_NM                = "sdh_base";
+//            prmDSOQuery.recordset.addNew();
+            prmDSOQuery.recordset.fields("FXFIG_REF_NO").value   = window.dialogArguments.Args[0];
+            prmDSOQuery.recordset.fields("FISD01_TBL_NM").value  = TBL_NM;
+            prmDSOQuery.recordset.update();
+            ivkQuery.call();
+         }
+         /*--- 탭버튼 클릭시 dispaly, backgroundcolor 정의 ---*/
+         function fDiv_Init() {
+            divBase.style.display = "none";
+            divTab2.style.display = "none";
+            divTab3.style.display = "none";
+            for(i=1; i<=3; i++) {
+               strTabOrder = eval('Tab' + i);
+               strTabOrder.className = "tabnormaltitle";
+            }
+         }
+         /*-------- 탭버튼 클릭 이벤트 --------*/
+         function fDisPlay(strTab) {
+            fDiv_Init();
+            switch(strTab) {
+               case 1: divBase.style.display = "block"; TBL_NM = "sdh_base"; break;
+               case 2: divTab2.style.display = "block"; TBL_NM = "sdh_his"; break;
+               case 3: divTab3.style.display = "block"; TBL_NM = "sdh_int"; break;
+            }
+            gPRM_NO=strTab; //인보크 참조자
+            TabOrder = eval('Tab'+ strTab);
+            TabOrder.className = "tabselecttitle";
+            fInvokeService();
+         }
+         /*-------- BI0101 팝업화면 --------*/
+         function fSearchBI0101() {
+            var arrPrm = new Array(1);
+            var arrOutRec = new Array(1);
+            arrPrm[0] = window;
+            var strWinSts = "status:no; resizable:no; scroll:no; center:yes; dialogHeight:435px; dialogWidth:650px;";
+            var strOutPrm = window.showModalDialog('./BI0101.html', arrPrm, strWinSts);
+            if(strOutPrm != null)
+            {
+               arrOutRec = strOutPrm;
+               txtREF_NO.value = arrOutRec[0];
+            }
+         }
+         /*------- 조회버튼 클릭 -------*/
+         function fInvokeService()
+         {
+           //while(eval("!prmDSOOut"+gPRM_NO+".recordset.BOF && !prmDSOOut"+gPRM_NO+".recordset.EOF")) eval("prmDSOOut"+gPRM_NO+".recordset.delete();");
+            if ( mskREF_NO.DataLength == 0 ) {
+               ShowInfoDialog("FILL IN REF_NO !!");
+               mskREF_NO.focus();
+            }else {
+               prmDSOQuery.recordset.fields("FISD01_TBL_NM").value = TBL_NM;
+               prmDSOQuery.recordset.update();
+               //alert(prmQryIn.OutParams.xml);
+               ivkQuery.call();
+               //alert( prmDSOOut1.recordset.recordCount );
+               //alert(prmDSOOut1.recordset.fields("SDH_BASE_REF_NO").value);
+            }
+         }
+         function fBSPLSearch(){
+           var DArg = new DArgument();
+           DArg.Args = new Array(2);
+           var strWindowStatus;
+           var strModalPut;
+           var arrModalGet = new Array(3);
+           DArg.Args[0]    = mskREF_NO.value;
+           strWindowStatus = "status:no; resizable:no; scroll:no; center:yes;dialogHeight:511px; dialogWidth:915px;";
+           strModalPut = window.showModalDialog('/ot/OT37.html', DArg, strWindowStatus);
+         }
+         function f_afterRefNo(){
+           mskREF_NO.focus();
+           fInvokeService();
+         }
+      //-->
+    </script>
+    <script type="text/javascript"></script>
+</head>
+<body onload="fInitProc()">
+    <!-- Y[wai] : Generated : dataServices -->
+    <dataservices>
+        <dataservice id="ivkQuery" map="/tis/SDO0100.xml" service="SDO0100" dso="prmDSOQuery=SCR_INPUT;prmDSOOut1=SCR_OUTPUT1;prmDSOOut2=SCR_OUTPUT2;prmDSOOut3=SCR_OUTPUT3"></dataservice>
+    </dataservices>
+    <!-- Y[wai] : Generated : dataServices -->
+    <div class="topbarDiv" style="left:1px;width:876px;top:6px;height:43px;">
+        <div class="topbarIngreen">
+            <label class="search" lang="RefNo" style="left:-6px;width:108px;position:absolute;top:10px;height:14px;">
+        Ref No
+      </label>
+            <edit id="mskREF_NO" dsoName="SDO0100.prmDSOQuery" fldName="FXFIG_REF_NO" type="MASK" mask="&&&&&&&&&&&&&&&&" class="default" tabindex="1" onkeydown="if(event.keyCode==13) fInvokeService();" style="left: 108px; width: 140px; position: absolute; top: 7px; text-transform: uppercase;"></edit>
+            <input type="image" hspace="0" id="btnREF_NOINQ" name="REF_NOINQ" src="/biz/images/detail.gif" vspace="0" onclick="f_onclick(this); " style="left:250px;width:21px;position:absolute;top:7px;height:21px;">
+            <input height="21" hspace="0" id="btnSearch" name="Search" onclick="fInvokeService();" onkeydown="if(event.keyCode==13) fInvokeService();" onmouseout="this.src='/biz/images/inquiry.gif'" onmouseover="this.src='/biz/images/inquiryover.gif'" src="/biz/images/inquiry.gif" type="image" vspace="0" width="80" style="left:618px;width:80px;position:absolute;top:7px;height:21px;">
+            <input id="btnBSPLSearch" onclick="fBSPLSearch();" onkeydown="if(event.keyCode==13) fBSPLSearch();" border="0" class="button" type="image" hspace="0" onmouseout="this.src='/biz/images/BSPLInquiry.gif'" onmouseover="this.src='/biz/images/BSPLInquiryover.gif'" src="/biz/images/BSPLInquiry.gif" vspace="0" width="65" style="left:708px;width:136px;position:absolute;top:7px;height:21px;">
+        </div>
+    </div>
+    <table border="0" cellpadding="0" cellspacing="0" style="left:16px;width:876px;position:absolute;top:52px;height:30px;">
+        <tr height="20px">
+            <td align="LEFT">
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td id="Tab1" class="tabselecttitle" onclick="fDisPlay(1)">
+              Base Inform
+            </td>
+                        <td width="5">
+                        </td>
+                        <td id="Tab2" class="tabnormaltitle" onclick="fDisPlay(2)">
+              History Inform
+            </td>
+                        <td width="5">
+                        </td>
+                        <td id="Tab3" class="tabnormaltitle" onclick="fDisPlay(3)">
+              Interest Inform
+            </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr height="10px">
+            <td height="10px" background="/biz/images/tabbar_back.gif">
+            </td>
+        </tr>
+    </table>
+    <div id="divBase" style="display: block;">
+        <div class="conditiontitle" style="top:85px;ltop:0px;">
+            <input class="titlearrowimg" height="20" hspace="0" src="/biz/images/title_arrow.gif" type="image" vspace="0" width="14">
+            <label class="Mtitle" lang="TrxHistory">
+        Trx History
+      </label>
+        </div>
+        <div class="infoDiv" style="left:1px;width:876px;top:102px;height:245px;">
+            <div class="infoIngray">
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="CommodityID" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Commodity ID
+          </label>
+                    <input fldname="SDH_BASE_COM_ID" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCOM_ID" tabindex="3" maxlength="10" name="txtCOM_ID" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="CommodityName" style="left:282px;width:152px;position:absolute;top:6px;height:16px;">
+            Commodity Name
+          </label>
+                    <input fldname="SDH_BASE_COM_NM" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCOM_NM" tabindex="5" maxlength="30" name="txtCOM_NM" size="1" type="text" width="0" style="left:439px;width:282px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="CounterpartyID" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Counterparty ID
+          </label>
+                    <input fldname="SDH_BASE_COUNTERPARTY_ID" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCOUNTERPARTY_ID" tabindex="7" maxlength="8" name="txtCOUNTERPARTY_ID" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="CounterpartyName" style="left:282px;width:152px;position:absolute;top:6px;height:16px;">
+            Counterparty Name
+          </label>
+                    <input fldname="SDH_BASE_COUNTERPARTY_NM" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCOUNTERPARTY_NM" tabindex="9" maxlength="30" name="txtCOUNTERPARTY_NM" size="1" type="text" width="0" style="left:439px;width:282px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                </div>
+                <div style="width:876px;position:relative;height:23px;">
+                    <label class="regist" lang="TrxTime" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Trx Time
+          </label>
+                    <input fldname="SDH_BASE_DEAL_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtDEAL_IL" tabindex="11" maxlength="10" name="txtDEAL_IL" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="ValueDate" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Value Date
+          </label>
+                    <input fldname="FOSD01_VALUE_YN" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtVALUE_YN" tabindex="13" maxlength="1" name="txtVALUE_YN" size="1" type="text" width="0" style="left:439px;width:40px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_VALUE_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtVALUE_IL" tabindex="15" maxlength="10" name="txtVALUE_IL" size="1" type="text" width="0" style="left:481px;width:82px;position:absolute;top:2px;">
+                    <label class="regist" lang="MaturityDate" style="left:569px;width:151px;position:absolute;top:6px;height:16px;">
+            Maturity Date
+          </label>
+                    <input fldname="FOSD01_EXP_YN" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtEXP_YN" tabindex="17" maxlength="1" name="txtEXP_YN" size="1" type="text" width="0" style="left:725px;width:40px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_EXP_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtEXP_IL" tabindex="19" maxlength="10" name="txtEXP_IL" size="1" type="text" width="0" style="left:767px;width:82px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="Borrow&Loan" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Borrow&Loan
+          </label>
+                    <input fldname="FOSD01_BORROW_LON_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtBORROW_LON_GB" tabindex="21" maxlength="1" name="txtBORROW_LON_GB" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Ccy" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Ccy
+          </label>
+                    <input fldname="SDH_BASE_CCY" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCCY" tabindex="23" maxlength="3" name="txtCCY" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="PrincipalAmt" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Principal Amt
+          </label>
+                    <input fldname="SDH_BASE_PRINCIPAL_AMT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtPRINCIPAL_AMT" tabindex="25" maxlength="16" name="txtPRINCIPAL_AMT" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="RateCcy" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Rate Ccy
+          </label>
+                    <input fldname="SDH_BASE_RATE_CCY" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtRATE_CCY" tabindex="27" maxlength="3" name="txtRATE_CCY" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Fix/Float" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Fix/Float
+          </label>
+                    <input fldname="FOSD01_FIX_FLT_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtFIX_FLT_GB" tabindex="29" maxlength="1" name="txtFIX_FLT_GB" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="RatePeriod" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Rate Period
+          </label>
+                    <input fldname="FOSD01_RATE_FREQ" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtRATE_FREQ" tabindex="31" maxlength="1" name="txtRATE_FREQ" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:877px;position:relative;height:23px;">
+                    <label class="regist" lang="IndexRate" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Index Rate
+          </label>
+                    <input fldname="SDH_BASE_INDEX_RT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtINDEX_RT" tabindex="33" maxlength="16" name="txtINDEX_RT" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="SpreadRate" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Spread Rate
+          </label>
+                    <input fldname="FOSD01_RATE_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtRATE_GB" tabindex="35" maxlength="1" name="txtRATE_GB" size="1" type="text" width="0" style="left:439px;width:40px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_SPREAD_RT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtSPREAD_RT" tabindex="37" maxlength="16" name="txtSPREAD_RT" size="1" type="text" width="0" style="left:482px;width:81px;position:absolute;top:2px;">
+                    <label class="regist" lang="TotalRate" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Total Rate
+          </label>
+                    <input fldname="SDH_BASE_TOTAL_RT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtTOTAL_RT" tabindex="39" maxlength="16" name="txtTOTAL_RT" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="InterestCcy" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Interest Ccy
+          </label>
+                    <input fldname="SDH_BASE_INT_CCY" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtINT_CCY" tabindex="41" maxlength="3" name="txtINT_CCY" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="InterestAmt" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Interest Amt
+          </label>
+                    <input fldname="SDH_BASE_INT_AMT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtINT_AMT" tabindex="43" maxlength="16" name="txtINT_AMT" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Advance&Deferred" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Advance&Deferred
+          </label>
+                    <input fldname="FOSD01_ADV_ARR_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtADV_ARR_GB" tabindex="45" maxlength="1" name="txtADV_ARR_GB" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="Single&Both" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Single&Both
+          </label>
+                    <input fldname="FOSD01_SINGLE_BOTH_TYPE" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtSINGLE_BOTH_TYPE" tabindex="47" maxlength="1" name="txtSINGLE_BOTH_TYPE" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Day Count Basis
+          </label>
+                    <input fldname="FOSD01_ACCR_TYPE" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtACCR_TYPE" tabindex="49" maxlength="1" name="txtACCR_TYPE" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="IntRcv/PayDate" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Int Rcv/Pay Date
+          </label>
+                    <input fldname="SDH_BASE_INT_PAY_RCV_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtINT_Pay_Rcv_IL" tabindex="55" maxlength="10" name="txtINT_Pay_Rcv_IL" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Status" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Status
+          </label>
+                    <input fldname="FOSD01_STS" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtSTS" tabindex="57" maxlength="1" name="txtSTS" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+            </div>
+        </div>
+        <div class="conditiontitle" style="width:857px;top:350px;height:20px;">
+            <input height="20" hspace="0" src="/biz/images/title_arrow.gif" type="image" vspace="0" width="14" style="left:0px;width:14px;position:absolute;top:3px;height:20px;">
+            <label class="Mtitle" lang="TransactionInformation" style="left:15px;top:3px;">
+        Transaction Information
+      </label>
+        </div>
+        <div class="infoDiv" style="left:1px;width:876px;top:369px;height:174px;">
+            <div class="infoIngray">
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="Confirm" style="left:5px;width:135px;position:absolute;top:5px;height:2px;">
+            Confirm
+          </label>
+                    <input fldname="FOSD01_CONFIRM_YN" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCONFIRM_YN" tabindex="59" maxlength="1" name="txtCONFIRM_YN" size="1" type="text" width="0" style="left:145px;width:33px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_CONFIRM_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCONFIRM_IL" tabindex="61" maxlength="10" name="txtCONFIRM_IL" size="1" type="text" width="0" style="left:183px;width:84px;position:absolute;top:2px;">
+                    <label class="regist" lang="P/O" style="left:210px;width:108px;position:absolute;top:6px;height:14px;">
+            P/O
+          </label>
+                    <input fldname="FOSD01_PO_YN" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtPO_YN" tabindex="63" maxlength="1" name="txtPO_YN" size="1" type="text" width="0" style="left:322px;width:33px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_PO_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtPO_IL" tabindex="65" maxlength="10" name="txtPO_IL" size="1" type="text" width="0" style="left:360px;width:84px;position:absolute;top:2px;">
+                    <label class="regist" lang="OurRcvDepo" style="left:451px;width:108px;position:absolute;top:6px;height:14px;">
+            Our Rcv Depo
+          </label>
+                    <input fldname="SDH_BASE_OUR_RCV_DEPO_CCY" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtOur_Rcv_Depo_CCY" tabindex="67" maxlength="3" name="txtOur_Rcv_Depo_CCY" size="1" type="text" width="0" style="left:562px;width:43px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_OUR_RCV_DEPO_CD" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtOur_Rcv_Depo_CD" tabindex="69" maxlength="4" name="txtOur_Rcv_Depo_CD" size="1" type="text" width="0" style="left:610px;width:44px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_OUR_RCV_DEPO_NM" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtOur_Rcv_Depo_NM" tabindex="71" maxlength="35" name="txtOur_Rcv_Depo_NM" size="1" type="text" width="0" style="left:658px;width:190px;position:absolute;top:2px;">
+                </div>
+                <div style="width:876px;position:relative;height:23px;">
+                    <label class="regist" lang="TheirRcvDepo" style="left:6px;width:134px;position:absolute;top:5px;height:16px;">
+            Their Rcv Depo
+          </label>
+                    <input fldname="SDH_BASE_THR_RCV_DEPO_CCY" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtTHR_Rcv_Depo_CCY" tabindex="79" maxlength="3" name="txtTHR_Rcv_Depo_CCY" size="1" type="text" width="0" style="left:145px;width:33px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_THR_RCV_DEPO_BIC" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtTHR_Rcv_Depo_BIC" tabindex="81" maxlength="11" name="txtTHR_Rcv_Depo_BIC" size="1" type="text" width="0" style="left:183px;width:84px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_THR_RCV_DEPO_NM" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtTHR_Rcv_Depo_NM" tabindex="83" maxlength="35" name="txtTHR_Rcv_Depo_NM" size="1" type="text" width="0" style="left:271px;width:174px;position:absolute;top:2px;">
+                    <label class="regist" lang="OurPayDepo" style="left:451px;width:108px;position:absolute;top:4px;height:14px;">
+            Our Pay Depo
+          </label>
+                    <input fldname="SDH_BASE_OUR_PAY_DEPO_CCY" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtOur_Pay_Depo_CCY" tabindex="73" maxlength="3" name="txtOur_Pay_Depo_CCY" size="1" type="text" width="0" style="left:562px;width:43px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_OUR_PAY_DEPO_CD" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtOur_Pay_Depo_CD" tabindex="75" maxlength="4" name="txtOur_Pay_Depo_CD" size="1" type="text" width="0" style="left:610px;width:44px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_OUR_PAY_DEPO_NM" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtOur_Pay_Depo_NM" tabindex="77" maxlength="35" name="txtOur_Pay_Depo_NM" size="1" type="text" width="0" style="left:658px;width:190px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="BrokerFee" style="left:6px;width:134px;position:absolute;top:4px;height:16px;">
+            Broker Fee
+          </label>
+                    <input fldname="SDH_BASE_BROKER_FEE_CCY" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtBroker_Fee_CCY" tabindex="85" maxlength="3" name="txtBroker_Fee_CCY" size="1" type="text" width="0" style="left:145px;width:33px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_BROKER_FEE_AMT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtBroker_Fee_AMT" tabindex="89" maxlength="16" name="txtBroker_Fee_AMT" size="1" type="text" width="0" style="left:183px;width:184px;position:absolute;top:2px;">
+                    <input fldname="SDH_BASE_BROKER_ID" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtBroker_ID" tabindex="87" maxlength="7" name="txtBroker_ID" size="1" type="text" width="0" style="left:370px;width:74px;position:absolute;top:2px;">
+                    <input fldname="FOSD01_BROKER_NM" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtCOM_NM1" tabindex="5" maxlength="30" name="txtBROKER_NM" size="1" type="text" width="0" oldid="txtCOM_NM" style="left:445px;width:282px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="On&Off" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            On&Off
+          </label>
+                    <input fldname="FOSD01_ONOFF_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtONOFF_GB" tabindex="91" maxlength="1" name="txtONOFF_GB" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="In&Out" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            In&Out
+          </label>
+                    <input fldname="FOSD01_INOUT_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtINOUT_GB" tabindex="93" maxlength="1" name="txtINOUT_GB" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="BorrowKind" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Borrow Kind
+          </label>
+                    <input fldname="FOSD01_BORROW_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtBORROW_GB" tabindex="95" maxlength="1" name="txtBORROW_GB" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="LoanType" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Loan Type
+          </label>
+                    <input fldname="FOSD01_NATION_LON_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtNATION_LON_GB" tabindex="99" maxlength="2" name="txtNATION_LON_GB" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="LoanPurposeKind" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Loan Purpose Kind
+          </label>
+                    <input fldname="FOSD01_LOAN_USE_GB" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtLOAN_USE_GB" tabindex="101" maxlength="3" name="txtLOAN_USE_GB" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="UsdConvAmt" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Usd Conv Amt
+          </label>
+                    <input fldname="SDH_BASE_USD_CVT_AMT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtUSD_CVT_AMT" tabindex="103" maxlength="16" name="txtUSD_CVT_AMT" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="BaseConvAmt" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Base Conv Amt
+          </label>
+                    <input fldname="SDH_BASE_BASE_CVT_AMT" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtBASE_CVT_AMT" tabindex="105" maxlength="16" name="txtBASE_CVT_BAMT" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="RollOvery/n" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            RollOver y/n
+          </label>
+                    <input fldname="FOSD01_ROLLOVER_YN" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtROLLOVER_YN" tabindex="109" maxlength="1" name="txtROLLOVER_YN" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="RollOverType" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            RollOver Type
+          </label>
+                    <input fldname="FOSD01_ROLLOVER_TYPE" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtROLLOVER_TYPE" tabindex="111" maxlength="1" name="txtROLLOVER_TYPE" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            RollOver Ref No
+          </label>
+                    <input fldname="SDH_BASE_ROLLOVER_REF_NO" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtROLLOVER_REF_NO" tabindex="113" maxlength="15" name="txtROLLOVER_REF_NO" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+            </div>
+        </div>
+        <div class="conditiontitle" style="width:858px;top:538px;height:20px;position:absolute;">
+            <input height="20" hspace="0" src="/biz/images/title_arrow.gif" type="image" vspace="0" width="14" style="left:0px;width:14px;position:absolute;top:11px;height:20px;">
+            <label class="Mtitle" lang="ManageNo" style="left:12px;width:96px;top:11px;height:20px;">
+        Manage No
+      </label>
+        </div>
+        <div class="infoDiv" style="left:2px;width:876px;top:565px;height:83px;">
+            <div class="infoIngray" style="height:77px;">
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="LastHisNo" style="left:569px;width:151px;position:absolute;top:6px;height:16px;">
+            Last His No
+          </label>
+                    <input fldname="SDH_BASE_LST_HIS_NO" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtLST_HIS_NO" tabindex="119" maxlength="5" name="txtLST_HIS_NO" size="1" type="text" width="0" style="left:724px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="FirstInputDate" style="left:31px;width:108px;position:absolute;top:5px;height:14px;">
+            First Input Date
+          </label>
+                    <input fldname="SDH_BASE_FST_IB_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtFirst_IB_IL" tabindex="121" maxlength="10" name="txtFirst_IB_IL" size="1" type="text" width="0" style="left:144px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="LastTrxDate" style="left:281px;width:152px;position:absolute;top:6px;height:16px;">
+            Last Trx Date
+          </label>
+                    <input fldname="SDH_BASE_LST_DEAL_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtLST_DEAL_IL" tabindex="123" maxlength="10" name="txtLST_DEAL_IL" size="1" type="text" width="0" style="left:438px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="LstInputDate" style="left:568px;width:151px;position:absolute;top:6px;height:16px;">
+            Lst Input Date
+          </label>
+                    <input fldname="SDH_BASE_LST_IB_IL" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtLST_IB_IL" tabindex="125" maxlength="10" name="txtLST_IB_IL" size="1" type="text" width="0" style="left:724px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="DealerID" style="left:31px;width:108px;position:absolute;top:5px;height:14px;">
+            Dealer ID
+          </label>
+                    <input fldname="SDH_BASE_DEALER_ID" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtDEALER_ID" tabindex="127" maxlength="2" name="txtDEALER_ID" size="1" type="text" width="0" style="left:144px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Remark" style="left:281px;width:152px;position:absolute;top:5px;height:16px;">
+            Remark
+          </label>
+                    <input fldname="SDH_BASE_REMARK" dsoname="SDO0100.prmDSOOut1" class="readonly" readonly height="0" id="txtLST_DEAL_IL1" tabindex="123" maxlength="10" name="txtREMARK" size="1" type="text" width="0" oldid="txtLST_DEAL_IL" style="left:438px;width:410px;position:absolute;top:2px;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divTab2" style="display:none;">
+        <div style="left:16px;width:876px;position:absolute;top:85px;height:150px;">
+            <grid id="DATAGRID1" dsoName="SDO0100.prmDSOOut2" style="left: 0px; width: 876px; position: absolute; top: 0px; height: 188px; border: 1px solid rgb(175, 174, 175);">
+                "options" : {
+                  "fixColumn":0
+                  ,"columns" : [
+                    {"text":"Trx His No","field":"SDH_HIS_HIS_NO","alignment":"center","width":100,"lang":"TrxHisNo","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Status","field":"FOSD01_STS","alignment":"","width":90,"lang":"Status","editor":{"type":"text","alignment":""}}
+                    ,{"text":"Trx Type","field":"FOSD01_TR_GB","alignment":"center","width":100,"lang":"TrxType","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Trx Code","field":"SDH_HIS_TR_CD","alignment":"center","width":100,"lang":"TrxCode","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Trx Ccy","field":"SDH_HIS_TR_CCY","alignment":"center","width":100,"lang":"TrxCcy","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Trx Amt","field":"SDH_HIS_TR_FAMT","alignment":"right","width":160,"lang":"TrxAmt","editor":{"type":"text","alignment":"right"}}
+                    ,{"text":"Trx Amt(BaseCcy)","field":"SDH_HIS_TR_BAMT","alignment":"right","width":160,"lang":"TrxAmt(BaseCcy)","editor":{"type":"text","alignment":"right"}}
+                    ,{"text":"","field":"","alignment":"","width":0,"editor":{"type":"text","alignment":""}}
+                  ]
+                }
+            </grid>
+        </div>
+        <div class="conditiontitle" style="width:857px;top:276px;height:20px;">
+            <input type="image" height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:0px;width:14px;position:absolute;top:3px;height:20px;">
+            <label class="Mtitle" lang="BaseInfo" style="left:15px;top:3px;">
+        Base Info
+      </label>
+        </div>
+        <div class="infoDiv" style="left:1px;width:876px;top:295px;height:180px;">
+            <div class="infoIngray" style="height:174px;">
+                <div style="width:876px;position:relative;height:23px;top:5px;">
+                    <label class="regist" lang="HisNo/Status" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            His No/Status
+          </label>
+                    <input fldname="SDH_HIS_HIS_NO" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtHIS_NO" tabindex="129" maxlength="5" name="txtHIS_NO" size="1" type="text" width="0" style="left:145px;width:57px;position:absolute;top:2px;">
+                    <input fldname="FOSD01_STS" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtSTS1" tabindex="131" maxlength="1" name="txtSTS" size="1" type="text" width="0" oldid="txtSTS" style="left:204px;width:65px;position:absolute;top:2px;">
+                    <label class="regist" lang="TrxKind" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Trx Kind
+          </label>
+                    <input fldname="FOSD01_TR_GB" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtTR_GB" tabindex="133" maxlength="1" name="txtTR_GB" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="TrxCode" style="left:569px;width:151px;position:absolute;top:6px;height:11px;">
+            Trx Code
+          </label>
+                    <input fldname="SDH_HIS_TR_CD" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtTR_CD" tabindex="135" maxlength="4" name="txtTR_CD" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;top:5px;">
+                    <label class="regist" lang="InputDate" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Input Date
+          </label>
+                    <input fldname="SDH_HIS_IB_IL" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtIB_IL" tabindex="137" maxlength="10" name="txtIB_IL" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="AcctDate" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Acct Date
+          </label>
+                    <input fldname="SDH_HIS_AC_IL" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtAC_IL" tabindex="139" maxlength="10" name="txtAC_IL" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="BackvalueDate" style="left:569px;width:151px;position:absolute;top:6px;height:11px;">
+            Backvalue Date
+          </label>
+                    <input fldname="SDH_HIS_GIS_IL" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtGIS_IL" tabindex="141" maxlength="10" name="txtGIS_IL" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;top:5px;">
+                    <label class="regist" lang="CancelDate" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Cancel Date
+          </label>
+                    <input fldname="SDH_HIS_CAN_IL" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtCAN_IL" tabindex="143" maxlength="10" name="txtCAN_IL" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="RelateTrxHisNo" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Relate Trx His No
+          </label>
+                    <input fldname="SDH_HIS_SD_HIS_NO" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtSD_HIS_NO" tabindex="145" maxlength="5" name="txtSD_HIS_NO" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="TrxCcy" style="left:569px;width:151px;position:absolute;top:6px;height:11px;">
+            Trx Ccy
+          </label>
+                    <input fldname="SDH_HIS_TR_CCY" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtTR_CCY" tabindex="147" maxlength="3" name="txtTR_CCY" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;top:5px;">
+                    <label class="regist" lang="TrxAmt" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Trx Amt
+          </label>
+                    <input fldname="SDH_HIS_TR_FAMT" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtTR_FAMT" tabindex="149" maxlength="16" name="txtTR_FAMT" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="TrxAmt(BaseCcy)" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Trx Amt(BaseCcy)
+          </label>
+                    <input fldname="SDH_HIS_TR_BAMT" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtTR_BAMT" tabindex="151" maxlength="16" name="txtTR_BAMT" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="AfterTrxBalance" style="left:569px;width:151px;position:absolute;top:6px;height:11px;">
+            AfterTrx Balance
+          </label>
+                    <input fldname="SDH_HIS_AF_JAN" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtAF_JAN" tabindex="153" maxlength="16" name="txtAF_JAN" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;top:5px;">
+                    <label class="regist" lang="SendMsgNo" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Send MsgNo
+          </label>
+                    <input fldname="SDH_HIS_SND_DOC_NO" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtSND_DOC_NO" tabindex="155" maxlength="17" name="txtSND_DOC_NO" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="TrxBranch" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Trx Branch
+          </label>
+                    <input fldname="SDH_HIS_TR_BR" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtTR_BR" tabindex="157" maxlength="3" name="txtTR_BR" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;top:5px;">
+                    <label class="regist" lang="TrxTime" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Trx Time
+          </label>
+                    <input fldname="SDH_HIS_TR_TIME" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtTR_TIME" tabindex="161" maxlength="8" name="txtTR_TIME" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="OpNo" style="left:282px;width:152px;position:absolute;top:6px;height:14px;">
+            Op No
+          </label>
+                    <input fldname="SDH_HIS_USER_ID" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtUSER_ID" tabindex="163" maxlength="7" name="txtUSER_ID" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="ManageNo" style="left:569px;width:151px;position:absolute;top:6px;height:11px;">
+            Manage No
+          </label>
+                    <input fldname="SDH_HIS_MANAGER_ID" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtMANAGER_ID" tabindex="165" maxlength="7" name="txtMANAGER_ID" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;top:5px;">
+                    <label class="regist" lang="DepositType" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Deposit Type
+          </label>
+                    <input fldname="FOSD01_IBJI_MD" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtIBJI_MD" tabindex="167" maxlength="1" name="txtIBJI_MD" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="LstInputDate" style="left:282px;width:151px;position:absolute;top:5px;height:11px;">
+            Lst Input Date
+          </label>
+                    <input fldname="SDH_HIS_LST_IB_IL" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtLST_IB_IL1" tabindex="169" maxlength="10" name="txtLST_IB_IL" size="1" type="text" width="0" oldid="txtLST_IB_IL" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Status" style="left:569px;width:151px;position:absolute;top:5px;height:14px;">
+            Status
+          </label>
+                    <input fldname="FOSD01_PRE_STS" dsoname="SDO0100.prmDSOOut2" class="readonly" readonly height="0" id="txtPRE_STS" tabindex="171" maxlength="1" name="txtPRE_STS" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divTab3" style="display:none;">
+        <div style="left:16px;width:876px;position:absolute;top:85px;height:150px;">
+            <grid id="DATAGRID" dsoName="SDO0100.prmDSOOut3" style="left: 0px; width: 876px; position: absolute; top: 2px; height: 150px; border: 1px solid rgb(175, 174, 175);">
+                "options" : {
+                  "fixColumn":0
+                  ,"columns" : [
+                    {"text":"Seq No","field":"SDH_INT_SEQ_NO","alignment":"center","width":80,"lang":"SeqNo","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Status","field":"FOSD01_STS","alignment":"center","width":80,"lang":"Status","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Int Pay Dt","field":"SDH_INT_INT_PAY_IL","alignment":"center","width":100,"editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Ccy","field":"SDH_INT_CCY","alignment":"center","width":80,"lang":"Ccy","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Int SubjectAmt","field":"SDH_INT_INT_CALC_AMT","alignment":"right","width":135,"lang":"IntSubjectAmt","editor":{"type":"text","alignment":"right"}}
+                    ,{"text":"Interest Amt","field":"SDH_INT_INT_AMT","alignment":"right","width":135,"lang":"InterestAmt","editor":{"type":"text","alignment":"right"}}
+                    ,{"text":"Int FromDt","field":"SDH_INT_INT_FROM_IL","alignment":"center","width":100,"lang":"IntFromDt","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"Int ToDt","field":"SDH_INT_INT_TO_IL","alignment":"center","width":100,"lang":"IntToDt","editor":{"type":"text","alignment":"center"}}
+                    ,{"text":"","field":"","alignment":"","width":0,"editor":{"type":"text","alignment":""}}
+                  ]
+                }
+            </grid>
+        </div>
+        <div class="conditiontitle" style="width:857px;top:250px;height:20px;">
+            <input type="image" height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14" style="left:0px;width:14px;position:absolute;top:1px;height:20px;">
+            <label class="Mtitle" lang="BaseInfo" style="left:15px;top:0px;">
+        Base Info
+      </label>
+        </div>
+        <div class="infoDiv" style="left:0px;width:876px;top:270px;height:127px;">
+            <div class="infoIngray">
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="SeqNo" style="left:7px;width:133px;position:absolute;top:6px;height:11px;">
+            Seq No
+          </label>
+                    <input fldname="SDH_INT_SEQ_NO" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtSEQ_NO" name="txtSEQ_NO" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;text-align:right;">
+                    <label class="regist" style="left:283px;width:152px;position:absolute;top:5px;height:14px;">
+            Int Pay Dt
+          </label>
+                    <input fldname="SDH_INT_INT_PAY_IL" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtINT_RCV_IL" name="txtINT_RCV_IL" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Status" style="left:571px;width:151px;position:absolute;top:6px;height:16px;">
+            Status
+          </label>
+                    <input fldname="FOSD01_STS" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtSTS2" name="txtSTS" size="1" type="text" width="0" oldid="txtSTS" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="IntFromDt" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            Int FromDt
+          </label>
+                    <input fldname="SDH_INT_INT_FROM_IL" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtINT_FROM_IL" name="txtINT_FROM_IL" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="IntToDt" style="left:283px;width:152px;position:absolute;top:6px;height:16px;">
+            Int ToDt
+          </label>
+                    <input fldname="SDH_INT_INT_TO_IL" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtINT_TO_IL" name="txtINT_TO_IL" size="1" type="text" width="0" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="Procy/n" style="left:571px;width:151px;position:absolute;top:6px;height:16px;">
+            Proc y/n
+          </label>
+                    <input fldname="SDH_INT_PROCESS_YN" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtPROCESS_YN" name="txtPROCESS_YN" size="1" type="text" width="0" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" style="left:5px;width:135px;position:absolute;top:5px;height:2px;">
+            Int Subject Amt
+          </label>
+                    <input fldname="SDH_INT_CCY" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtCCY1" name="txtCCY" size="1" type="text" width="0" oldid="txtCCY" style="left:145px;width:40px;position:absolute;top:2px;">
+                    <input fldname="SDH_INT_INT_CALC_AMT" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtINT_CALC_AMT" name="txtINT_CALC_AMT" size="1" type="text" width="0" style="left:190px;width:129px;position:absolute;top:2px;text-align:right;">
+                    <label class="regist" lang="InterestAmt" style="left:285px;width:152px;position:absolute;top:6px;height:14px;">
+            Interest Amt
+          </label>
+                    <input fldname="SDH_INT_INT_AMT" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtINT_AMT1" name="txtINT_AMT" size="1" type="text" width="0" oldid="txtINT_AMT" style="left:439px;width:124px;position:absolute;top:2px;text-align:right;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="Rate" style="left:32px;width:108px;position:absolute;top:5px;height:14px;">
+            Rate
+          </label>
+                    <input fldname="SDH_INT_INDEX_RT" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtINDEX_RT1" name="txtINDEX_RT" size="1" type="text" width="0" oldid="txtINDEX_RT" style="left:145px;width:124px;position:absolute;top:2px;text-align:right;">
+                    <label class="regist" lang="Spread" style="left:285px;width:152px;position:absolute;top:6px;height:16px;text-align:right;">
+            Spread
+          </label>
+                    <input fldname="SDH_INT_SPREAD_RT" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtSPREAD_RT1" name="txtSPREAD_RT" size="1" type="text" width="0" oldid="txtSPREAD_RT" style="left:439px;width:124px;position:absolute;top:2px;text-align:right;">
+                    <label class="regist" lang="TotalRate" style="left:571px;width:151px;position:absolute;top:6px;height:16px;">
+            Total Rate
+          </label>
+                    <input fldname="SDH_INT_TOTAL_RT" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtTOTAL_RT1" name="txtTOTAL_RT" size="1" type="text" width="0" oldid="txtTOTAL_RT" style="left:725px;width:124px;position:absolute;top:2px;text-align:right;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="FirstInputDate" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            First Input Date
+          </label>
+                    <input fldname="SDH_INT_FST_IB_IL" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtFST_IB_IL" name="txtFST_IB_IL" size="1" type="text" width="0" style="left:145px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="LastTrxDate" style="left:283px;width:152px;position:absolute;top:6px;height:14px;">
+            Last Trx Date
+          </label>
+                    <input fldname="SDH_INT_LST_DEAL_IL" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtLST_DEAL_IL2" name="txtLST_DEAL_IL" size="1" type="text" width="0" oldid="txtLST_DEAL_IL" style="left:439px;width:124px;position:absolute;top:2px;">
+                    <label class="regist" lang="LstInputDate" style="left:571px;width:151px;position:absolute;top:6px;height:11px;">
+            Lst Input Date
+          </label>
+                    <input fldname="SDH_INT_LST_IB_IL" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtLST_IB_IL2" name="txtLST_IB_IL" size="1" type="text" width="0" oldid="txtLST_IB_IL" style="left:725px;width:124px;position:absolute;top:2px;">
+                </div>
+                <div style="width:100%;position:relative;height:23px;">
+                    <label class="regist" lang="UserId" style="left:7px;width:133px;position:absolute;top:5px;height:14px;">
+            User Id
+          </label>
+                    <input fldname="SDH_INT_USER_ID" dsoname="SDO0100.prmDSOOut3" class="readonly" readonly height="0" id="txtUSER_ID1" name="txtUSER_ID" size="1" type="text" width="0" oldid="txtUSER_ID" style="left:145px;width:124px;position:absolute;top:2px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

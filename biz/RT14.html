@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 1024px;">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+    <link href="/css/Base.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="/biz/rt/commonRT.js"></script>
+</head>
+<body onload="fInitProc()">
+    <actman id="AMan" style="left: 0px; top: 0px;">
+        <action name="ActEntry">
+            <ctrl cid="txtREF_NO" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_FX_CCY" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_FX_FAMT" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_CCY" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_FAMT" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_FEE_RT_GB" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_OTHER_FEE_GB" enabled="true"></ctrl>
+            <!--                                                                       
+            <Ctrl cid="cbbFIRT11_CORR_GB"       enabled="true"   > </Ctrl>
+             -->
+            <ctrl cid="cbbFIRT11_AMOUNT_GB" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_FEE_AMT" enabled="true"></ctrl>
+            <ctrl cid="cedFIRT11_OTHER_FEE_AMT" enabled="true"></ctrl>
+            <ctrl cid="cbbCALBE_CCY" enabled="true"></ctrl>
+            <ctrl cid="cbbFULL_AMT_CCY" enabled="true"></ctrl>
+            <ctrl cid="cedSAME_DAY_AMT" enabled="true"></ctrl>
+            <ctrl cid="cedFULL_AMT" enabled="true"></ctrl>
+            <!--                                                  
+            <Ctrl cid="cbbFIRT11_CORR_CCY"      enabled="true"   > </Ctrl>
+            <Ctrl cid="cedFIRT11_CORR_AMT"      enabled="true"   > </Ctrl>
+             -->
+            <ctrl cid="txtAPPL_CIX_NO" enabled="true"></ctrl>
+            <ctrl cid="cbbACCT_NO" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ID_NO" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_NM1" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_NM2" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ADDR1" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ADDR2" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_ADDR3" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_APPL_NATION" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_POST_NO1" enabled="true"></ctrl>
+            <ctrl cid="txtAPPL_POST_NO2" enabled="true"></ctrl>
+            <ctrl cid="cbbOUTGOING" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_NM1" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_NM2" enabled="true"></ctrl>
+            <ctrl cid="RCV_ADDR1" enabled="true"></ctrl>
+            <ctrl cid="RCV_ADDR2" enabled="true"></ctrl>
+            <!--                                                  
+            <Ctrl cid="RCV_ADDR3"               enabled="true"   > </Ctrl>
+             -->
+            <ctrl cid="txtRCV_ACCT_NO" enabled="true"></ctrl>
+            <ctrl cid="rdoRCV_KIND_1" enabled="true"></ctrl>
+            <ctrl cid="rdoRCV_KIND_2" enabled="true"></ctrl>
+            <ctrl cid="txtSET_BKCD" enabled="true"></ctrl>
+            <ctrl cid="txtSET_BKNM" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_CABLE_GB" enabled="true"></ctrl>
+            <ctrl cid="mskRCV_BANK_BIC" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_BANK_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_BIC" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_ACNO" enabled="true"></ctrl>
+            <ctrl cid="txtRCVBANK_BIC_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR2" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR3" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR1" enabled="true"></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR2" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME1" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME3" enabled="true"></ctrl>
+            <ctrl cid="txtINFO_NAME4" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME1" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME3" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME4" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME5" enabled="true"></ctrl>
+            <ctrl cid="txtINFO72_NAME6" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_GEOJU_GB" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_SD_CTRY" enabled="true"></ctrl>
+            <ctrl cid="cbbFIRT11_CH_GB" enabled="true"></ctrl>
+            <ctrl cid="txtOP_NO" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_BIC" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_BIC_NAME" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_NAME2" enabled="true"></ctrl>
+            <ctrl cid="txtINTER_NAME3" enabled="true"></ctrl>
+            <ctrl cid="txtEMAIL_NM" enabled="true"></ctrl>
+            <ctrl cid="cbbRT_CD" enabled="false"></ctrl>
+            <ctrl cid="txtDD_NO" enabled="false"></ctrl>
+            <ctrl cid="cbbDD_TYPE" enabled="false"></ctrl>
+            <ctrl cid="btnRT0018" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC1" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC2" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC3" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC4" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC5" enabled="true"></ctrl>
+            <!--  20140221_Agus_1  -->
+            <ctrl cid="cbbSTAT_CD" enabled="true"></ctrl>
+            <ctrl cid="cbbAPPL_STS" enabled="true"></ctrl>
+            <ctrl cid="cbbBENE_STS" enabled="true"></ctrl>
+            <ctrl cid="cbbAPPL_CAT" enabled="true"></ctrl>
+            <ctrl cid="cbbBENE_CAT" enabled="true"></ctrl>
+            <ctrl cid="cbbBENE_AFIL" enabled="true"></ctrl>
+            <ctrl cid="chkAPP_IDENTITY" enabled="true"></ctrl>
+        </action>
+        <!--  20140930_rizky_1 
+        <CORE1:action name="ActSimulation">
+            <Ctrl cid="txtREF_NO"               enabled="false"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_FX_CCY"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedFIRT11_FX_FAMT"       enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cbbFIRT11_CCY"           enabled="true"   clear="true" value=g_BaseCcy> </Ctrl>
+            <Ctrl cid="cedFIRT11_FAMT"          enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cbbFIRT11_FEE_RT_GB"     enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_OTHER_FEE_GB"  enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_AMOUNT_GB"     enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedFIRT11_FEE_AMT"       enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cedFIRT11_OTHER_FEE_AMT" enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cbbFIRT11_CABLE_GB"      enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbCALBE_CCY"            enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFULL_AMT_CCY"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedSAME_DAY_AMT"         enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="cedFULL_AMT"             enabled="true"   clear="true" value="0.00"> </Ctrl>
+            <Ctrl cid="txtAPPL_CIX_NO"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbACCT_NO"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ID_NO"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_NM1"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_NM2"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ADDR1"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ADDR2"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_ADDR3"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_APPL_NATION"   enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_POST_NO1"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtAPPL_POST_NO2"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbOUTGOING"             enabled="true"   clear="true" value="1"> </Ctrl>
+            <Ctrl cid="txtRCV_NM1"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_NM2"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="RCV_ADDR1"               enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="RCV_ADDR2"               enabled="true"   clear="true" value=""> </Ctrl>
+             -->
+        <!-- Ctrl cid="RCV_ADDR3"               enabled="true"   clear="true" value=""> </Ctrl -->
+        <!--   <Ctrl cid="txtRCV_ACCT_NO"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="rdoRCV_KIND_1"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="rdoRCV_KIND_2"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtSET_BKCD"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtSET_BKNM"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="mskRCV_BANK_BIC"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_BANK_NAME"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_BIC"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_NAME2"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_ACNO"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCVBANK_BIC_NAME"     enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_BK_ADDR2"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_BK_ADDR3"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR_NAME"        enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR_ADDR1"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtRCV_CORR_ADDR2"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME1"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME2"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME3"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO_NAME4"           enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME1"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME2"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME3"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME4"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME5"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINFO72_NAME6"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_GEOJU_GB"      enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_SD_CTRY"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbFIRT11_CH_GB"         enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_BIC"            enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_BIC_NAME"       enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_NAME2"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtINTER_NAME3"          enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtEMAIL_NM"             enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbRT_CD"                enabled="false"  clear="true" value=""> </Ctrl>
+            <Ctrl cid="txtDD_NO"                enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cbbDD_TYPE"              enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="btnRT0018"               enabled="false"  ></Ctrl>
+            <Ctrl cid="btnHQBIC1"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC2"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC3"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC4"               enabled="true"   ></Ctrl>
+            <Ctrl cid="btnHQBIC5"               enabled="true"   ></Ctrl>    
+        </CORE1:action>
+         -->
+        <action name="ActMstInqry">
+        </action>
+        <action name="ActExecute">
+        </action>
+        <action name="ActCanCelJob">
+            <ctrl cid="txtREF_NO" enabled="false" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_FX_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedFIRT11_FX_FAMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbFIRT11_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedFIRT11_FAMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbFIRT11_FEE_RT_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_OTHER_FEE_GB" enabled="true" clear="true" value=""></ctrl>
+            <!-- Ctrl cid="cbbFIRT11_CORR_GB"       enabled="true"   clear="true" value=""> </Ctrl -->
+            <ctrl cid="cbbFIRT11_AMOUNT_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedFIRT11_FEE_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cedFIRT11_OTHER_FEE_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbFIRT11_CABLE_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbCALBE_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFULL_AMT_CCY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cedSAME_DAY_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cedFULL_AMT" enabled="true" clear="true" value="0.00"></ctrl>
+            <!-- Ctrl cid="cbbFIRT11_CORR_CCY"      enabled="true"   clear="true" value=""> </Ctrl>
+            <Ctrl cid="cedFIRT11_CORR_AMT"      enabled="true"   clear="true" value="0.00"> </Ctrl -->
+            <ctrl cid="txtAPPL_CIX_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbACCT_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ID_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_NM1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_NM2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ADDR1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_ADDR3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_APPL_NATION" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_POST_NO1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtAPPL_POST_NO2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbOUTGOING" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_NM1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_NM2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="RCV_ADDR1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="RCV_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <!-- Ctrl cid="RCV_ADDR3"               enabled="true"   clear="true" value=""> </Ctrl -->
+            <ctrl cid="txtRCV_ACCT_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="rdoRCV_KIND_1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="rdoRCV_KIND_2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtSET_BKCD" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtSET_BKNM" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="mskRCV_BANK_BIC" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_BANK_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_BIC" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_ACNO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCVBANK_BIC_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_BK_ADDR3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtRCV_CORR_ADDR2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO_NAME4" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME1" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME4" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME5" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINFO72_NAME6" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_GEOJU_GB" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_SD_CTRY" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="cbbFIRT11_CH_GB" enabled="true" clear="true" value=""></ctrl>
+            <!-- Ctrl cid="txtOP_NO"                enabled="true"   clear="true" value=""> </Ctrl -->
+            <ctrl cid="txtOWNER_NO" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_BIC" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_BIC_NAME" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_NAME2" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtINTER_NAME3" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="txtEMAIL_NM" enabled="true" clear="true" value=""></ctrl>
+            <ctrl cid="btnRT0018" enabled="false"></ctrl>
+            <ctrl cid="btnHQBIC1" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC2" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC3" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC4" enabled="true"></ctrl>
+            <ctrl cid="btnHQBIC5" enabled="true"></ctrl>
+        </action>
+        <!--  20120702_Park_1  -->
+        <action name="ActFXInfo">
+        </action>
+        <action name="ActScan">
+        </action>
+    </actman>
+    <div class="topbarDiv" id="div1" style="height: 37px; left: 24px; top: 24px; width: 1228px; position: absolute;">
+        <div class="" style="left: 0px; top: 0px; width: 1216px; height: 40px;">
+            <label class="searchTop" lang="RefNo" style="left: 5px; width: 65px; position: absolute; top: 7px; height: 24px;">
+        Ref No
+        <input type="text" maxlength="16" size="1" onblur="fRefNoOnBlur();" title="Ref No" id="txtREF_NO" style="left: 69px; width: 120px; position: absolute; top: 0px; height: 24px; text-transform: uppercase;">
+                <img border="0" class="button" height="22" hspace="0" onclick="fRefSearchRT0018(); LIB().FindCBNMAll(document);" src="/biz/images/detail.gif" vspace="0" width="21" id="btnRT0018" style="left: 193px; width: 24px; position: absolute; top: 0px; height: 24px;">
+                <img height="22" width="71" hspace="0" src="/biz/images/BLACKLIST_s.gif" vspace="0" id="imgBlackLst" style="left: 899px; top: -1px; position: absolute; height: 24px;">
+                <img height="22" width="71" hspace="0" src="/biz/images/BLACKLIST_s.gif" vspace="0" id="imgDormant" style="left: 974px; top: -1px; position: absolute; height: 24px;">
+            </label>
+            <label class="search" style="left: 1056px; width: 141px; position: absolute; top: 6px; height: 24px;">
+        One Trx  (with RT12)
+        <input height="0" size="1" type="checkbox" value="Y" width="0" tabindex="2" onclick="" id="chkONE_DEAL" style="left: 0px; width: 16px; position: absolute; top: 0px; height: 24px;">
+            </label>
+        </div>
+    </div>
+    <tabControl id="tabControl1" index="0" onTabChange="tabOnChange( event )" style="position: absolute; left: 24px; top: 68px; width: 1232px; height: 740px;">
+        <tabPage id="tabPage1" title="Remittance Info" style="width: 100%; height: 100%; display: block;">
+            <label class="Mtitle" style="left: 24px; width: 256px; top: 34px; height: 24px; position: absolute; display: block;">
+            
+                Remittance Information
+              </label>
+            <div class="infoIngray" style="position: absolute; width: 1214px; height: 65px; left: 8px; top: 61px;">
+                <label class="search" lang="STS" style="position: absolute; width: 102px; height: 24px; left: 5px; top: 5px;">
+              STS
+            </label>
+                <codecombo id="cbbSTS" dsoName="dsoIN" fldName="LLG_TEMP_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 150px; height: 100%;" labelWidth="150px" url="/jsondb/F900.json" cbDisplayTextField="false" class="default" panelWidth="320px" panelHeight="105px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="9" onLoadError="cbbSTS.value = '';" style="position: absolute; width: 200px; height: 24px; left: 111px; top: 5px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                    "data":[]
+                </codecombo>
+                <label class="search" lang="CifNo" style="position: absolute; width: 60px; height: 24px; left: 504px; top: 5px;">
+              Cif No
+              <edit id="txtAPPL_CIX_NO" dsoName="RTO1400.prmDsoIn" fldName="FXFIG_CIX_NO" type="MASK" mask="99999999" class="default" tabindex="6" maxlength="8" defaultValue="0" manalerttext="Cif No" onblur="f_acno();" style="position: absolute; width: 65px; left: 62px; top: 0px; height: 24px;"></edit>
+                    <img border="0" class="button" height="22" hspace="0" onclick="fCifSearch();" src="/biz/images/detail.gif" vspace="0" width="21" id="btnIQ11" style="position: absolute; width: 24px; height: 24px; left: 131px; top: 0px;">
+                    <input height="0" readonly size="1" type="text" width="0" id="txtCIF_NM" style="position: absolute; width: 120px; left: 159px; top: 0px; height: 24px;">
+                </label>
+                <label class="search" lang="ChargeType" style="position: absolute; width: 102px; height: 24px; left: 5px; top: 33px;">
+              Charge Type
+              <codecombo id="cbbFIRT11_CH_GB" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 60px; height: 100%;" labelWidth="60px" url="/jsondb/F233.json" cbDisplayTextField="false" class="default" panelWidth="160px" panelHeight="85px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="36" manalerttext="Charge Type" onChange=";" onLoadError="cbbFIRT11_CH_GB.Value = '';" style="position: absolute; width: 100px; height: 24px; left: 105px; top: 0px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                        "data":[]
+                    </codecombo>
+                    <edit id="cedFIRT11_CHARGE_AMT" type="CURRENCY" value="0.00" tabindex="-1" maxlength="20" style="display: none; left: 209px; width: 50px; position: absolute; top: 0px; text-align: right; height: 24px;"></edit>
+                </label>
+                <label class="search" lang="BeneficiaryCtry" style="position: absolute; width: 108px; height: 24px; left: 456px; top: 33px;">
+              Beneficiary Ctry
+              <codecombo id="cbbFIRT11_SD_CTRY" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 110px; height: 100%;" labelWidth="110px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="Remittance Ctry" tabindex="37" manalerttext="Beneficiary Ctry" onLoadError="cbbFIRT11_SD_CTRY.Value = '';" style="position: absolute; width: 160px; height: 24px; left: 110px; top: 0px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                        "data":[]
+                    </codecombo>
+                </label>
+                <label class="search" style="position: absolute; width: 150px; height: 24px; left: 856px; top: 33px;">
+              Applicant Nationality
+              <codecombo id="cbbFIRT11_APPL_NATION" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 110px; height: 100%;" labelWidth="110px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="160px" panelHeight="205px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="Nationality" tabindex="38" manalerttext="Applicant Nationality" onLoadError="cbbFIRT11_APPL_NATION.Value = '';" style="position: absolute; width: 160px; height: 24px; left: 154px; top: 0px;">
+                        "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                        "data":[]
+                    </codecombo>
+                </label>
+                <div class="infoIngray" style="position: absolute; width: 604px; height: 174px; left: 0px; top: 96px;">
+                    <label class="search" lang="Name" style="position: absolute; width: 50px; height: 24px; left: 5px; top: 5px;">
+                Name
+                <input type="text" class="default" maxlength="35" size="1" tabindex="40" title=" Applicant Name" manalerttext="Applicant Name Line 1" id="txtAPPL_NM1" style="left: 55px; width: 260px; position: absolute; top: 0px; height: 24px; text-transform: uppercase;">
+                    </label>
+                    <label class="search" style="position: absolute; width: 100px; height: 24px; left: 5px; top: 33px;">
+                        <input type="text" class="default" maxlength="25" size="1" tabindex="41" title=" Name(Or Acct #)" manalerttext="Applicant Name Line 2" id="txtAPPL_NM2" style="left: 55px; width: 260px; position: absolute; top: 0px; height: 24px; text-transform: uppercase;">
+                    </label>
+                    <label class="search" lang="Address" style="position: absolute; width: 50px; height: 24px; left: 5px; top: 61px;">
+                Address
+                <input type="text" maxlength="35" size="1" tabindex="42" title=" Applicant Address1" id="txtAPPL_ADDR1" style="position: absolute; width: 260px; height: 24px; left: 55px; top: 0px;">
+                        <input type="text" maxlength="35" size="1" tabindex="43" title=" Applicant Address2" id="txtAPPL_ADDR2" style="position: absolute; width: 260px; height: 24px; left: 55px; top: 28px;">
+                        <input type="text" maxlength="35" size="1" tabindex="44" title=" Applicant Address3" id="txtAPPL_ADDR3" style="position: absolute; width: 260px; height: 24px; left: 56px; top: 56px;">
+                        <input type="text" maxlength="35" size="1" tabindex="45" title=" Applicant Address4" id="txtAPPL_ADDR4" style="display: none; left: 56px; width: 260px; position: absolute; top: 84px; height: 24px; text-transform: uppercase;">
+                    </label>
+                </div>
+                <label class="Mtitle" lang="Beneficiary" style="left: 626px; width: 76px; top: 69px; height: 24px; position: absolute;">
+              
+              Beneficiary
+            </label>
+                <div class="infoIngray" style="position: absolute; width: 604px; height: 174px; left: 610px; top: 96px;">
+                    <label class="regist" style="display: none; left: 5px; width: 60px; position: absolute; top: 5px; height: 24px;">
+                Bene Kind
+                <div class="grayline" style="left: 65px; width: 200px; position: absolute; top: 0px; height: 24px;">
+                            <label class="search" lang="Corporation" style="left: 30px; width: 41px; position: absolute; top: 0px; height: 24px;">
+                    Corporation
+                    <input checked="" height="0" name="rdoRcv_Kind" size="18" type="radio" value="1" width="0" tabindex="46" id="rdoRCV_KIND_1" style="left: -20px; width: 16px; position: absolute; top: 0px; height: 24px;">
+                            </label>
+                            <label class="search" lang="Individual" style="left: 130px; width: 35px; position: absolute; top: 0px; height: 24px;">
+                    Individual
+                    <input checked="" height="0" name="rdoRcv_Kind" size="18" type="radio" value="1" width="0" tabindex="47" id="rdoRCV_KIND_2" style="left: -20px; width: 16px; position: absolute; top: 0px; height: 24px;">
+                            </label>
+                        </div>
+                    </label>
+                    <label class="search" lang="AcctNo." style="left: 5px; width: 52px; position: absolute; top: 29px; height: 24px;">
+                Acct No.
+                <input type="text" class="default" maxlength="34" size="1" tabindex="45" title=" Beneficiary Acct #" manalerttext="Beneficiary Acct No." onblur="fCheckField(this);" id="txtRCV_ACCT_NO" style="position: absolute; width: 260px; height: 24px; left: 56px; top: 0px;">
+                    </label>
+                    <label class="search" style="left: 20px; vertical-align: middle; width: 50px; position: absolute; top: 55px; height: 5px; text-align: right;">
+                        <codecombo id="cbbTAG59F_1" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="default" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_1" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_1.Value = '';" style="position: absolute; width: 55px; height: 24px; left: -16px; top: 2px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                        <input type="text" class="default" maxlength="33" size="1" tabindex="46" title=" Beneficiary Name" manalerttext="Beneficiary Name" onblur="fCheckField(this);" id="txtRCV_NM1" style="position: absolute; width: 260px; height: 24px; left: 42px; top: 2px;">
+                        <codecombo id="cbbTAG59F_2" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="default" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_2" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_2.Value = '';" style="position: absolute; width: 55px; height: 24px; left: -16px; top: 30px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                        <input type="text" class="default" maxlength="33" size="1" tabindex="47" manalerttext="Beneficiary Information" id="txtRCV_NM2" style="position: absolute; width: 260px; height: 24px; left: 42px; top: 30px;">
+                    </label>
+                    <label class="search" style="left: 20px; vertical-align: middle; width: 50px; position: absolute; top: 96px; height: 15px; text-align: right;">
+                        <codecombo id="cbbTAG59F_3" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="default" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_3" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_3.Value = '';" style="position: absolute; width: 55px; height: 24px; left: -16px; top: 17px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                        <input type="text" class="default" maxlength="33" size="1" tabindex="47" manalerttext="Beneficiary Information" id="RCV_ADDR1" style="position: absolute; width: 260px; height: 24px; left: 42px; top: 17px;">
+                        <codecombo id="cbbTAG59F_4" labelStyle="margin-left: 0px; display: none; width: 0px; height: 100%;" labelWidth="0px" url="/jsondb/F2090.json" cbDisplayTextField="false" class="search" panelWidth="220px" panelHeight="100px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" title="TAG59F_4" manalerttext="Beneficiary Information" onblur="fTAG59F(this);" onLoadError="cbbTAG59F_4.Value = '';" style="position: absolute; width: 55px; height: 24px; left: -16px; top: 45px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                        <input type="text" maxlength="33" size="1" tabindex="48" id="RCV_ADDR2" style="position: absolute; width: 260px; height: 24px; left: 42px; top: 45px;">
+                    </label>
+                    <div class="infoIngray" style="position: absolute; width: 1214px; height: 34px; left: -611px; top: 205px;">
+                        <label class="search" style="left: 5px; width: 100px; position: absolute; top: 5px; height: 24px; text-align: right;">
+                  Bank SWIFT Code
+                  <label class="search" style="left:31px;vertical-align:middle;width:85px;position:absolute;top:0px;height:1px;text-align:right;">
+                                <edit id="txtRCVBANK_BIC" type="MASK" mask="AAAAAA&&&&&" class="default" tabindex="65" title="Receiving Bank" maxlength="11" defaultValue="0" onblur="f_onblur()" style="left: 73px; width: 84px; position: absolute; top: 0px; text-transform: uppercase; height: 24px;"></edit>
+                                <img border="0" class="button" height="22" hspace="0" onclick="fRefSearchHQBIC()" src="/biz/images/detail.gif" vspace="0" width="21" id="btnHQBIC3" style="left: 161px; width: 24px; position: absolute; top: 0px; height: 24px;">
+                            </label>
+                            <label class="search" lang="ReceivingBankName" id="div_57A_nm1" style="left: 608px; vertical-align: middle; width: 125px; position: absolute; top: 0px; height: 24px; text-align: right;">
+                    Receiving Bank Name
+                  </label>
+                            <label class="search" id="div_57A_txt2" style="left: 608px; vertical-align: middle; width: 128px; position: absolute; top: 0px; height: 24px; text-align: right;">
+                                <input type="text" fldname="inter_name" dsoname="wasSqlDso" title="Receiving Bank Name" maxlength="35" size="317" value="" tabindex="66" id="txtRCVBANK_BIC_NAME" style="left: 132px; width: 226px; position: absolute; top: 0px; height: 24px; text-transform: uppercase;">
+                            </label>
+                        </label>
+                    </div>
+                    <div style="left: -27px; top: 200px; position: absolute;">
+                        <div class="infoIngray" style="position: absolute; width: 1214px; height: 61px; left: -584px; top: 72px;">
+                            <input type="text" fldname="info_name1" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="90" id="txtINFO_NAME1" style="left: 5px; width: 600px; position: absolute; top: 5px; text-transform: uppercase; height: 24px;">
+                            <input type="text" fldname="info_name2" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="91" id="txtINFO_NAME2" style="left: 609px; width: 600px; position: absolute; top: 5px; text-transform: uppercase; height: 24px;">
+                            <input type="text" fldname="info_name3" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="92" id="txtINFO_NAME3" style="left: 5px; width: 600px; position: absolute; top: 33px; height: 24px; text-transform: uppercase;">
+                            <input type="text" fldname="info_name4" dsoname="wasSqlDso" maxlength="35" size="24" tabindex="93" id="txtINFO_NAME4" style="left: 609px; width: 600px; position: absolute; top: 33px; text-transform: uppercase; height: 24px;">
+                        </div>
+                        <label class="Mtitle" lang="Inform(TAG70)" style="left: -568px; width: 141px; top: 45px; height: 24px; position: absolute;">
+                  Inform (TAG70)
+                  </label>
+                    </div>
+                    <div id="divLLD" style="left: -596px; top: 339px; position: absolute;">
+                        <label class="Mtitle" style="left:8px;width:141px;top:3px;height:2px;">
+                  
+                  LLD Declaration
+                </label>
+                        <div class="infoIngray" style="position: absolute; width: 1214px; height: 194px; left: -16px; top: 28px;">
+                            <label lang="Applicant" style="left: 5px; top: 5px; position: absolute; height: 24px;">
+                                <img height="20" hspace="0" src="/biz/images/icon0.gif" vspace="0" width="14" style="position: relative; left: 0px; top: 0px; height: 16px; width: 16px;">
+                                <b style="height: 24px;">
+                      Applicant
+                    </b>
+                            </label>
+                            <label style="position: absolute; width: 108px; height: 24px; left: 5px; top: 33px;">
+                    Resident Country
+                    <codecombo id="cbbAPPL_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Applicant Resident Ctry" onLoadError="cbbAPPL_STS.Value = '';" style="position: relative; width: 250px; height: 24px; left: 112px; top: -24px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                            </label>
+                            <label style="position: absolute; width: 108px; height: 24px; left: 5px; top: 61px;">
+                    Category
+                    <codecombo id="cbbAPPL_CAT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Applicant Category" onblur="fCheckDocument()" onLoadError="cbbAPPL_CAT.Value = '';" style="position: relative; width: 250px; height: 24px; left: 112px; top: -24px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                            </label>
+                            <label style="position: absolute; width: 125px; height: 24px; left: 7px; top: 81px;">Identity
+                    <input height="0" size="280" type="checkbox" value="checkbox" width="0" tabindex="2" onclick="fAppIdentity(this);fCheckDocument()" id="chkAPP_IDENTITY" style="position: relative; width: 16px; height: 24px; left: 2px; top: 8px;">
+                            </label>
+                            <label style="position: absolute; width: 233px; height: 24px; left: 137px; top: 89px;">
+                    I0 - Applicant is identical with Beneficiary
+                  </label>
+                            <label lang="Beneficiary" style="left: 608px; top: 5px; position: absolute;">
+                                <img height="20" hspace="0" src="/biz/images/icon0.gif" vspace="0" width="14" style="position: relative; left: 0px; top: 0px; height: 16px; width: 16px;">
+                                <b style="height: 24px;">
+                      Beneficiary
+                    </b>
+                            </label>
+                            <label style="position: absolute; width: 108px; height: 24px; left: 608px; top: 33px;">
+                    Resident Country
+                    <codecombo id="cbbBENE_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Beneficiary Resident Ctry" onLoadError="cbbBENE_STS.Value = '';" style="position: relative; width: 250px; height: 24px; left: 115px; top: -25px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                            </label>
+                            <label style="position: absolute; width: 108px; height: 24px; left: 608px; top: 61px;">
+                    Category
+                    <codecombo id="cbbBENE_CAT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="130px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Beneficiary Category" onblur="fCheckDocument()" onLoadError="cbbBENE_CAT.Value = '';" style="position: relative; width: 250px; height: 24px; left: 115px; top: -25px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                            </label>
+                            <label style="position: absolute; width: 108px; height: 24px; left: 608px; top: 89px;">
+                    Affiliation
+                    <codecombo id="cbbBENE_AFIL" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F10.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="90px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Affiliation" onLoadError="cbbBENE_AFIL.Value = '';" style="position: relative; width: 250px; height: 24px; left: 115px; top: -25px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                            </label>
+                            <label style="position: absolute; width: 108px; height: 24px; left: 608px; top: 117px;">
+                    Document
+                    <codecombo id="cbbDOC_TP" dsoName="RTO1400.prmDsoIn" fldName="FIRT11_LLD_DOCUMENT" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 200px; height: 100%;" labelWidth="200px" url="/jsondb/F1006.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="90px" btnImg="/biz/images/cb_arrow.gif" dropdownkeycode="145" tabindex="37" manalerttext="LLD Document" onLoadError="cbbDOC_TP.Value = '';" style="position: relative; width: 250px; height: 24px; left: 115px; top: -25px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                            </label>
+                            <label style="position: absolute; left: 5px; top: 120px; height: 24px;">
+                                <img height="20" hspace="0" src="/biz/images/icon0.gif" vspace="0" width="14" style="position: relative; left: 0px; top: 0px; height: 16px; width: 16px;">
+                                <b style="height: 7px; left: 18px; top: 6px; width: 113px;">
+                      Transaction Purpose
+                    </b>
+                            </label>
+                            <label class="search" style="position: absolute; width: 108px; height: 24px; left: 5px; top: 148px;">
+                    Statistic Code
+                    <codecombo id="cbbSTAT_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 302px; height: 100%;" labelWidth="302px" url="/jsondb/F2041.json" cbDisplayTextField="false" class="default" panelWidth="610px" panelHeight="300px" dropdownkeycode="145" manalerttext="LLD Statistic Code" onblur="if (chkONE_DEAL.checked == true) fDisPlay(2);fCheckDocument()" onLoadError="cbbSTAT_CD.Value = '';" style="position: absolute; width: 372px; height: 24px; left: 112px; top: 0px;">
+                                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                                    "data":[]
+                                </codecombo>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <label class="Mtitle" lang="Applicant" style="left: 25px; width: 72px; top: 131px; height: 24px; position: absolute;">
+              
+              Applicant
+            </label>
+            <input id="btnAdd" onclick="fDataInsert();" src="" tabindex="-1" type="button" onmouseout="" onmouseover="" class="greenBtn" value="┿ Add " style="display: none; position: absolute; width: 104px; height: 24px; left: 879px; top: 671px;">
+        </tabPage>
+    </tabControl>
+    <label class="Mtitle" lang="BankInformation" style="left: 48px; width: 120px; top: 405px; height: 24px; position: absolute;">
+                Bank Information
+                </label>
+</body>
+</html>

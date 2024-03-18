@@ -1,0 +1,515 @@
+@import "/frame/css/font.css";
+
+#cssmenu,
+#cssmenu ul,
+#cssmenu ul li,
+#cssmenu ul li a,
+#scnroConts,
+#scnroConts ul,
+#scnroConts ul li,
+#scnroConts ul li a,
+#favConts,
+#favConts ul,
+#favConts ul li,
+#favConts ul li a {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  list-style: none;
+  line-height: 1;
+  display: block;
+  position: relative;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+#cssmenu,
+#scnroConts,
+#favConts {
+  width: 100%;
+  height: calc(100% - 40px);
+  overflow-y: overlay;
+  overflow-x: hidden;
+  
+}
+#cssmenu::-webkit-scrollbar,
+#scnroConts::-webkit-scrollbar,
+#favConts::-webkit-scrollbar{
+  background-color: transparent;
+  width: 4px;
+}
+#cssmenu::-webkit-scrollbar-thumb,
+#scnroConts::-webkit-scrollbar-thumb,
+#favConts::-webkit-scrollbar-thumb {
+  background-color: rgb(224, 230, 228);
+  border-radius: 100px;
+  height: 20%;
+}
+
+#cssmenu::-webkit-scrollbar-thumb:active,
+#scnroConts::-webkit-scrollbar-thumb:active,
+#favConts::-webkit-scrollbar-thumb:active{
+  background-color: #aeb3b3;
+}
+
+#cssmenu::-webkit-scrollbar-track,
+#scnroConts::-webkit-scrollbar-track,
+#favConts::-webkit-scrollbar-track{
+  background-color: rgb(0, 104, 104);
+  background-color: #008485;
+  /* display: none; */
+}
+
+#cssmenu ul ul,
+#scnroConts ul ul {
+  display: none;
+  border-bottom: 1px solid #d0d0d0;
+}
+.align-right {
+  float: right;
+}
+#cssmenu > ul > li > a,
+#scnroConts > ul > li > a {
+  padding: 10px 10px;
+  /* border-left: 1px solid #fdfdfd;
+  border-right: 1px solid #f9f9f9; */
+  border-top: 1px solid #d0d0d0;
+  cursor: pointer;
+  z-index: 2;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #515151;
+  background-color: #f8f8f8f5;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+
+/*   background-repeat: no-repeat;
+  background-size: contain; */
+/* 	
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  background: #36aae7;
+  background: -webkit-linear-gradient(#36aae7, #1fa0e4);
+  background: -moz-linear-gradient(#36aae7, #1fa0e4);
+  background: -o-linear-gradient(#36aae7, #1fa0e4);
+  background: -ms-linear-gradient(#36aae7, #1fa0e4);
+  background: linear-gradient(#36aae7, #1fa0e4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+	 */
+}
+#cssmenu > ul > li > a:hover,
+#cssmenu > ul > li.active > a,
+#cssmenu > ul > li.open > a,
+#scnroConts > ul > li > a:hover,
+#scnroConts > ul > li.active > a,
+#scnroConts > ul > li.open > a {
+  color: #008485;
+  font-weight:bold;
+  background-color: #ecf6f6;
+  /* background-image: url('../images/1depth_bg.gif'); */
+  /* background-repeat: no-repeat;
+  background-size: contain; */
+	/*
+  color: #eeeeee;
+  background: #1fa0e4;
+  background: -webkit-linear-gradient(#1fa0e4, #1992d1);
+  background: -moz-linear-gradient(#1fa0e4, #1992d1);
+  background: -o-linear-gradient(#1fa0e4, #1992d1);
+  background: -ms-linear-gradient(#1fa0e4, #1992d1);
+  background: linear-gradient(#1fa0e4, #1992d1);
+	*/
+}
+#cssmenu > ul > li.open > a,
+#scnroConts > ul > li.open > a {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid #00787890;
+}
+#cssmenu > ul > li:last-child > a,
+#cssmenu > ul > li.last > a,
+#scnroConts > ul > li:last-child > a,
+#scnroConts > ul > li.last > a {
+  /* border-bottom: 1px solid #d6d6d6; */
+  border-bottom: none;
+}
+.holder {
+  width: 0;
+  height: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.holder::after,
+.holder::before {
+  display: block;
+  position: absolute;
+  content: "";
+  width: 6px;
+  height: 6px;
+  right: 20px;
+  z-index: 10;
+  -webkit-transform: rotate(-135deg);
+  -moz-transform: rotate(-135deg);
+  -ms-transform: rotate(-135deg);
+  -o-transform: rotate(-135deg);
+  transform: rotate(-135deg);
+}
+.holder::after {
+  top: 17px;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+}
+#cssmenu > ul > li > a:hover > span::after,
+#cssmenu > ul > li.active > a > span::after,
+#cssmenu > ul > li.open > a > span::after,
+#scnroConts > ul > li > a:hover > span::after,
+#scnroConts > ul > li.active > a > span::after,
+#scnroConts > ul > li.open > a > span::after {
+  border-color: #eeeeee;
+}
+.holder::before {
+  top: 18px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+  border-top-color: inherit;
+  border-left-color: inherit;
+}
+#cssmenu ul ul li,
+#scnroConts ul ul li,
+#favConts ul li {
+  border-bottom: 1px solid #d6d6d6;
+}
+
+#cssmenu ul ul li.is-item,
+#cssmenu ul ul li:last-child,
+#scnroConts ul ul li.is-item,
+#scnroConts ul ul li:last-child,
+#favConts ul li.is-item,
+#favConts ul li:last-child {
+  border-bottom: 0;
+}
+#cssmenu ul ul li a,
+#scnroConts ul ul li a,
+#favConts ul li a {
+  cursor: pointer;
+  /* border-bottom: 1px solid #32373e;
+  border-left: 1px solid #32373e;
+  border-right: 1px solid #32373e; */
+  padding: 10px 20px;
+  z-index: 1;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: bold;
+  color: #304343;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.2s;
+
+}
+#cssmenu ul ul li:hover > a,
+#cssmenu ul ul li.open > a,
+#cssmenu ul ul li.active > a,
+#scnroConts ul ul li:hover > a,
+#scnroConts ul ul li.open > a,
+#scnroConts ul ul li.active > a,
+#favConts ul li:hover > a,
+#favConts ul li.open > a,
+#favConts ul li.active > a {
+  background: #dfeceb;
+  color: #000000;
+}
+
+#cssmenu ul ul li:first-child > a,
+#scnroConts ul ul li:first-child > a,
+#favConts ul li:first-child > a {
+  box-shadow: none;
+}
+#cssmenu ul ul ul li:first-child > a,
+#scnroConts ul ul ul li:first-child > a,
+#favConts ul ul li:first-child > a {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+#cssmenu ul ul ul li a,
+#scnroConts ul ul ul li a,
+#favConts ul ul li a {
+  padding-left: 30px;
+}
+#cssmenu > ul > li > ul > li:last-child > a,
+#cssmenu > ul > li > ul > li.last > a,
+#scnroConts > ul > li > ul > li:last-child > a,
+#scnroConts > ul > li > ul > li.last > a {
+  border-bottom: 0;
+}
+#cssmenu > ul > li > ul > li.open:last-child > a,
+#cssmenu > ul > li > ul > li.last.open > a,
+#scnroConts > ul > li > ul > li.open:last-child > a,
+#scnroConts > ul > li > ul > li.last.open > a {
+  /* border-bottom: 1px solid #5a5b5b; */
+  border-bottom: 0;
+}
+#cssmenu > ul > li > ul > li.open:last-child > ul > li:last-child > a,
+#scnroConts > ul > li > ul > li.open:last-child > ul > li:last-child > a {
+  border-bottom: 0;
+}
+#cssmenu ul ul li.has-sub > a::after,
+#scnroConts ul ul li.has-sub > a::after,
+#favConts ul li.has-sub > a::after {
+  display: block;
+  position: absolute;
+  content: "";
+  width: 5px;
+  height: 5px;
+  right: 20px;
+  z-index: 10;
+  top: 14px;
+  border-top: 2px solid #898989;
+  border-left: 2px solid #898989;
+  /* -webkit-transform: rotate(-135deg);
+  -moz-transform: rotate(-135deg);
+  -ms-transform: rotate(-135deg);
+  -o-transform: rotate(-135deg);
+  transform: rotate(-135deg); */
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+#cssmenu ul ul li.active > a::after,
+#cssmenu ul ul li.open > a::after,
+#scnroConts ul ul li.active > a::after,
+#scnroConts ul ul li.open > a::after,
+#favConts ul li.active > a::after,
+#favConts ul li.open > a::after {
+  top: 11.5px;
+  border-color: #1a1a1a;
+
+  -webkit-transform: rotate(-135deg);
+  -moz-transform: rotate(-135deg);
+  -ms-transform: rotate(-135deg);
+  -o-transform: rotate(-135deg);
+  transform: rotate(-135deg);
+}
+
+#cssmenu ul ul li > a:hover::after,
+#scnroConts ul ul li > a:hover::after,
+#favConts ul li > a:hover::after{
+  border-color: #1a1a1a;
+}
+
+#cssmenu ul ul li.is-item a,
+#scnroConts ul ul li.is-item a,
+#favConts ul li.is-item a {
+  font-family: Arial, sans-serif, Thahoma;
+  cursor: pointer;
+  /* border-bottom: 0.1px solid rgb(255, 255, 255); */
+/*   border-left: 1px solid #32373e;
+  border-right: 1px solid #32373e; */
+  padding: 10px 5px 10px 34px;
+  z-index: 1;
+  text-decoration: none;
+  font-weight:normal;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  color: #e4e4e4;
+  background: #0c8f8f;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+#cssmenu ul ul ul li:hover > a,
+#cssmenu ul ul ul li.open > a,
+#cssmenu ul ul ul li.active > a,
+#scnroConts ul ul ul li:hover > a,
+#scnroConts ul ul ul li.open > a,
+#scnroConts ul ul ul li.active > a,
+#favConts ul ul li:hover > a,
+#favConts ul ul li.open > a,
+#favConts ul ul li.active > a {
+  background: #007272b9;
+  color: #ffffff;
+  transition: all 0.2s;
+}
+
+#cssmenu ul ul li.is-item:hover > a,
+#scnroConts ul ul li.is-item:hover > a,
+#favConts ul li.is-item:hover > a,
+#favConts ul li.is-item.active > a{
+  background: #007272b9;
+  color: #ffffff;
+  transition: all 0.2s;
+}
+
+#cssmenu ul ul li.is-item a .is-item-code,
+#scnroConts ul ul li.is-item a .is-item-code,
+#favConts ul li.is-item a .is-item-code {
+  font-family: Arial, sans-serif, Thahoma;
+  color: rgb(255, 191, 0);
+  margin-right: 10px;
+  font-size: 12px;
+  display: inline-block;
+  width: 35px;
+}
+
+#cssmenu ul ul li.is-item:hover a .is-item-code,
+#scnroConts ul ul li.is-item:hover a .is-item-code,
+#favConts ul li.is-item:hover a .is-item-code {
+  color: #ffe100;
+  margin-right: 10px;
+}
+
+#scnroConts ul li.is-item a .is-item-name,
+#favConts ul li.is-item a .is-item-name {
+  font-family: Arial, sans-serif, Thahoma;
+}
+
+.bodyBG {
+	scrollbar-face-color:#d1d4d7;
+	scrollbar-shadow-color: #D6DAC9;
+	scrollbar-highlight-color: #FFFFFF;
+	scrollbar-3dlight-color: #D6DAC9;
+	scrollbar-darkshadow-color: #F0F4E3;
+	scrollbar-track-color: #BECDE6;
+	scrollbar-arrow-color: #B6BBA4;
+	
+	background: #666666;	
+	/*
+  color: #eeeeee;
+  background: #303050;
+  background: -webkit-linear-gradient(#0982c1, #404060);
+  background: -moz-linear-gradient(#0982c1, #404060);
+  background: -o-linear-gradient(#0982c1, #404060);
+  background: -ms-linear-gradient(#0982c1, #404060);
+  background: linear-gradient(#0982c1, #404060);
+	*/
+}
+
+#searchItemDiv {
+  margin-bottom: 10px;
+}
+
+#searchItemDiv .searchInp {
+  width: 315px;
+  height: 25px;
+  margin-left: 15px;
+  border: 1px solid #d3d3d3;
+  padding-left: 5px;
+}
+
+#searchItemDiv > select{
+  outline: none;
+}
+
+
+#searchItemDiv > select > option{
+  border-radius: 1px;
+  background-color: #fff;
+}
+
+#searchItemDiv > input{
+  outline: none;
+}
+
+#searchItemDiv > input:focus{
+  background-color: #f3f7f7;
+}
+
+#searchItemDiv > input[type=search]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: url(./../images/input_close.png) center center no-repeat;
+  background-size: 8px 8px;
+  cursor: pointer;
+}
+
+#favBtns{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  width: 300px;
+}
+
+#favBtns > button{
+  position: relative;
+  width: 90px;
+  height: 24px;
+  border: 1px solid #d3d3d3;
+  text-indent: -10px;
+  border-radius: 2px;
+  background-color: #f9f9f9;
+  transition: all 0.3s;
+  color: #737373;
+  font-size: 13px;
+}
+
+#favBtns > button:hover{
+  color: #006c6c;
+  border: 1px solid #b1b1b1;
+  background-color: #f0f3f3;
+}
+
+#favBtns > button > img{
+  position: absolute;
+  top: 5px;
+  right: 14px;
+  width: 12px;
+  height: 12px;
+}
+
+#favBtns > button > img.off{
+  display: block;
+}
+
+#favBtns > button > img.on{
+  display: none;
+}
+
+#favBtns > button:hover > img.off{
+  display: none;
+}
+
+#favBtns > button:hover > img.on{
+  display: block;
+}
+
+#favBtns > button.del > img{
+  padding: 1.5px;
+  right: 8px;
+}
+
+.gProgressDiv {
+  position: fixed;
+  left: 0px;
+  top: 35px;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(245 245 245 / 40%);
+  z-index: 9999;
+}
+
+.gLoaderDiv {
+  display: inline-block;
+  position: fixed;
+  z-index: 2;
+  top: calc(50% - 24px);
+  left: calc(50% - 24px);
+  width: 48px;
+  height: 48px;
+  border: 5px solid #008485;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  z-index: 10000;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

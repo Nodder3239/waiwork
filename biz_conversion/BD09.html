@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Transaction List</title>
+  <script type="text/javascript" src="/wai/wai.js"></script>
+  <link href="/css/Base_old.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="/js/GBS.js"></script>
+  <script id="bodyScript1" type="text/javascript">
+
+            /********************************************************/
+            /* global variable set                                  */
+            /********************************************************/
+            var gBizDate    = GET_COMM_DATA("FXFIG_COM","FXFIG_IBIL", 0);
+            var g_sBizDate  = LIB().Util.DateToLocal(gBizDate, "YYYY/MM/DD", "S");
+            var gTabId      = "";
+            var iIPOCnt     = 0;
+            var sHanaInfo1 = ""; // ID Branch Address
+            var sHanaInfo2 = ""; // ID Branch Fax, Tel, E-Mail
+
+            /******************************************************/
+            /* Document Initialize                                */
+            /******************************************************/
+            function fInitProc(){
+
+                LIB().InitCB(cbbMNG_BR);
+                LIB().InitCB(cbbMNG_BR2);
+                LIB().InitCB(cbbMNG_BR3);
+                LIB().InitCB(cbbMNG_BR4);
+                LIB().InitCB(cbbCAN_YN);
+                LIB().InitCB(cbbCAN_YN2);
+                LIB().InitCB(cbbCAN_YN3);
+                LIB().InitCB(cbbCAN_YN4);
+
+                prmDSOSearch.clear();
+                prmDSOSearch.recordset.addNew();
+
+                prmDSOOutListBuyRel.clear();
+                prmDSOOutListBuyRel.recordset.addNew();
+
+                prmDSOOutListSellRel.clear();
+                prmDSOOutListSellRel.recordset.addNew();
+                
+                /* report */
+                prmDSOSearchInRpt.clear();
+                prmDSOSearchInRpt.recordset.addNew();
+        
+                prmDSOOutRpt.clear();
+                prmDSOOutRpt.recordset.addNew();
+    
+                prmDSOOutRptList1.clear();
+                prmDSOOutRptList1.recordset.addNew();
+        
+                // Report (Product List)
+                prmDSOSearchInRpt2.clear();
+                prmDSOSearchInRpt2.recordset.addNew();
+        
+                prmDSOOutRptList2.clear();
+                prmDSOOutRptList2.recordset.addNew();
+
+                dtpBASC_DT1_1.value   = g_sBizDate;
+                dtpBASC_DT1_2.value   = g_sBizDate;
+                dtpBASC_DT2_1.value   = g_sBizDate;
+                dtpBASC_DT2_2.value   = g_sBizDate;
+                dtpBASC_DT3_1.value   = g_sBizDate;
+                dtpBASC_DT3_2.value   = g_sBizDate;
+                dtpBASC_DT4_1.value   = g_sBizDate;
+                dtpBASC_DT4_2.value   = g_sBizDate;
+                
+                cbbCAN_YN.value = "N";
+                cbbCAN_YN2.value = "N";
+                cbbCAN_YN3.value = "N";
+                cbbCAN_YN4.value = "N";
+
+                gridBase.setRecordset(null);
+                gridBase2.setRecordset(null);
+                gridBase3.setRecordset(null);
+                gridBase4.setRecordset(null);
+
+                fDisPlay(1);
+				
+            }
+
+            /********************************************************/
+            /* 매수매도 주문내역 조회 : 매수                         */
+            /********************************************************/
+            function fOnClickBuy(){
+
+                var tmpBasDt    = "";
+                var tmpBasDt2   = "";
+                    tmpBasDt    = dtpBASC_DT1_1.value;
+                    tmpBasDt2   = dtpBASC_DT1_2.value;
+
+                if ( tmpBasDt == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[FROM]");
+                    dtpBASC_DT1_1.focus();
+
+                    return;
+                }
+                if ( tmpBasDt2 == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[TO]");
+                    dtpBASC_DT2_2.focus();
+
+                    return;
+                }
+
+                var basDt   = strReplaceOfDate(tmpBasDt);
+                var basDt2  = strReplaceOfDate(tmpBasDt2);
+
+                prmDSOSearch.recordset.fields("FIBD09_JOB_GB").value        = "B";
+                prmDSOSearch.recordset.fields("FIBD09_MGNT_BR_NO").value    = cbbMNG_BR.value;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYFRDATE").value = basDt;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYTODATE").value = basDt2;
+                prmDSOSearch.recordset.fields("FIBD09_CAN_YN").value        = cbbCAN_YN.value;
+
+                ivkSearch.call();
+
+                /* 데이타 바인딩 */
+                if(prmDSOOutListBuyRel.recordset.recordCount == 0){
+
+                    prmDSOOutListBuyRel.clear();
+                    gridBase.setRecordset(null);
+                }
+                else {
+
+                    /////////////// convert date type   //////////////////
+                    var ii, strTemp;
+
+                    prmDSOOutListBuyRel.recordset.moveFirst();
+
+                    for (ii=0; ii < prmDSOOutListBuyRel.recordset.recordCount; ii++) {
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_TRSC_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_TRSC_DATE").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_PAY_SCHE_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_PAY_SCHE_DATE").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_SETL_SCHE_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_SETL_SCHE_DATE").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_BUY_SETL_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_BUY_SETL_DATE").value = strTemp;
+
+                        //strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_SELL_SETL_DATE").value, "YYYY/MM/DD","S");
+                        //prmDSOOutListBuyRel.recordset.fields("FOBD09_SELL_SETL_DATE").value = strTemp;
+
+                        prmDSOOutListBuyRel.recordset.moveNext();
+                    }
+                    ///////////////////////////////////////////////
+
+                    gridBase.setRecordset(prmDSOOutListBuyRel.recordset);
+                    gridBase.syncToDSO();
+                }
+
+            }
+
+            /********************************************************/
+            /* 매수매도 주문내역 조회 : 매도                        */
+            /********************************************************/
+            function fOnClickSell(){
+
+                var tmpBasDt    = "";
+                var tmpBasDt2   = "";
+
+                tmpBasDt    = dtpBASC_DT2_1.value;
+                tmpBasDt2   = dtpBASC_DT2_2.value;
+
+                if ( tmpBasDt == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[FROM]");
+                    dtpBASC_DT2_1.focus();
+
+                    return;
+                }
+                if ( tmpBasDt2 == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[TO]");
+                    dtpBASC_DT2_2.focus();
+
+                    return;
+                }
+
+                var basDt   = strReplaceOfDate(tmpBasDt);
+                var basDt2  = strReplaceOfDate(tmpBasDt2);
+
+
+                prmDSOSearch.recordset.fields("FIBD09_JOB_GB").value        = "S";
+                prmDSOSearch.recordset.fields("FIBD09_MGNT_BR_NO").value    = cbbMNG_BR2.value;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYFRDATE").value = basDt;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYTODATE").value = basDt2;
+                prmDSOSearch.recordset.fields("FIBD09_CAN_YN").value        = cbbCAN_YN2.value;
+
+                ivkSearch.call();
+
+                /* 데이타 바인딩 */
+                if(prmDSOOutListSellRel.recordset.recordCount == 0){
+
+                    prmDSOOutListSellRel.clear();
+                    gridBase2.setRecordset(null);
+                }
+                else {
+
+                    /////////////// convert date type   //////////////////
+                    var ii, strTemp;
+
+                    prmDSOOutListSellRel.recordset.moveFirst();
+
+                    for (ii=0; ii < prmDSOOutListSellRel.recordset.recordCount; ii++) {
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListSellRel.recordset.fields("FOBD09_TRSC_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListSellRel.recordset.fields("FOBD09_TRSC_DATE").value = strTemp;
+
+                        //strTemp = LIB().Util.DateToLocal(prmDSOOutListSellRel.recordset.fields("FOBD09_PAY_SCHE_DATE").value, "YYYY/MM/DD","S");
+                        //prmDSOOutListSellRel.recordset.fields("FOBD09_PAY_SCHE_DATE").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListSellRel.recordset.fields("FOBD09_SETL_SCHE_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListSellRel.recordset.fields("FOBD09_SETL_SCHE_DATE").value = strTemp;
+
+                        //strTemp = LIB().Util.DateToLocal(prmDSOOutListSellRel.recordset.fields("FOBD09_BUY_SETL_DATE").value, "YYYY/MM/DD","S");
+                        //prmDSOOutListSellRel.recordset.fields("FOBD09_BUY_SETL_DATE").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListSellRel.recordset.fields("FOBD09_SELL_SETL_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListSellRel.recordset.fields("FOBD09_SELL_SETL_DATE").value = strTemp;
+
+                        prmDSOOutListSellRel.recordset.moveNext();
+                    }
+                    ///////////////////////////////////////////////
+
+                    gridBase2.setRecordset(prmDSOOutListSellRel.recordset);
+                    gridBase2.syncToDSO();
+                }
+
+            }
+
+            /********************************************************/
+            /* 매수매도 주문내역 조회 : IPO                         */
+            /********************************************************/
+            function fOnClickIPO(){
+
+                var tmpBasDt    = "";
+                var tmpBasDt2   = "";
+                    tmpBasDt    = dtpBASC_DT3_1.value;
+                    tmpBasDt2   = dtpBASC_DT3_2.value;
+
+                if ( tmpBasDt == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[FROM]");
+                    dtpBASC_DT3_1.focus();
+
+                    return;
+                }
+                if ( tmpBasDt2 == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[TO]");
+                    dtpBASC_DT3_2.focus();
+
+                    return;
+                }
+
+                var basDt   = strReplaceOfDate(tmpBasDt);
+                var basDt2  = strReplaceOfDate(tmpBasDt2);
+                
+                iIPOCnt = 0;
+                prmDSOSearch.recordset.fields("FIBD09_JOB_GB").value        = "I";
+                prmDSOSearch.recordset.fields("FIBD09_MGNT_BR_NO").value    = cbbMNG_BR3.value;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYFRDATE").value = basDt;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYTODATE").value = basDt2;
+                prmDSOSearch.recordset.fields("FIBD09_CAN_YN").value        = cbbCAN_YN3.value;
+
+                ivkSearch.call();
+
+                iIPOCnt = prmDSOOutListBuyRel.recordset.recordCount;
+                    
+                /* 데이타 바인딩 */
+                if(prmDSOOutListBuyRel.recordset.recordCount == 0){
+
+                    prmDSOOutListBuyRel.clear();
+                    gridBase3.setRecordset(null);
+                }
+                else {
+
+                    /////////////// convert date type   //////////////////
+                    var ii, strTemp;
+                    
+                    prmDSOOutListBuyRel.recordset.moveFirst();
+
+                    for (ii=0; ii < prmDSOOutListBuyRel.recordset.recordCount; ii++) {
+                    
+                        imgPRINT.disabled = false;
+                        imgPRINT.style.filter = "alpha(opacity:100)";
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_TRSC_DATE").value, "YYYY/MM/DD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_TRSC_DATE").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_BID_SCHE_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_BID_SCHE_DT").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_OFFER_SCHE_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_OFFER_SCHE_DT").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_OFFER_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_OFFER_DT").value = strTemp;
+
+                        prmDSOOutListBuyRel.recordset.moveNext();
+                    }
+                    ///////////////////////////////////////////////
+
+                    gridBase3.setRecordset(prmDSOOutListBuyRel.recordset);
+                    gridBase3.syncToDSO();
+                }
+            }
+
+            /********************************************************/
+            /* 매수매도 주문내역 조회 : Coupon                      */
+            /********************************************************/
+            function fOnClickCoupon(){
+
+                var tmpBasDt    = "";
+                var tmpBasDt2   = "";
+                    tmpBasDt    = dtpBASC_DT4_1.value;
+                    tmpBasDt2   = dtpBASC_DT4_2.value;
+
+                if ( tmpBasDt == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[FROM]");
+                    dtpBASC_DT4_1.focus();
+
+                    return;
+                }
+                if ( tmpBasDt2 == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[TO]");
+                    dtpBASC_DT4_2.focus();
+
+                    return;
+                }
+
+                var basDt   = strReplaceOfDate(tmpBasDt);
+                var basDt2  = strReplaceOfDate(tmpBasDt2);
+
+                prmDSOSearch.recordset.fields("FIBD09_JOB_GB").value        = "C";
+                prmDSOSearch.recordset.fields("FIBD09_MGNT_BR_NO").value    = cbbMNG_BR4.value;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYFRDATE").value = basDt;
+                prmDSOSearch.recordset.fields("FIBD09_INQUIRYTODATE").value = basDt2;
+                prmDSOSearch.recordset.fields("FIBD09_CAN_YN").value        = cbbCAN_YN4.value;
+
+                ivkSearch.call();
+
+                /* 데이타 바인딩 */
+                if(prmDSOOutListBuyRel.recordset.recordCount == 0){
+
+                    prmDSOOutListBuyRel.clear();
+                    gridBase4.setRecordset(null);
+                }
+                else {
+
+                    /////////////// convert date type   //////////////////
+                    var ii, strTemp;
+
+                    prmDSOOutListBuyRel.recordset.moveFirst();
+
+                    for (ii=0; ii < prmDSOOutListBuyRel.recordset.recordCount; ii++) {
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_TRSC_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_TRSC_DT").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_PAY_SCHE_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_PAY_SCHE_DT").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_PAY_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_PAY_DT").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_TRADE_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_TRADE_DT").value = strTemp;
+
+                        strTemp = LIB().Util.DateToLocal(prmDSOOutListBuyRel.recordset.fields("FOBD09_DUE_DT").value, "YYYYMMDD","S");
+                        prmDSOOutListBuyRel.recordset.fields("FOBD09_DUE_DT").value = strTemp;
+
+                        prmDSOOutListBuyRel.recordset.moveNext();
+                    }
+                    ///////////////////////////////////////////////
+
+                    gridBase4.setRecordset(prmDSOOutListBuyRel.recordset);
+                    gridBase4.syncToDSO();
+                }
+            }
+            
+            /******************************************************/
+            /* Tab Div Init                                       */
+            /*      strTab : 1 - 매수주문 내역                    */
+            /*               2 - 매도주문 내역                    */
+            /*               3 - IPO 주문 내역                    */
+            /*               4 - 쿠폰,만기내역                    */
+            /******************************************************/
+            function fDisPlay(strTab) {
+
+                divTab1.style.display = "none";
+                divTab2.style.display = "none";
+                divTab3.style.display = "none";
+                divTab4.style.display = "none";
+
+                Tab1.className = "tabnormaltitle_big";
+                Tab2.className = "tabnormaltitle_big";
+                Tab3.className = "tabnormaltitle_big";
+                Tab4.className = "tabnormaltitle_big";
+
+                gTabId = strTab;
+
+                if (strTab == 1) {
+                    divTab1.style.display = "";
+                    Tab1.className        = "tabselecttitle_big";
+
+                    dtpBASC_DT1_1.focus();
+                }
+                else if (strTab == 2) {
+                    divTab2.style.display = "";
+                    Tab2.className        = "tabselecttitle_big";
+
+                    dtpBASC_DT2_1.focus();
+                }
+                else if (strTab == 3) {
+                    divTab3.style.display = "";
+                    Tab3.className        = "tabselecttitle_big";
+
+					if (iIPOCnt > 0) {
+						imgPRINT.disabled = false;
+						imgPRINT.style.filter = "alpha(opacity:100)";					
+					} else {
+						imgPRINT.disabled = true;
+						imgPRINT.style.filter = "alpha(opacity:50)";
+					}
+                    dtpBASC_DT3_1.focus();
+                }
+                else if (strTab == 4) {
+                    divTab4.style.display = "";
+                    Tab4.className        = "tabselecttitle_big";
+
+                    dtpBASC_DT4_1.focus();
+                }
+            }
+
+            /********************************************************/
+            /* 입력 key : 영문자 소문자 -> 대문자 처리              */
+            /********************************************************/
+            function upperCase() {
+
+                var keyCode = event.keyCode;
+
+                if(keyCode>96 && keyCode<123) event.keyCode -=32;
+
+                event.returnValue=true;
+            }
+
+            /********************************************************/
+            /* 일자 구분자 제거 처리                                */
+            /********************************************************/
+            function strReplaceOfDate(obj) {
+
+                var tmpDt = "";
+                var baseDt = "";
+
+                tmpDt = LIB().Util.LocalToDate(obj);
+                tmpDt  = tmpDt.replace(/\//g, "");
+                baseDt  = tmpDt.replace (/-/g, "");
+
+                return baseDt;
+            }
+            
+            /********************************************************/
+            /* Report Print                                         */
+            /********************************************************/
+            function fPrint() {
+            
+            
+                var tmpBasDt    = "";
+                var tmpBasDt2   = "";
+                    tmpBasDt    = dtpBASC_DT1_1.value;
+                    tmpBasDt2   = dtpBASC_DT1_2.value;
+
+                if ( tmpBasDt == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[FROM]");
+                    dtpBASC_DT1_1.focus();
+
+                    return;
+                }
+                if ( tmpBasDt2 == "" ){
+                    ShowInfoDialog("Input the Inquiry Date[TO]");
+                    dtpBASC_DT2_2.focus();
+
+                    return;
+                }
+
+                var basDt   = strReplaceOfDate(tmpBasDt);
+                var basDt2  = strReplaceOfDate(tmpBasDt2);
+                
+                if(prmDSOOutListSellRel.recordset.recordCount == 0) {
+                    alert("There is no Searching Data. \n Click Search Button !");
+                    return;
+                }
+                
+            
+                prmDSOSearchInRpt.recordset.fields("FIBD09_1_JOB_GB").value        = "1";
+                prmDSOSearchInRpt.recordset.fields("FIBD09_1_MGNT_BR_NO").value    = cbbMNG_BR.value;
+                prmDSOSearchInRpt.recordset.fields("FIBD09_1_INQUIRYFRDATE").value = basDt
+                prmDSOSearchInRpt.recordset.fields("FIBD09_1_INQUIRYTODATE").value = basDt2;
+                prmDSOSearchInRpt.recordset.fields("FIBD09_1_CAN_YN").value        = cbbCAN_YN.value;
+                
+                ivkSearchRpt.call();
+
+                var sOffiCd = "";
+                var sBidScheDt = "";
+                
+                prmDSOOutRptList1.recordset.moveFirst();
+                for(var i = 0; i < prmDSOOutRptList1.recordset.recordCount ; i++) {
+                     sOffiCd = prmDSOOutRptList1.recordset.fields("FOBD09_1_A_ISSU_AGENCY_OFFICE_CD").value ;
+ 
+                     prmDSOSearchInRpt2.recordset.fields("FIBD09_1_JOB_GB").value        = "2";
+                     prmDSOSearchInRpt2.recordset.fields("FIBD09_1_MGNT_BR_NO").value    = cbbMNG_BR.value;
+                     prmDSOSearchInRpt2.recordset.fields("FIBD09_1_INQUIRYFRDATE").value = basDt
+                     prmDSOSearchInRpt2.recordset.fields("FIBD09_1_INQUIRYTODATE").value = basDt2;
+                     prmDSOSearchInRpt2.recordset.fields("FIBD09_1_CAN_YN").value        = cbbCAN_YN.value;
+                     prmDSOSearchInRpt2.recordset.fields("FIBD09_1_ISSU_AGENCY_OFFICE_CD").value = sOffiCd;
+
+                    ivkSearchRpt2.call();
+                    
+                    prmDSOOutRptList2.recordset.moveFirst();
+                    if (prmDSOOutRptList2.recordset.recordCount > 0)
+                    {
+                        sBidScheDt = prmDSOOutRptList2.recordset.fields("FOBD09_2_A_BID_SCHE_DT").value;
+                        
+                        RepViewer.ViewerURL = '/rpt/RPTView.html';
+                        RepViewer.ReportUrl = '/rpt/BD09_IPO.rpx';
+                        RepViewer.DataType  = 1;
+                        RepViewer.RecordSet = prmDSOOutRptList2.recordset;
+                        RepViewer.AddData( "PageHeader", "" , "text", sHanaInfo1);
+                        RepViewer.AddData( "PageHeader", "" , "text", sHanaInfo2);
+                        RepViewer.AddData( "PageHeader", "lblTrscDt"    , "text", sBidScheDt );
+                        RepViewer.AddData( "PageHeader", "lblHanaInfo1" , "text", prmDSOOutRpt.recordset.fields("FOBD09_1_BANK_ADDR").value  );
+                        RepViewer.AddData( "PageHeader", "lblHanaInfo2" , "text", prmDSOOutRpt.recordset.fields("FOBD09_1_BANK_INFO").value  );
+    
+                        RepViewer.AddData( "PageHeader", "lblMgcoInfo"  , "text", prmDSOOutRptList1.recordset.fields("FOBD09_1_A_MGCO_INFO").value  );
+                        RepViewer.AddData( "PageHeader", "lblMgcoAddr"  , "text", prmDSOOutRptList1.recordset.fields("FOBD09_1_A_MGCO_ADR").value   );
+                        RepViewer.AddData( "PageHeader", "lblMgcoFax"   , "text", prmDSOOutRptList1.recordset.fields("FOBD09_1_A_COMP_FAX").value   );
+                        RepViewer.AddData( "PageHeader", "lblMgcoTel"   , "text", prmDSOOutRptList1.recordset.fields("FOBD09_1_A_COMP_PHONE").value );
+                        RepViewer.AddData( "PageHeader", "lblUnqTrscNo" , "text", prmDSOOutRptList1.recordset.fields("FOBD09_1_A_UNQ_TRSC_NO").value);
+                        RepViewer.Show();
+                        
+                        prmDSOOutRptList2.recordset.moveNext();
+                    } 
+                    
+                    prmDSOOutRptList1.recordset.moveNext();
+                }            
+               
+            }
+
+        
+  </script>
+  <script type="text/javascript">
+  </script>
+</head>
+<body onload="fInitProc()">
+  <!-- Y[wai] : Generated : dataServices -->
+  <DataServices>
+    <dataService id="ivkSearch" map="/tis/BDO0900.xml" service="BDO0900" dso="prmDSOSearch=SCR_INPUT;prmDSOOutListBuyRel=SCR_OUTPUT;prmDSOOutListSellRel=SCR_OUTPUT" onerror="//alert(ivkSearch.RawResult.xml);"></dataService>
+    <dataService id="ivkSearchRpt" map="/tis/BDO0901.xml" service="BDO0901" dso="prmDSOSearchInRpt=SCR_INPUT;prmDSOOutRpt=SCR_OUTPUT;prmDSOOutRptList1=SCR_DTLSREL1" onerror="//alert(ivkSearch.RawResult.xml);"></dataService>
+    <dataService id="ivkSearchRpt2" map="/tis/BDO0901.xml" service="BDO0901" dso="prmDSOSearchInRpt2=SCR_INPUT;prmDSOOutRptList2=SCR_DTLSREL2" onerror="//alert(ivkSearch.RawResult.xml);"></dataService>
+  </DataServices>
+  <!-- Y[wai] : Generated : dataServices -->
+  <rmwvendor id="RepViewer">
+  </rmwvendor>
+  <table border="0" cellpadding="0" cellspacing="0" style="margin-left:16px;width:876px;position:absolute;top:0px;height:500px;">
+    <tr height="20px">
+      <td>
+        <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td id="Tab1" class="tabnormaltitle_big" onclick="fDisPlay(1)">
+              Buy Detail
+            </td>
+            <td width="5">
+            </td>
+            <td id="Tab2" class="tabnormaltitle_big" onclick="fDisPlay(2)">
+              Sell Detail
+            </td>
+            <td width="5">
+            </td>
+            <td id="Tab3" class="tabnormaltitle_big" onclick="fDisPlay(3)">
+              IPO Detail
+            </td>
+            <td width="5">
+            </td>
+            <td id="Tab4" class="tabnormaltitle_big" onclick="fDisPlay(4)">
+              Coupon, Maturity Detail
+            </td>
+            <td width="5">
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr height="10px">
+      <td background="/biz/images/tabbar_back.gif">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="tabDiv" id="divTab1" style="left:0px;width:876px;position:relative;top:-4px;height:490px;">
+          <div class="topbarIngreen" style="width:876px;height:66px;">
+            <label class="regist" style="left:4px;width:90px;padding-top:3px;position:absolute;top:7px;height:20px;" lang="InquiryDate">
+              Inquiry Date
+            </label>
+            <dateedit id="dtpBASC_DT1_1" class="default" dateOrder="yyyymmdd" title="Apply start date" tabindex="2" value="" style="left:100px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:198px;width:10px;padding-top:2px;position:absolute;top:7px;height:20px;">
+              ~
+            </label>
+            <dateedit id="dtpBASC_DT1_2" class="default" dateOrder="yyyymmdd" title="Apply end date" tabindex="2" value="" style="left:214px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:385px;width:90px;padding-top:3px;position:absolute;top:7px;height:20px;">
+              Product Code
+            </label>
+            <codecombo id="cbbCOM_ACTCD_AC_CD" cbDisplayTextField="false" fldName="COM_ACTCD_AC_CD" dsoName="prmQryInDso" dropdownkeycode="145" class="search" tabindex="110" panelHeight="125px" panelWidth="310px" labelwidth="210px" style="left:480px;width:330px;height:20px;position:absolute;top:8px;"></codecombo>
+            <label class="regist" style="left:24px;width:70px;padding-top:33px;position:absolute;top:5px;height:20px;" lang="Branch">
+              Branch
+            </label>
+            <codecombo id="cbbMNG_BR" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F181.json" labelwidth="180px" panelHeight="110px" panelWidth="250px" style="left:100px;top:36px;height:20px;width:250px;position:absolute;"></codecombo>
+            <label class="regist" style="left:370px;width:90px;padding-top:33px;position:absolute;top:5px;height:20px;">
+              Cancel Y/N
+            </label>
+            <codecombo id="cbbCAN_YN" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F23.json" labelwidth="100px" panelHeight="110px" panelWidth="250px" style="left:465px;top:36px;height:20px;width:150px;position:absolute;"></codecombo>
+            <input id="imgSEARCH" type="image" name="imgSearch" height="21" hspace="0" size="1" src="/biz/images/search.gif" onmouseout="this.src='/biz/images/search.gif'" onmouseover="this.src='/biz/images/searchover.gif'" vspace="0" width="90" onclick="fOnClickBuy()" tabindex="-1" style="left:790px;width:80px;position:absolute;top:37px;height:21px;">
+            
+          </div>
+          <grid id="gridBase" dsoName="BDO0900.prmDSOOutListBuyRel" style="font-size:8pt;color:#303030;position:absolute;top:75px;left:10px;width:855px;height:435px;">
+            "options":{
+              "fixColumn":0,
+              "columns" : [
+                {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1"}
+               ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1"}
+               ,{"text":"Process Dt","field":"FOBD09_TRSC_DT","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process Date","field":"FOBD09_TRSC_DATE","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProcessDate","style":"custSty1"}
+               ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":70,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":200,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Requested Price","field":"FOBD09_CUST_REQ_PRICE","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Broker Price","field":"FOBD09_BROKER_PRICE","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Customer Price","field":"FOBD09_CUST_PRICE","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Face Value","field":"FOBD09_TRSC_FACE_VAL_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Capital Gain","field":"FOBD09_CAPT_GAIN","alignment":"center","width":0,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Capital Gain Tax","field":"FOBD09_CAPT_GAIN_TAX","alignment":"center","width":0,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Accrued Interest","field":"FOBD09_ACCR_INT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Accrued Interest Tax","field":"FOBD09_ACCR_INT_TAX","alignment":"center","width":0,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Principal Amount","field":"FOBD09_BOND_PRIN_AMT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Settlement Amount","field":"FOBD09_BOND_SETL_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Paymant Schedule Dt","field":"FOBD09_PAY_SCHE_DT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Paymant Schedule Date","field":"FOBD09_PAY_SCHE_DATE","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Settled Schedule Dt","field":"FOBD09_SETL_SCHE_DT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Settled Schedule Date","field":"FOBD09_SETL_SCHE_DATE","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Settled Dt","field":"FOBD09_BUY_SETL_DT","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Settled Date","field":"FOBD09_BUY_SETL_DATE","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Ctp","field":"FOBD09_THR_MGNT_NO","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"YTM","field":"FOBD09_YTM","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1"}
+               ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1"}
+               ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+              ]
+              ,"style" : {
+                "custSty1" :{
+              "header" :{"color":"#289088","font":"normal 8px Arial white"}
+,
+              "cell" :{"color":"white","font":"normal 8px Arial #666666"}
+               }
+              }
+            }
+          </grid>
+        </div>
+        <div class="tabDiv" id="divTab2" style="left:0px;width:876px;position:relative;top:-4px;height:490px;">
+          <div class="topbarIngreen" style="width:876px;height:66px;">
+            <label class="regist" style="left:4px;width:90px;padding-top:3px;position:absolute;top:7px;height:20px;" lang="InquiryDate">
+              Inquiry Date
+            </label>
+            <dateedit id="dtpBASC_DT2_1" class="default" dateOrder="yyyymmdd" title="Apply start date" tabindex="2" value="" style="left:100px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:198px;width:10px;padding-top:2px;position:absolute;top:7px;height:20px;">
+              ~
+            </label>
+            <dateedit id="dtpBASC_DT2_2" class="default" dateOrder="yyyymmdd" title="Apply end date" tabindex="2" value="" style="left:214px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:24px;width:70px;padding-top:33px;position:absolute;top:5px;height:20px;" lang="Branch">
+              Branch
+            </label>
+            <codecombo id="cbbMNG_BR2" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F181.json" labelwidth="180px" panelHeight="110px" panelWidth="250px" style="left:100px;top:36px;height:20px;width:250px;position:absolute;"></codecombo>
+            <label class="regist" style="left:370px;width:90px;padding-top:33px;position:absolute;top:5px;height:20px;">
+              Cancel Y/N
+            </label>
+            <codecombo id="cbbCAN_YN2" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F23.json" labelwidth="100px" panelHeight="110px" panelWidth="250px" style="left:465px;top:36px;height:20px;width:150px;position:absolute;"></codecombo>
+            <input id="imgSEARCH2" type="image" name="imgSearch" height="21" hspace="0" size="1" src="/biz/images/search.gif" onmouseout="this.src='/biz/images/search.gif'" onmouseover="this.src='/biz/images/searchover.gif'" vspace="0" width="90" onclick="fOnClickSell()" tabindex="-1" style="left:790px;width:80px;position:absolute;top:37px;height:21px;">
+            
+          </div>
+          <grid id="gridBase2" dsoName="BDO0900.prmDSOOutListSellRel" style="font-size:8pt;color:#303030;position:absolute;top:75px;left:10px;width:855px;height:435px;">
+            "options":{
+              "fixColumn":0,
+              "columns" : [
+                {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1"}
+               ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1"}
+               ,{"text":"Process Dt","field":"FOBD09_TRSC_DT","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process Date","field":"FOBD09_TRSC_DATE","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProcessDate","style":"custSty1"}
+               ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":70,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":200,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Requested Price","field":"FOBD09_CUST_REQ_PRICE","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Broker Price","field":"FOBD09_BROKER_PRICE","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Customer Price","field":"FOBD09_CUST_PRICE","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Face Value","field":"FOBD09_TRSC_FACE_VAL_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Capital Gain","field":"FOBD09_CAPT_GAIN","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Capital Gain Tax","field":"FOBD09_CAPT_GAIN_TAX","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Accrued Interest","field":"FOBD09_ACCR_INT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Accrued Interest Tax","field":"FOBD09_ACCR_INT_TAX","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Principal Amount","field":"FOBD09_BOND_PRIN_AMT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Settlement Amount","field":"FOBD09_BOND_SETL_AMT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Settled schedule Dt","field":"FOBD09_SETL_SCHE_DT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Settled Dt","field":"FOBD09_SELL_SETL_DT","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Settled schedule Date","field":"FOBD09_SETL_SCHE_DATE","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Settled Date","field":"FOBD09_SELL_SETL_DATE","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Ctp","field":"FOBD09_THR_MGNT_NO","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"YTM","field":"FOBD09_YTM","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1"}
+               ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1"}
+               ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+              ]
+              ,"style" : {
+                "custSty1" :{
+              "header" :{"color":"#289088","font":"normal 8px Arial white"}
+,
+              "cell" :{"color":"white","font":"normal 8px Arial #666666"}
+               }
+              }
+            }
+          </grid>
+        </div>
+        <div class="tabDiv" id="divTab3" style="left:0px;width:876px;position:relative;top:-4px;height:490px;">
+          <div class="topbarIngreen" style="width:876px;height:66px;">
+            <label class="regist" style="left:4px;width:90px;padding-top:3px;position:absolute;top:7px;height:20px;" lang="InquiryDate">
+              Inquiry Date
+            </label>
+            <dateedit id="dtpBASC_DT3_1" class="default" dateOrder="yyyymmdd" title="Apply start date" tabindex="2" value="" style="left:100px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:198px;width:10px;padding-top:2px;position:absolute;top:7px;height:20px;">
+              ~
+            </label>
+            <dateedit id="dtpBASC_DT3_2" class="default" dateOrder="yyyymmdd" title="Apply end date" tabindex="2" value="" style="left:214px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:24px;width:70px;padding-top:33px;position:absolute;top:5px;height:20px;" lang="Branch">
+              Branch
+            </label>
+            <codecombo id="cbbMNG_BR3" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F181.json" labelwidth="180px" panelHeight="110px" panelWidth="250px" style="left:100px;top:36px;height:20px;width:250px;position:absolute;"></codecombo>
+            <label class="regist" style="left:370px;width:90px;padding-top:33px;position:absolute;top:5px;height:20px;">
+              Cancel Y/N
+            </label>
+            <codecombo id="cbbCAN_YN3" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F23.json" labelwidth="100px" panelHeight="110px" panelWidth="250px" style="left:465px;top:36px;height:20px;width:150px;position:absolute;"></codecombo>
+            <input id="imgSEARCH3" type="image" name="imgSearch" height="21" hspace="0" size="1" src="/biz/images/search.gif" onmouseout="this.src='/biz/images/search.gif'" onmouseover="this.src='/biz/images/searchover.gif'" vspace="0" width="90" onclick="fOnClickIPO()" tabindex="-1" style="left:708px;width:80px;position:absolute;top:37px;height:21px;">
+            
+            <input id="imgPRINT" name="imgPrint" height="21" hspace="0" size="1" src="/biz/images/print.gif" onmouseout="this.src='/biz/images/print.gif'" onmouseover="this.src='/biz/images/printover.gif'" type="image" vspace="0" width="90" onclick="fPrint()" style="left:790px;width:80px;position:absolute;top:37px;height:21px;filter:alpha(opacity;">
+            
+          </div>
+          <grid id="gridBase3" dsoName="BDO0900.prmDSOOutListBuyRel" style="font-size:8pt;color:#303030;position:absolute;top:75px;left:10px;width:855px;height:435px;">
+            "options":{
+              "fixColumn":0,
+              "columns" : [
+                {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1"}
+               ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1"}
+               ,{"text":"Process Dt","field":"FOBD09_TRSC_DT","alignment":"center","width":80,"editable":"false","focusing":"false","displayformat":"!99-99-9999;0;_","editor":{"type":"MaskEdit","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process Date","field":"FOBD09_TRSC_DATE","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"ProcessDate","style":"custSty1"}
+               ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":70,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":200,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Requested Price","field":"FOBD09_CUST_REQ_PRICE","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Applied Fee Rate","field":"FOBD09_APPLIED_FEE_RATE","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Face Value Amount","field":"FOBD09_TRSC_FACE_VAL_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Offer Amount","field":"FOBD09_OFFER_AMT","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Fee Amount","field":"FOBD09_FEE_AMOUNT","alignment":"center","width":90,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"lang":"FeeAmount","style":"custSty1"}
+               ,{"text":"Settlement Amount","field":"FOBD09_BOND_SETL_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Bid Schedule Date","field":"FOBD09_BID_SCHE_DT","alignment":"center","width":100,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Offer Schedule Date","field":"FOBD09_OFFER_SCHE_DT","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Offer Date","field":"FOBD09_OFFER_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1"}
+               ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1"}
+               ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+              ]
+              ,"style" : {
+                "custSty1" :{
+              "header" :{"color":"#289088","font":"normal 8px Arial white"}
+,
+              "cell" :{"color":"white","font":"normal 8px Arial #666666"}
+               }
+              }
+            }
+          </grid>
+        </div>
+        <div class="tabDiv" id="divTab4" style="left:0px;width:876px;position:relative;top:-4px;height:490px;">
+          <div class="topbarIngreen" style="width:876px;height:66px;">
+            <label class="regist" style="left:4px;width:90px;padding-top:3px;position:absolute;top:7px;height:20px;" lang="InquiryDate">
+              Inquiry Date
+            </label>
+            <dateedit id="dtpBASC_DT4_1" class="default" dateOrder="yyyymmdd" title="Apply start date" tabindex="2" value="" style="left:100px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:198px;width:10px;padding-top:2px;position:absolute;top:7px;height:20px;">
+              ~
+            </label>
+            <dateedit id="dtpBASC_DT4_2" class="default" dateOrder="yyyymmdd" title="Apply end date" tabindex="2" value="" style="left:214px;width:100px;position:absolute;top:7px;height:20px;"></dateedit>
+            <label class="regist" style="left:24px;width:70px;padding-top:33px;position:absolute;top:5px;height:20px;" lang="Branch">
+              Branch
+            </label>
+            <codecombo id="cbbMNG_BR4" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F181.json" labelwidth="180px" panelHeight="110px" panelWidth="250px" style="left:100px;top:36px;height:20px;width:250px;position:absolute;"></codecombo>
+            <label class="regist" style="left:370px;width:90px;padding-top:33px;position:absolute;top:5px;height:20px;">
+              Cancel Y/N
+            </label>
+            <codecombo id="cbbCAN_YN4" cbDisplayTextField="false" dsoName="" fldName="" dropdownkeycode="145" btnImg="/biz/images/cb_arrow.gif" url="/jsondb/F23.json" labelwidth="100px" panelHeight="110px" panelWidth="250px" style="left:465px;top:36px;height:20px;width:150px;position:absolute;"></codecombo>
+            <input id="imgSEARCH4" type="image" name="imgSearch" height="21" hspace="0" size="1" src="/biz/images/search.gif" onmouseout="this.src='/biz/images/search.gif'" onmouseover="this.src='/biz/images/searchover.gif'" vspace="0" width="90" onclick="fOnClickCoupon()" tabindex="-1" style="left:790px;width:80px;position:absolute;top:37px;height:21px;">
+            
+          </div>
+          <grid id="gridBase4" dsoName="BDO0900.prmDSOOutListBuyRel" style="font-size:8pt;color:#303030;position:absolute;top:75px;left:10px;width:855px;height:435px;">
+            "options":{
+              "fixColumn":0,
+              "columns" : [
+                {"text":"Refrence No","field":"FOBD09_ACCT_NO","alignment":"center","width":110,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Cif No","field":"FOBD09_CIF","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"CifNo","style":"custSty1"}
+               ,{"text":"Customer Name","field":"FOBD09_CIF_NM","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"CustomerName","style":"custSty1"}
+               ,{"text":"Process Dt","field":"FOBD09_TRSC_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process Seq","field":"FOBD09_TRSC_SEQ_NO","alignment":"center","width":70,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Product No","field":"FOBD09_PRODUCT_NO","alignment":"center","width":130,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Product Name","field":"FOBD09_PRODUCT_NAME","alignment":"center","width":200,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"ProductName","style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_CD","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Trading Status","field":"FOBD09_TRAD_PROCSS_STA_NM","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN","alignment":"center","width":0,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Cancel","field":"FOBD09_CAN_YN_NM","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Cancel","style":"custSty1"}
+               ,{"text":"Face Value Balance","field":"FOBD09_BOND_FACE_VAL_BAL","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Payment Amount","field":"FOBD09_BOND_SETL_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Tax Amount","field":"FOBD09_TAX_AMT","alignment":"center","width":100,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Payment Net Amount","field":"FOBD09_BOND_SETL_NET_AMT","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Estimated Accured Interest","field":"FOBD09_ACCR_INT","alignment":"center","width":140,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Estimated Tax Amount","field":"FOBD09_CAPT_GAIN_TAX","alignment":"center","width":120,"editable":"false","focusing":"false","displayformat":",0.00","editor":{"type":"CalcEdit","alignment":"right","url":""},"style":"custSty1"}
+               ,{"text":"Paymant Schedule Date","field":"FOBD09_PAY_SCHE_DT","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Paymant Date","field":"FOBD09_PAY_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Trading Date","field":"FOBD09_TRADE_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Due Date","field":"FOBD09_DUE_DT","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"DueDate","style":"custSty1"}
+               ,{"text":"Branch","field":"FOBD09_MGNT_BR_NO","alignment":"center","width":50,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Branch","style":"custSty1"}
+               ,{"text":"Branch Name","field":"FOBD09_MGNT_BR_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"lang":"BranchName","style":"custSty1"}
+               ,{"text":"Sales","field":"FOBD09_SALE_EMP_NO","alignment":"center","width":60,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Sales Name","field":"FOBD09_SALE_EMP_NM","alignment":"center","width":120,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+               ,{"text":"Process User","field":"FOBD09_OPTR_EMP_NO","alignment":"center","width":80,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+               ,{"text":"Process User Name","field":"FOBD09_OPTR_EMP_NM","alignment":"center","width":150,"editable":"false","focusing":"false","editor":{"type":"text","alignment":"left","url":""},"style":"custSty1"}
+              ]
+              ,"style" : {
+                "custSty1" :{
+              "header" :{"color":"#289088","font":"normal 8px Arial white"}
+,
+              "cell" :{"color":"white","font":"normal 8px Arial #666666"}
+               }
+              }
+            }
+          </grid>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,82 @@
+@import "/frame/css/font.css";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "hanaL";
+}
+
+body {
+  position: relative;
+}
+
+#container {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 410px;
+  height: 250px;
+  border: 1px solid #c2c2c2;
+  box-shadow: 1px 2px 5px #878787;
+  background-color: #f2f2f2;
+  border-radius: 3px;
+}
+
+.textbox {
+  display: block;
+  width: 85%;
+  height: 40%;
+  margin: auto;
+  margin-top: 55px;
+}
+.textbox > p {
+  margin: 0 auto;
+  font-size: 0.92rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+  line-height: 2;
+  color: #008485;
+}
+
+#ok {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  border-top: 1px solid #ebebeb;
+}
+#ok .btn {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background-color: #fff;
+  font-weight: 600;
+  color: #616161;
+  font-size: 17px;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  text-indent: 25px;
+}
+#ok .btn::before {
+  display: block;
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 115px;
+  width: 24px;
+  height: 24px;
+  background-image: url(./../images/logout.png);
+  background-size: contain;
+}
+#ok .btn:hover {
+  background-color: #008485;
+  color: #fff;
+}
+#ok .btn:hover::before {
+  background-image: url(./../images/logout_hover.png);
+}/*# sourceMappingURL=Logout.css.map */

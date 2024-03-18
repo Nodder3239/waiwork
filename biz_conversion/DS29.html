@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html style="width: 900px; height: 479px;">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/css/Base_old.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript">
+        var isThereNewFileUploadLOAN = false;
+        var pos;
+        var flagapp = false;
+        var chkLoan ='';
+        /*======================================*/
+        /* ActionOnActive()                    */
+        /*======================================*/
+        function ActionOnActive() {
+            parent.ActionLsnr.ActionManager = AMan;
+        }
+        /*======================================*/
+        /* actExecute(actid)                    */
+        /*======================================*/
+        function actExecute(actid) {
+            switch (actid) {
+            case 1: // Entry
+                fInitClear();
+                break;
+            case 2: // Cancel
+                fInitClear();
+                break;
+            case 6: // Execute
+                fExecute();
+                break;
+            default: //
+                ShowInfoDialog('Execution type error. Select left execution mode button again.');
+                break;
+            }
+        }
+        // Entry å…€ë©¨ï¿½ äº¦Î¶ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½æ�™ï¿½
+        function fEntryOk() {
+        }
+        /*======================================*/
+        /* fInitProc()                          */
+        /*======================================*/
+        function fInitProc() {
+            var BizDate = GET_COMM_DATA("FXFIG_COM", "FXFIG_IBIL", 0);
+            var g_sBizDate = LIB().Util.DateToLocal(BizDate, "YYYY/MM/DD", "S");
+            prmQueryCheckIn.clear();
+            prmQueryCheckIn.recordset.addNew();
+            LIB().InitCB(cbbACTION_TP);
+            LIB().InitCB(cbbSTS);
+            LIB().InitCB(cbbTRX_SRC);
+            LIB().InitCB(cbbBENE_TP);
+            LIB().InitCB(cbbCRED_TP);
+            LIB().InitCB(cbbNOTIFICATION);
+            LIB().InitCB(cbbEXPENSE_CD);
+            LIB().InitCB(cbbCHANNEL_TYPE);
+            LIB().InitCB(cbbUSAGE_TP);
+            LIB().InitCB(cbbDAY_TP);
+            LIB().InitCB(cbbGROUP);
+            LIB().InitCB(cbbLIMIT_TP);
+            LIB().InitCB(cbbCAMPAIGN_FLAG);
+            LIB().InitCB(cbbLOAN_FLAG);
+            LIB().InitCB(cbbCOSTUMER_TYPE_LN);
+            LIB().InitCB(cbbNEW_CIF);
+            LIB().InitCB(cbbLOAN_STATUS);
+            LIB().InitCB(cbbPARTNER_DESTINATION_FLAG);
+            LIB().InitCB(cbbQUICK_CREDIT_FLAG);
+            LIB().InitCB(cbbMIN_TENOR_LIMIT_QC);
+            LIB().InitCB(cbbREPAYMENT_TYPE);
+            LIB().InitCB(cbbMIN_TENOR_INS_QC);
+            LIB().InitCB(cbbKTA_FLAG);
+            LIB().InitCB(cbbMIN_TENOR_KTA);
+            LIB().InitCB(cbbPORTOFOLIO_FLAG);
+            LIB().InitCB(cbbDISB_DAY);
+        }
+        /*======================================*/
+        /* fInitClear()                         */
+        /*======================================*/
+        function fInitClear() {
+            prmQueryCheckIn.clear();
+            prmQueryCheckOut.clear();
+            prmExcelLOANCheckOut.clear();
+            prmQueryCheckIn.recordset.addNew();
+            prmQueryCheckOut.recordset.addNew();
+            prmExcelLOANUpload.clear();
+            prmExcelLOAN.clear();
+            prmExcelLOANCheckIn.clear();
+        }
+        /*======================================*/
+        /* fExecute()                           */
+        /*======================================*/
+        function fExecute() {
+            if (cbbACTION_TP.value == "21" && isThereNewFileUploadLOAN ) {
+                prmQueryCheckIn.recordset.fields("FIDS29_ACTION_TP").value = "22";
+            } else {
+                prmQueryCheckIn.recordset.fields("FIDS29_ACTION_TP").value = cbbACTION_TP.value;
+            }
+            var txtalert = "Please Check ";
+            var ret;
+            var num = 0;
+            if (dtpSTR_DT.value == "  /  /    ") {
+                ShowErrorDialog("dtpSTR_DT is Mandatory");
+                return (-1);
+            }
+            if (dtpEND_DT.value == "  /  /    ") {
+                ShowErrorDialog("dtpEND_DT is Mandatory");
+                return (-1);
+            }
+            if (ret == true) {
+                ShowInfoDialog(txtalert + "!\n Value Or Enable Can't Be Empty");
+                return (-1);
+            }
+            prmQueryCheckIn.recordset.fields("FXFIG_REF_NO").value = txtREF_NO.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_PROMO_NM").value = txtPRMO_NM.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_BENE_TP").value = cbbBENE_TP.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_CRED_TP").value = cbbCRED_TP.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_STR_DT").value = dtpSTR_DT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_END_DT").value = dtpEND_DT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_TRX_SRC").value = cbbTRX_SRC.value;
+            /* Promotional Amount */
+            prmQueryCheckIn.recordset.fields("FIDS29_PROMO_AMT").value = txtPROMO_AMT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_PERC_AMT_MAXIMAL").value = txtMAX_AMT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_STS").value = cbbSTS.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_USAGE_TP").value = cbbUSAGE_TP.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_DAY_TP").value = cbbDAY_TP.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_SPC_DT").value = txtSPC_DT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_STR_TM").value = txtSTR_TM.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_END_TM").value = txtEND_TM.value;
+            /* Limit Property */
+            prmQueryCheckIn.recordset.fields("FIDS29_LIMIT_TP").value = cbbLIMIT_TP.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_DAILY_LIMIT").value = txtDAILY_LIMIT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_DAILY_FREQ").value = txtDAILY_FREQ.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MONTHLY_LIMIT").value = txtMONTHLY_LIMIT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MONTHLY_FREQ").value = txtMONTHLY_FREQ.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_YEARLY_LIMIT").value = txtYEARLY_LIMIT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_YEARLY_FREQ").value = txtYEARLY_FREQ.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_WEEKLY_LIMIT").value = txtWEEKLY_LIMIT.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_WEEKLY_FREQ").value = txtWEEKLY_FREQ.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_DISB_DAY").value = cbbDISB_DAY.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_CHANNEL_TYPE").value = cbbCHANNEL_TYPE.value;
+            /* Limit Property Campaign */
+            prmQueryCheckIn.recordset.fields("FIDS29_CAMPAIGN_FLAG").value = cbbCAMPAIGN_FLAG.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_DAILY_LIMIT_CAMPAIGN").value = txtDAILY_LIMIT_CAMPAIGN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_DAILY_FREQ_CAMPAIGN").value = txtDAILY_FREQ_CAMPAIGN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MONTHLY_LIMIT_CAMPAIGN").value = txtMONTHLY_LIMIT_CAMPAIGN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MONTHLY_FREQ_CAMPAIGN").value = txtMONTHLY_FREQ_CAMPAIGN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_YEARLY_LIMIT_CAMPAIGN").value = txtYEARLY_LIMIT_CAMPAIGN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_YEARLY_FREQ_CAMPAIGN").value = txtYEARLY_FREQ_CAMPAIGN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_WEEKLY_LIMIT_CAMPAIGN").value = txtWEEKLY_LIMIT_CAMPAIGN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_WEEKLY_FREQ_CAMPAIGN").value = txtWEEKLY_FREQ_CAMPAIGN.value;
+            /*20200617_3213*/
+            prmQueryCheckIn.recordset.fields("FIDS29_NOTIFICATION").value = cbbNOTIFICATION.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_GROUP_NO").value = txtGROUP_NO.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_GROUP_STS").value = cbbGROUP.value;
+            /*20201001_3213*/
+            prmQueryCheckIn.recordset.fields("FIDS29_EXPENSE_CD").value = cbbEXPENSE_CD.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_REMARK_FOR_INTERNAL").value = txtREMARK_FOR_INTERNAL.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_REMARK_FOR_CUSTOMER").value = txtREMARK_FOR_CUSTOMER.value;
+            /*Loan */
+            prmQueryCheckIn.recordset.fields("FIDS29_LOAN_FLAG").value = cbbLOAN_FLAG.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_NEW_CIF").value = cbbNEW_CIF.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_COSTUMER_TYPE").value = cbbCOSTUMER_TYPE_LN.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_LOAN_STS").value = cbbLOAN_STATUS.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_PARTNER_DESTINATION_FLAG").value = cbbPARTNER_DESTINATION_FLAG.value;
+            /*Quick Credit*/
+            prmQueryCheckIn.recordset.fields("FIDS29_QUICK_CREDIT_FLAG").value = cbbQUICK_CREDIT_FLAG.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MIN_LIMIT_AMT_QC").value = txtMIN_LIMIT_AMT_QC.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MIN_TENOR_LIMIT_QC").value = cbbMIN_TENOR_LIMIT_QC.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MIN_USAGE_QC").value = txtMIN_USAGE_QC.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_REPAYMENT_TYPE_QC").value = cbbREPAYMENT_TYPE.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MIN_TENOR_INS_QC").value = cbbMIN_TENOR_INS_QC.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MIN_INS_CVT_QC").value = txtMIN_INS_CVT_QC.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_USAGE_DUE_DATE").value = txtUSAGE_DUE_DATE.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_USAGE_DUE_TO").value = txtUSAGE_DUE_TO.value;
+            /*KTA*/
+            prmQueryCheckIn.recordset.fields("FIDS29_KTA_FLAG").value = cbbKTA_FLAG.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MIN_LOAN_AMT_KTA").value = txtMIN_LOAN_AMT_KTA.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MIN_TENOR_KTA").value = cbbMIN_TENOR_KTA.value;
+            /*Portofolio*/
+            prmQueryCheckIn.recordset.fields("FIDS29_PORTOFOLIO_FLAG").value = cbbPORTOFOLIO_FLAG.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_MINIMUM_LOAN_AMT_PFP").value = txtMIN_LOAN_AMT_PFP .value;
+            prmQueryCheckIn.recordset.fields("FIDS29_CONTRACTED_DUE_DATE").value = txtCONTRACTED_DUE_DATE.value;
+            prmQueryCheckIn.recordset.fields("FIDS29_CONTRACTED_DUE_TO").value = txtCONTRACTED_DUE_TO.value;
+            if (flagapp == false) {
+                ivkEntryExe.call();
+                /*  flagapp = true;*/
+            }
+            if (cbbTRX_SRC.value == "ADL" || cbbTRX_SRC.value == "ALL" ) {
+                if (isThereNewFileUploadLOAN) {
+                    prmExcelLOAN.recordset.moveFirst();
+                    while (!prmExcelLOAN.recordset.EOF) {
+                        prmExcelLOANUpload.clear();
+                        prmExcelLOANUpload.recordset.addNew();
+                        prmExcelLOANCheckIn.clear();
+                        prmExcelLOANCheckIn.recordset.addNew();
+                        prmExcelLOANCheckIn.recordset.fields("FIDS29_ACTION_TP").value = "81";
+                        prmExcelLOANCheckIn.recordset.fields("FIDS29_TRX_SRC").value = cbbTRX_SRC.value;
+                        prmExcelLOANCheckIn.recordset.fields("FXFIG_REF_NO").value = txtREF_NO.value;
+                        prmExcelLOANUpload.recordset
+                                .fields("FIDS291_LN_MERCHANT_ID").value = prmExcelLOAN.recordset.fields("FODS291_LN_MERCHANT_ID").value;
+                        prmExcelLOANUpload.recordset
+                                .fields("FIDS291_LN_MERCHANT_NM").value = prmExcelLOAN.recordset.fields("FODS291_LN_MERCHANT_NM").value;
+                        prmExcelLOANUpload.recordset
+                                .fields("FIDS291_LN_TERMINAL_ID").value = prmExcelLOAN.recordset.fields("FODS291_LN_TERMINAL_ID").value;
+                        prmExcelLOANUpload.recordset
+                                .fields("FIDS291_LN_TERMINAL_NM").value = prmExcelLOAN.recordset.fields("FODS291_LN_TERMINAL_NM").value;
+                        prmExcelLOANUpload.recordset
+                                .fields("FIDS291_LOCATION").value = prmExcelLOAN.recordset.fields("FODS291_LOCATION").value;
+                        prmExcelLOANUpload.recordset
+                                .fields("FIDS291_REG_DT").value = prmExcelLOAN.recordset.fields("FODS291_REG_DT").value;
+                        /*if (inpExcel == true)
+                        {*/
+                        ivkExcelLOAN.call();
+                        /*}*/
+                        prmExcelLOAN.recordset.moveNext();
+                    }
+                }
+            }
+            if (flagapp == true) {
+                ivkEntry.call();
+            }
+            if (flagapp == true) {
+                if (prmQueryCheckOut.recordset.fields("FODS29_REF_NO").value != "") {
+                    txtREF_NO.value = prmQueryCheckOut.recordset
+                            .fields("FODS29_REF_NO").value;
+                    cbbACTION_TP.value = prmQueryCheckOut.recordset
+                            .fields("FODS29_ACTION_TP").value;
+                    fInquiry();
+                }
+            }
+            if (cbbACTION_TP.value == "11") {
+                flagapp = true;
+            } else {
+                flagapp = false;
+            }
+            inpExcel = true;
+        }
+        /*======================================*/
+        /* fDisPlay()                           */
+        /*======================================*/
+        function fDisPlay(sel, alrt) {
+            pos = sel;
+            tabLimit.style.display = "none";
+            tabLimitCampaign.style.display = "none";
+            tabLoan.style.display = "none";
+            tabQuickCredit.style.display = "none";
+            tabKTA.style.display = "none";
+            tabPortofolio.style.display = "none";
+            ExcelGridLOAN.style.display = 'none';
+            Tab1.className = "tabnormaltitle_big";
+            Tab2.className = "tabnormaltitle_big";
+            Tab3.className = "tabnormaltitle_big";
+            Tab4.className = "tabnormaltitle_big";
+            Tab5.className = "tabnormaltitle_big";
+            Tab6.className = "tabnormaltitle_big";
+            if (sel == 1) 
+            {
+                tabLimit.style.display = "";
+                Tab1.className = "tabselecttitle_big";
+            }
+            else if (sel == 2) 
+            {
+                tabLimitCampaign.style.display = "";
+                Tab2.className = "tabselecttitle_big";
+            }
+            else if( sel == 3 ) 
+            {
+                if (cbbACTION_TP.value == "11" || cbbACTION_TP.value == "")
+                {
+                    if (alrt == 1) ShowInfoDialog("Please Register Promo First. You can open the Loan tab after register the promo.");
+                    tabLoan.style.display = "none";
+                    ExcelGridLOAN.style.display = "none";
+                }
+                else if (cbbACTION_TP.value == "21")
+                {
+                        tabLoan.style.display = "";
+                        ExcelGridLOAN.style.display = "";
+                }
+                Tab3.className   = "tabselecttitle_big";
+            }
+            else if( sel == 4 ) 
+            {
+                if (cbbTRX_SRC.value == "LBK" || cbbTRX_SRC.value == "PFP" )
+                {
+                    if (alrt == 1) ShowInfoDialog("Not For LBK & PFP");
+                    tabQuickCredit.style.display = "none";
+                }
+                else
+                {
+                    tabQuickCredit.style.display = "";
+                }
+                Tab4.className = "tabselecttitle_big";
+            }
+            else if( sel == 5 )
+            {
+                if (cbbTRX_SRC.value == "QCL" || cbbTRX_SRC.value == "QCI" || cbbTRX_SRC.value == "PFP")
+                {
+                    if (alrt == 1) ShowInfoDialog("Trx Source Must be LBK or ADL ");
+                    tabKTA.style.display = "none";
+                }
+                else
+                {
+                    tabKTA.style.display = "";
+                }
+                Tab5.className = "tabselecttitle_big";
+            }
+            else if (sel == 6)
+            {
+                if(cbbTRX_SRC.value == "LBK" || cbbTRX_SRC.value == "QCL" || cbbTRX_SRC.value == "QCI" ) {
+                 if (alrt == 1) ShowInfoDialog("Trx Source Must be ADL or PFP ");
+                    tabPortofolio.style.display = "none";
+                }
+                tabPortofolio.style.display = "";
+                Tab6.className = "tabselecttitle_big";
+            }
+        }
+        function ftxtREF_NO_ENTER() {
+            if (event.keyCode == 13) {
+                if (txtREF_NO.value != '') {
+                    fInquiry();
+                }
+            }
+        }
+        function cbbACTION_TP_Change() {
+            fDisPlay(pos, 2);
+            if (cbbACTION_TP.value == "11") {
+                txtREF_NO.className = "search";
+            } else {
+                txtREF_NO.className = "default";
+            }
+        }
+        function cbbLIMIT_TP_Change() {
+        }
+        function cbbTRX_SRC_Change() {
+            table_ONBOARDING.style.display = "";
+            if (cbbTRX_SRC.value == "LBK" || cbbTRX_SRC.value == "ADL")
+            {
+                btnPARTNER_DESTINATIONUpload.disabled               = true; 
+                document.all.btnPARTNER_DESTINATIONUpload.className = "readonly";
+                cbbPARTNER_DESTINATION_FLAG.disabled                 = true;
+                document.all.cbbPARTNER_DESTINATION_FLAG.className   = "readonly";
+            }
+            else if(cbbTRX_SRC.value == "QCL")
+            {
+                cbbLOAN_STATUS.disabled                 = true;
+                document.all.cbbLOAN_STATUS.className   = "readonly";
+                txtMIN_INS_CVT_QC.className    = "readonly";
+                txtMIN_INS_CVT_QC.readOnly     = true;
+                cbbMIN_TENOR_INS_QC.disabled                 = true;
+                document.all.cbbMIN_TENOR_INS_QC.className   = "readonly";
+                btnPARTNER_DESTINATIONUpload.disabled               = false; 
+                cbbPARTNER_DESTINATION_FLAG.disabled                 = false;
+            }
+            else if(cbbTRX_SRC.value == "QCI")
+            { 
+                cbbREPAYMENT_TYPE.disabled                 = true;
+                document.all.cbbREPAYMENT_TYPE.className   = "readonly";
+                txtMIN_LIMIT_AMT_QC.className    = "readonly";
+                txtMIN_LIMIT_AMT_QC.readOnly     = true;
+                btnPARTNER_DESTINATIONUpload.disabled               = true; 
+                document.all.btnPARTNER_DESTINATIONUpload.className = "readonly";
+                cbbPARTNER_DESTINATION_FLAG.disabled                 = true;
+                document.all.cbbPARTNER_DESTINATION_FLAG.className   = "readonly";
+            }
+            else if(cbbTRX_SRC.value == "PFP") 
+            {
+                cbbLOAN_STATUS.disabled                 = true;
+                document.all.cbbLOAN_STATUS.className   = "readonly";
+                cbbCOSTUMER_TYPE_LN.disabled                 = true;
+                document.all.cbbCOSTUMER_TYPE_LN.className   = "readonly";
+                btnPARTNER_DESTINATIONUpload.disabled               = true; 
+                document.all.btnPARTNER_DESTINATIONUpload.className = "readonly";
+                cbbPARTNER_DESTINATION_FLAG.disabled                 = true;
+                document.all.cbbPARTNER_DESTINATION_FLAG.className   = "readonly";
+            }
+        }
+        function cbbNOTIFICATION_Change() {
+        }
+        function cbbDISB_DAY_Change() {
+        }
+        function cbbCRED_TP_Change() {
+           if (cbbCRED_TP.value == "P" ) 
+             {
+                txtMAX_AMT.className = "default";
+                txtMAX_AMT.readOnly = false;
+             }
+             else
+             {
+               txtMAX_AMT.className = "readonly";
+               txtMAX_AMT.readOnly = true;
+               txtMAX_AMT.value = 0.00;
+             }
+          if(prmQueryCheckOut.recordset.fields("FODS29_ACTION_TP").value == "21")
+          {
+            txtMAX_AMT.className = "readonly";
+            txtMAX_AMT.readOnly = true;
+            txtPROMO_AMT.className = "readonly";
+            txtPROMO_AMT.readOnly = false;
+            cbbCRED_TP.className = "readonly";
+            cbbCRED_TP.readOnly = true;
+          }
+        }
+        function cbbBENE_TP_Change() {
+            if (cbbBENE_TP.value == "S") {
+                txtDAILY_LIMIT.className = "readonly";
+                txtMONTHLY_LIMIT.className = "readonly";
+                txtYEARLY_LIMIT.className = "readonly";
+                txtDAILY_LIMIT.readOnly = true;
+                txtMONTHLY_LIMIT.readOnly = true;
+                txtYEARLY_LIMIT.readOnly = true;
+                txtDAILY_LIMIT.value = "";
+                txtMONTHLY_LIMIT.value = "";
+                txtYEARLY_LIMIT.value = "";
+                cbbCRED_TP.value = "A";
+                cbbCRED_TP.className = "readonly";
+                cbbCRED_TP.readOnly = true;
+                txtPROMO_AMT.value = "";
+                txtPROMO_AMT.className = "readonly";
+                txtPROMO_AMT.readOnly = true;
+                txtMAX_AMT.value = "";
+                txtMAX_AMT.className = "readonly";
+                txtMAX_AMT.readOnly = true;
+            } else {
+                txtDAILY_LIMIT.className = "";
+                txtMONTHLY_LIMIT.className = "";
+                txtYEARLY_LIMIT.className = "";
+                if (cbbACTION_TP.value != "21") {
+                    cbbCRED_TP.className = "default";
+                    cbbCRED_TP.readOnly = false;
+                    txtPROMO_AMT.className = "default";
+                    txtPROMO_AMT.readOnly = false;
+                    txtMAX_AMT.className = "default";
+                    txtMAX_AMT.readOnly = false;
+                    dtpSTR_DT.classname = "default";
+                    dtpEND_DT.classname = "default";
+                }
+            }
+        }
+        function cbbUSAGE_TP_Change() {
+            cbbDAY_TP.className = "readonly";
+            cbbDAY_TP.readOnly = true;
+            txtSPC_DT.className = "readonly";
+            txtSPC_DT.readOnly = true;
+            txtSTR_TM.className = "readonly";
+            txtSTR_TM.readOnly = true;
+            txtEND_TM.className = "readonly";
+            txtEND_TM.readOnly = true;
+            if (cbbUSAGE_TP.value == "NN") {
+                cbbDAY_TP.value = '';
+                txtSPC_DT.value = '';
+                txtSTR_TM.value = '';
+                txtEND_TM.value = '';
+            } else if (cbbUSAGE_TP.value == "DD") {
+                cbbDAY_TP.className = "";
+                cbbDAY_TP.readOnly = false;
+                txtSPC_DT.value = '';
+                txtSTR_TM.value = '';
+                txtEND_TM.value = '';
+            } else if (cbbUSAGE_TP.value == "DY") {
+                txtSPC_DT.className = "";
+                txtSPC_DT.readOnly = false;
+                cbbDAY_TP.value = '';
+                txtSTR_TM.value = '';
+                txtEND_TM.value = '';
+            } else if (cbbUSAGE_TP.value == "DT") {
+                cbbDAY_TP.className = "";
+                cbbDAY_TP.readOnly = false;
+                txtSTR_TM.className = "";
+                txtSTR_TM.readOnly = false;
+                txtEND_TM.className = "";
+                txtEND_TM.readOnly = false;
+                txtSPC_DT.value = '';
+            } else if (cbbUSAGE_TP.value == "AT") {
+                txtSPC_DT.className = "";
+                txtSPC_DT.readOnly = false;
+                txtSTR_TM.className = "";
+                txtSTR_TM.readOnly = false;
+                txtEND_TM.className = "";
+                txtEND_TM.readOnly = false;
+                cbbDAY_TP.value = '';
+            } else {
+                txtSTR_TM.className = "";
+                txtSTR_TM.readOnly = false;
+                txtEND_TM.className = "";
+                txtEND_TM.readOnly = false;
+                cbbDAY_TP.value = '';
+                txtSPC_DT.value = '';
+            }
+        }
+        /*======================================*/
+        /* fInquiry()                           */
+        /*======================================*/
+        function fInquiry() {
+            prmQueryCheckIn.recordset.fields("FIDS29_ACTION_TP").value = "29";
+            prmQueryCheckIn.recordset.fields("FXFIG_REF_NO").value = txtREF_NO.value;
+            ivkEntry.call();
+            if (prmQueryCheckOut.recordset.recordCount == 0) {
+                ShowInfoDialog("No data!");
+                return (-1);
+            }
+            if (prmQueryCheckOut.recordset.fields("FODS29_TRX_SRC").value == "ADL" || prmQueryCheckOut.recordset.fields("FODS29_TRX_SRC").value == "ALL") {
+                if (prmExcelLOANCheckOut.recordset.recordCount > 0) {
+                    ExcelGridLOAN.setRecordset(prmExcelLOANCheckOut.recordset);
+                    ExcelGridLOAN.syncToDSO();
+                }
+            }
+            txtPRMO_NM_RD.value = prmQueryCheckOut.recordset.fields("FODS29_PROMO_NM").value;
+            txtGROUP_NO.value = prmQueryCheckOut.recordset.fields("FODS29_GROUP_NO").value;
+            if (prmQueryCheckOut.recordset.fields("FODS29_GROUP_STS").value != "") {
+                cbbGROUP.className = "";
+                cbbGROUP.readOnly = false;
+            } else {
+                cbbGROUP.className = "readonly";
+                cbbGROUP.readOnly = true;
+            }
+            if (prmQueryCheckOut.recordset.fields("FODS29_ACTION_TP").value == "21") {
+                txtPRMO_NM.className = "readonly";
+                cbbCRED_TP.className = "readonly";
+                cbbTRX_SRC.className = "readonly";
+                cbbBENE_TP.className = "readonly";
+                cbbNOTIFICATION.className = "readonly";
+                txtPROMO_AMT.className = "readonly";
+                txtMAX_AMT.className = "readonly";
+                cbbUSAGE_TP.className = "readonly";
+                cbbDAY_TP.className = "readonly";
+                txtSPC_DT.className = "readonly";
+                txtSTR_TM.className = "readonly";
+                txtEND_TM.className = "readonly";
+                txtGROUP_NO.className = "readonly";
+                cbbGROUP.className = "readonly";
+                cbbLIMIT_TP.className = "readonly";
+                cbbEXPENSE_CD.className = "readonly";
+                cbbDISB_DAY.className = "readonly";
+                /* cbbNEW_CIF.className = "readonly"; */
+                cbbCHANNEL_TYPE.className = "readonly";
+                txtREMARK_FOR_CUSTOMER.className = "readonly";
+                txtREMARK_FOR_INTERNAL.className = "readonly";
+                txtUSAGE_DUE_DATE.className = "readonly";
+                txtUSAGE_DUE_TO.className = "readonly";
+                txtCONTRACTED_DUE_DATE.className = "readonly";
+                txtCONTRACTED_DUE_TO.className = "readonly";
+                cbbCHANNEL_TYPE.readOnly = true;
+                txtREMARK_FOR_CUSTOMER.readOnly = true;
+                txtREMARK_FOR_INTERNAL.readOnly = true;
+                txtPRMO_NM.readOnly = true;
+                cbbCRED_TP.readOnly = true;
+                cbbTRX_SRC.readOnly = true;
+                cbbBENE_TP.readOnly = true;
+                cbbNOTIFICATION.readOnly = true;
+                txtPROMO_AMT.readOnly = true;
+                txtMAX_AMT.readOnly = true;
+                cbbUSAGE_TP.readOnly = true;
+                cbbDAY_TP.readOnly = true;
+                txtSPC_DT.readOnly = true;
+                txtSTR_TM.readOnly = true;
+                txtEND_TM.readOnly = true;
+                txtGROUP_NO.readOnly = true;
+                cbbGROUP.readOnly = true;
+                cbbLIMIT_TP.readOnly = true;
+                cbbDISB_DAY.readOnly = true;
+                cbbEXPENSE_CD.readOnly = true;
+                txtUSAGE_DUE_DATE.readOnly = true;
+                txtUSAGE_DUE_TO.readOnly = true;
+                txtCONTRACTED_DUE_DATE.readOnly = true;
+                txtCONTRACTED_DUE_TO.readOnly = true;
+                /* cbbNEW_CIF.readOnly = true; */ 
+            }
+        }
+        /*======================================*/
+        /* fSearchDS22()                        */
+        /*======================================*/
+        function fSearchDS22() {
+            var DArg = new DArgument();
+            DArg.Args = new Array(2);
+            DArg.Args[0] = "DS29";
+            var strWinSts = "status: no; resizable: no; scroll: no; center: yes; dialogHeight: 510px; dialogWidth: 910px;";
+            var Result = window.showModalDialog(LIB().GetTransURL('ds/DS22.html'),
+                    DArg, strWinSts);
+            if (Result != null) {
+                txtREF_NO.value = Result[0];
+                if (txtREF_NO.value != '') {
+                    fInquiry();
+                }
+            }
+        }
+        /*======================================*/
+        /* fLoadLOANExcel                       */
+        /*======================================*/
+        function fLoadLOANExcel() {
+            var TotAMT = 0;
+            var QuestionStr;
+            QuestionStr = "";
+            QuestionStr = QuestionStr
+                    + "Do you want to Upload Partner Destination File?\n\n";
+            isThereNewFileUploadLOAN = false;
+            if (confirm(QuestionStr) != true)
+                return;
+            isThereNewFileUploadLOAN = true;
+            if (!WINMAN1.OpenDialogCall("C:\\temp", "", "", false)) {
+                return;
+            }
+            prmExcelLOAN.clear();
+            ExcelGridLOAN.setRecordset(prmExcelLOAN.recordset);
+            ExcelGridLOAN.syncToDSO();
+            ExcelGridLOAN.SkipImportRow = 1;
+            ExcelGridLOAN.ImportExcel(WINMAN1.OpenDlgFileName);
+            if (prmExcelLOAN.recordset.recordCount > 0) {
+                ExcelGridLOAN.EditPost();
+                prmExcelLOAN.recordset.moveFirst();
+            }
+            ExcelGridLOAN.setRecordset(prmExcelLOAN.recordset);
+            ExcelGridLOAN.syncToDSO();
+        }
+    </script>
+</head>
+<body onload="fInitProc()">
+    <!-- Y[wai] : Generated : dataServices -->
+    <dataservices>
+        <dataservice id="ivkEntry" map="/tis/DSO2900.xml" service="DSO2900" dso="prmQueryCheckIn=SCR_INPUT;prmQueryCheckOut=SCR_OUTPUT;prmExcelLOANCheckOut=SCR_OUTPUT1;" onerror="//alert(ivkEntry.RawResult.xml);" onsuccess="fEntryOk();"></dataservice>
+        <dataservice id="ivkEntryExe" map="/tis/DSO2900.xml" service="DSO2900" dso="prmQueryCheckIn=SCR_INPUT;prmDSOEntryExe=SCR_OUTPUT" onerror="//alert(ivkEntry.RawResult.xml);" onsuccess="fEntryOk();"></dataservice>
+        <dataservice id="ivkExcelLOAN" map="/tis/DSO2900.xml" service="DSO2900" dso="prmExcelLOANCheckIn=SCR_INPUT;prmExcelLOANUpload=SCR_INPUT1"></dataservice>
+        <dataservice id="templateExcelLOAN" map="/tis/DSO2900.xml" service="DSO2900" dso="prmExcelLOAN=SCR_OUTPUT1"></dataservice>
+    </dataservices>
+    <!-- Y[wai] : Generated : dataServices -->
+    <winman id="WINMAN1" style=" display:block;">
+    </winman>
+    <!-- Action Manager -->
+    <actman id="AMan" onactive="ActionOnActive()">
+        <!--  Insert  -->
+        <action name="ActEntry" execute="actExecute(1)">
+        </action>
+        <action name="ActExecute" execute="actExecute(6)">
+        </action>
+        <action name="ActCancelJob" execute="actExecute(2)">
+            <ctrl cid="txtREF_NO" clear="true" value=""></ctrl>
+            <ctrl cid="txtPRMO_NM_RD" clear="true" value=""></ctrl>
+            <ctrl cid="cbbACTION_TP" clear="true" value=""></ctrl>
+            <ctrl cid="txtPRMO_NM" clear="true" value=""></ctrl>
+            <ctrl cid="cbbCRED_TP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbTRX_SRC" clear="true" value=""></ctrl>
+            <ctrl cid="cbbBENE_TP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbNOTIFICATION" clear="true" value=""></ctrl>
+            <ctrl cid="dtpSTR_DT" clear="true" value=""></ctrl>
+            <ctrl cid="dtpEND_DT" clear="true" value=""></ctrl>
+            <ctrl cid="cbbSTS" clear="true" value=""></ctrl>
+            <ctrl cid="txtPROMO_AMT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtMAX_AMT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="cbbUSAGE_TP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbDAY_TP" clear="true" value=""></ctrl>
+            <ctrl cid="txtSPC_DT" clear="true" value=""></ctrl>
+            <ctrl cid="txtSTR_TM" clear="true" value=""></ctrl>
+            <ctrl cid="txtEND_TM" clear="true" value=""></ctrl>
+            <ctrl cid="txtGROUP_NO" clear="true" value=""></ctrl>
+            <ctrl cid="cbbGROUP" clear="true" value=""></ctrl>
+            <ctrl cid="cbbLIMIT_TP" clear="true" value=""></ctrl>
+            <ctrl cid="txtDAILY_LIMIT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtDAILY_FREQ" clear="true" value="0"></ctrl>
+            <ctrl cid="txtMONTHLY_LIMIT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtMONTHLY_FREQ" clear="true" value="0"></ctrl>
+            <ctrl cid="txtYEARLY_LIMIT" clear="true" value="0.00"></ctrl>
+            <ctrl cid="txtYEARLY_FREQ" clear="true" value="0"></ctrl>
+            <ctrl cid="txtACCT_BAL" clear="true" value=""></ctrl>
+            <ctrl cid="cbbACCT_BAL_FLAG" clear="true" value=""></ctrl>
+            <ctrl cid="txtUSAGE_DUE_DATE" clear="true" value="0"></ctrl>
+            <ctrl cid="txtUSAGE_DUE_TO" clear="true" value="0"></ctrl>
+            <ctrl cid="txtCONTRACTED_DUE_DATE" clear="true" value="0"></ctrl>
+            <ctrl cid="txtCONTRACTED_DUE_TO" clear="true" value="0"></ctrl>
+        </action>
+    </actman>
+    <div class="topbarDiv" style="left:0px;width:876px;font-family:arial, helvetica, sans-serif;position:absolute;top:17px;height:48px;">
+        <div class="topbarIngreen">
+            <label class="search" style="left:-5px;width:104px;padding-top:5px;position:absolute;top:9px;height:20px;">
+        Promo Ref No
+      </label>
+            <input id="txtREF_NO" dsoname="DSO2900.prmQueryCheckOut" class="readonly" readonly fldname="FODS29_REF_NO" maxlength="20" onkeydown="ftxtREF_NO_ENTER()" style="left:105px;width:150px;position:absolute;top:9px;">
+            <input id="btnDS22" onclick="fSearchDS22();" tabindex="-1" src="/biz/images/detail.gif" type="image" style="left:256px;width:21px;padding-top:5px;position:absolute;top:9px;height:20px;">
+            <input id="txtPRMO_NM_RD" class="readonly" readonly tabindex="-1" type="text" style="left:280px;width:280px;position:absolute;top:9px;">
+            <label class="search" style="left:580px;width:104px;padding-top:5px;position:absolute;top:9px;height:20px;">
+        Action Type
+      </label>
+            <codecombo id="cbbACTION_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_ACTION_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS01.json" cbDisplayTextField="false" class="default" panelWidth="180px" panelHeight="100px" dropdownkeycode="145" title="Action Type" tabindex="5" onChange="cbbACTION_TP_Change();" onLoadError="cbbACTION_TP.value = '';" style="left: 692px; width: 150px; position: absolute; top: 9px; height: 20px;">
+                "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":35.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":143.2}],
+                "data":[]
+            </codecombo>
+        </div>
+    </div>
+    <div id="HFC_INFO1" class="conditiontitle" style="top:72px;left:12px;">
+        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+        <label class="Mtitle">
+      Basic Promo Information
+    </label>
+    </div>
+    <div id="infoDiv" class="infoDiv" style="position:absolute;top:88px;height:130px;">
+        <div class="infoIngray">
+            <label class="search" style="left:7px;width:80px;position:absolute;top:6px;height:30px;">
+        Promo Name
+        <input id="txtPRMO_NM" clientleft="2" clienttop="2" height="0" class="default" maxlength="50" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_PROMO_NM" style="left:85px;width:280px;position:absolute;top:-3px;">
+            </label>
+            <label class="search" style="left:610px;width:80px;position:absolute;top:6px;height:30px;">
+        Trx Source
+        <codecombo id="cbbTRX_SRC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_TRX_SRC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS41.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbTRX_SRC_Change();" style="left: 85px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left:7px;width:80px;position:absolute;top:28px;height:30px;">
+        Benefit Type
+        <codecombo id="cbbBENE_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_BENE_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS42.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbBENE_TP_Change();" style="left: 85px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" lang="CreditType" style="left:280px;width:80px;position:absolute;top:28px;height:30px;">
+        Credit Type
+        <codecombo id="cbbCRED_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_CRED_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 150px; height: 100%;" labelWidth="150px" url="/jsondb/DS43.json" cbDisplayTextField="false" class="default" panelWidth="250px" panelHeight="100px" dropdownkeycode="145" onChange="cbbCRED_TP_Change();" style="left: 85px; width: 220px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":49.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":199.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left:610px;width:80px;position:absolute;top:28px;height:30px;">
+        Notification
+        <codecombo id="cbbNOTIFICATION" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_NOTIFICATION" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS12.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbNOTIFICATION_Change();" style="left: 85px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left:7px;width:80px;position:absolute;top:50px;height:30px;">
+        Start Date
+        <dateedit id="dtpSTR_DT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_STR_DT" class="default" style="left: 85px; width: 110px; position: absolute; top: -3px; height: 20px;"></dateedit>
+            </label>
+            <label class="search" lang="EndDate" style="left:280px;width:80px;position:absolute;top:50px;height:30px;">
+        End Date
+        <dateedit id="dtpEND_DT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_END_DT" class="default" style="left: 85px; width: 110px; position: absolute; top: -3px; height: 20px;"></dateedit>
+            </label>
+            <label class="search" lang="Status" style="left:340px;width:80px;position:absolute;top:6px;height:30px;">
+        Status
+        <codecombo id="cbbSTS" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS02.json" cbDisplayTextField="false" class="default" panelWidth="180px" panelHeight="100px" dropdownkeycode="145" tabindex="5" onLoadError="cbbSTS.value = '';" style="left: 85px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":35.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":143.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left:570px;width:152px;position:absolute;top:50px;height:30px;">
+        Promo Amount
+        <edit id="txtPROMO_AMT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PROMO_AMT" type="CURRENCY" value="0.00" class="default" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+            </label>
+            <label class="search" style="left:570px;width:152px;position:absolute;top:75px;height:30px;">
+        Maximum Amount
+        <edit id="txtMAX_AMT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PERC_AMT_MAXIMAL" type="CURRENCY" value="0.00" class="default" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+            </label>
+            <label class="search" style="left:7px;width:120px;position:absolute;top:75px;height:30px;">
+        Remark Internal
+        <input id="txtREMARK_FOR_INTERNAL" clientleft="2" clienttop="2" height="0" class="default" maxlength="70" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_REMARK_FOR_INTERNAL" style="left:135px;overflow:hidden;width:140px;position:absolute;top:-3px;">
+            </label>
+            <label class="search" style="left:285px;width:120px;position:absolute;top:75px;height:30px;">
+        Remark Customer
+        <input id="txtREMARK_FOR_CUSTOMER" clientleft="2" clienttop="2" height="0" class="default" maxlength="70" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_REMARK_FOR_CUSTOMER" style="left:125px;overflow:hidden;width:140px;position:absolute;top:-3px;">
+            </label>
+            <label class="search" style="left:7px;width:120px;position:absolute;top:100px;height:30px;">
+        Expense Code
+        <codecombo id="cbbEXPENSE_CD" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_EXPENSE_CD" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS35.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 135px; width: 180px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left:305px;width:110px;position:absolute;top:100px;height:30px;">
+        Channel
+        <codecombo id="cbbCHANNEL_TYPE" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_CHANNEL_TYPE" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS45.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 125px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" style="left:570px;width:110px;position:absolute;top:100px;height:30px;">
+        Disburstment
+        <codecombo id="cbbDISB_DAY" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DISB_DAY" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS46.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbDISB_DAY_Change();" style="left: 125px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+        </div>
+    </div>
+    <div class="conditiontitle" style="top:225px;left:12px;">
+        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+        <label class="Mtitle">
+      Special Day/Time
+    </label>
+    </div>
+    <div id="infoDiv1" class="infoDiv" oldid="infoDiv" style="position:absolute;top:245px;height:84px;">
+        <div class="infoIngray">
+            <label class="search" lang="Usage" style="left:7px;width:80px;position:absolute;top:6px;height:30px;">
+        Usage
+        <codecombo id="cbbUSAGE_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_USAGE_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS05.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" onChange="cbbUSAGE_TP_Change();" onLoadError="cbbUSAGE_TP.value = 'NN';" style="left: 85px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" lang="Day" style="left:7px;width:80px;position:absolute;top:28px;height:30px;">
+        Day
+        <codecombo id="cbbDAY_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DAY_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/F483.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 85px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+            <label class="search" lang="Date" style="left:280px;width:80px;position:absolute;top:28px;height:30px;">
+        Date
+        <input id="txtSPC_DT" clientleft="2" clienttop="2" height="0" maxlength="50" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_SPC_DT" style="left:85px;overflow:hidden;width:50px;position:absolute;top:-3px;">
+            </label>
+            <label class="search" lang="StartTime" style="left:7px;width:80px;position:absolute;top:50px;height:30px;">
+        Start Time
+        <input id="txtSTR_TM" clientleft="2" clienttop="2" height="0" maxlength="4" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_STR_TM" style="left:85px;overflow:hidden;width:110px;position:absolute;top:-3px;">
+            </label>
+            <label class="search" lang="EndTime" style="left:280px;width:80px;position:absolute;top:50px;height:30px;">
+        End Time
+        <input id="txtEND_TM" clientleft="2" clienttop="2" height="0" maxlength="4" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_END_TM" style="left:85px;overflow:hidden;width:110px;position:absolute;top:-3px;">
+            </label>
+        </div>
+    </div>
+    <div class="conditiontitle" style="top:333px;left:12px;">
+        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+        <label class="Mtitle">
+      Promo Target
+    </label>
+    </div>
+    <div id="infoDiv2" class="infoDiv" oldid="infoDiv" style="position:absolute;top:350px;height:45px;">
+        <div class="infoIngray">
+            <label class="search" lang="GroupNo" style="left:7px;width:80px;position:absolute;top:8px;height:30px;">
+        Group No
+        <input id="txtGROUP_NO" class="readonly" readonly tabindex="-1" clientleft="2" clienttop="2" height="0" maxlength="20" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_GROUP_NO" style="left:85px;width:160px;position:absolute;top:-2px;">
+            </label>
+            <label class="search" style="left:280px;width:80px;position:absolute;top:8px;height:30px;">
+        Enable?
+        <codecombo id="cbbGROUP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_GROUP_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS13.json" cbDisplayTextField="false" class="readonly" readonly panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 85px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                    "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":33.800000000000004},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":135.2}],
+                    "data":[]
+                </codecombo>
+            </label>
+        </div>
+    </div>
+    <div class="conditiontitle" style="top:405px;left:12px;">
+        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+        <label class="Mtitle">
+      Parameters
+    </label>
+    </div>
+    <table border="0" id="table_ONBOARDING" cellpadding="0" cellspacing="0" style="margin-left:16px;width:876px;position:absolute;top:425px;display:block;">
+        <tr height="20px">
+            <td>
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td id="Tab1" class="tabnormaltitle_big" onclick="fDisPlay(1, 1);">
+              Limit User
+            </td>
+                        <td width="4">
+                        </td>
+                        <td id="Tab2" class="tabnormaltitle_big" onclick="fDisPlay(2, 1);">
+              Limit Campaign
+            </td>
+                        <td width="4">
+                        </td>
+                        <td id="Tab3" class="tabnormaltitle_big" onclick="fDisPlay(3, 1);">
+              Loan
+            </td>
+                        <td width="4">
+                        </td>
+                        <td id="Tab4" class="tabnormaltitle_big" onclick="fDisPlay(4, 1);">
+              Quick Credit
+            </td>
+                        <td width="4">
+                        </td>
+                        <td id="Tab5" class="tabnormaltitle_big" onclick="fDisPlay(5, 1);">
+              KTA
+            </td>
+                        <td width="4">
+                        </td>
+                        <td id="Tab6" class="tabnormaltitle_big" onclick="fDisPlay(6, 1);">
+              Portofolio
+            </td>
+                        <td width="4">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr height="10px">
+            <td background="/biz/images/tabbar_back.gif">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="tabDiv" id="tabLimit" style=" display:block;left:0px;width:876px;position:relative;top:4px;height:300px;">
+                    <label class="default" style="left:7px;width:150px;position:absolute;top:6px;height:30px;">
+                        <b>
+              Limitation Level
+            </b>
+                        <codecombo id="cbbLIMIT_TP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_LIMIT_TP" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS47.json" cbDisplayTextField="false" class="default" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:35px;height:30px;">
+            Daily Amount Limit
+            <edit id="txtDAILY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DAILY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:57px;height:30px;">
+            Daily Frequency Limit
+            <input id="txtDAILY_FREQ" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_DAILY_FREQ" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:85px;height:30px;">
+            Weekly Amount Limit
+            <edit id="txtWEEKLY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_WEEKLY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:107px;height:30px;">
+            Weekly Frequency Limit
+            <input id="txtWEEKLY_FREQ" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_WEEKLY_FREQ" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:134px;height:30px;">
+            Monthly Amount Limit
+            <edit id="txtMONTHLY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MONTHLY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:157px;height:30px;">
+            Monthly Frequency Limit
+            <input id="txtMONTHLY_FREQ" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_MONTHLY_FREQ" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:188px;height:30px;">
+            Yearly Amount Limit
+            <edit id="txtYEARLY_LIMIT" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_YEARLY_LIMIT" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:210px;height:30px;">
+            Yearly Frequency Limit
+            <input id="txtYEARLY_FREQ" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_YEARLY_FREQ" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:500px;position:absolute;top:235px;height:30px;">
+                        <i style="font-size:8pt;color:#ff0000;">
+              * Please Set 99 For Unlimited Frequency Limit And 99,999,999 For Unlimited Amount Limit
+            </i>
+                    </label>
+                </div>
+                <div class="tabDiv" id="tabLimitCampaign" style=" display:block;left:0px;width:876px;position:relative;top:4px;height:300px;">
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:6px;height:30px;">
+            Enable?
+            <codecombo id="cbbCAMPAIGN_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_CAMPAIGN_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:35px;height:30px;">
+            Daily Amount Limit
+            <edit id="txtDAILY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_DAILY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:57px;height:30px;">
+            Daily Frequency Limit
+            <input id="txtDAILY_FREQ_CAMPAIGN" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_DAILY_FREQ_CAMPAIGN" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:85px;height:30px;">
+            Weekly Amount Limit
+            <edit id="txtWEEKLY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_WEEKLY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:107px;height:30px;">
+            Weekly Frequency Limit
+            <input id="txtWEEKLY_FREQ_CAMPAIGN" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_WEEKLY_FREQ_CAMPAIGN" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:134px;height:30px;">
+            Monthly Amount Limit
+            <edit id="txtMONTHLY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MONTHLY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:157px;height:30px;">
+            Monthly Frequency Limit
+            <input id="txtMONTHLY_FREQ_CAMPAIGN" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_MONTHLY_FREQ_CAMPAIGN" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:188px;height:30px;">
+            Yearly Amount Limit
+            <edit id="txtYEARLY_LIMIT_CAMPAIGN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_YEARLY_LIMIT_CAMPAIGN" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:210px;height:30px;">
+            Yearly Frequency Limit
+            <input id="txtYEARLY_FREQ_CAMPAIGN" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_YEARLY_FREQ_CAMPAIGN" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:500px;position:absolute;top:235px;height:30px;">
+                        <i style="font-size:8pt;color:#ff0000;">
+              * Please Set 99 For Unlimited Frequency Limit And 99,999,999 For Unlimited Amount Limit
+            </i>
+                    </label>
+                </div>
+                <div class="tabDiv" id="tabLoan" style=" display:block;left:0px;width:876px;position:relative;top:4px;height:170px;">
+          "
+          <div class="conditiontitle" style="top:6px;left:12px;">
+                        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+                        <label class="Mtitle" lang="Loan">
+              Loan
+            </label>
+                    </div>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:36px;height:30px;">
+            Enable?
+            <codecombo id="cbbLOAN_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_LOAN_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="width: 150px; position: absolute; top: -3px; height: 20px; left: 168px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:66px;height:30px;">
+            Costumer Type
+            <codecombo id="cbbCOSTUMER_TYPE_LN" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_COSTUMER_TYPE" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS48.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:66px;height:30px;">
+            New CIF?
+            <codecombo id="cbbNEW_CIF" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_NEW_CIF" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:96px;height:30px;">
+            Loan Status
+            <codecombo id="cbbLOAN_STATUS" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_LOAN_STS" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS49.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:126px;height:30px;">
+            Enable?
+            <codecombo id="cbbPARTNER_DESTINATION_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PARTNER_DESTINATION_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:126px;height:30px;">
+            Partner Destination
+            <input id="btnPARTNER_DESTINATIONUpload" onclick="fLoadLOANExcel();" src="/biz/images/excel.gif" tabindex="-1" type="image" onmouseout="this.src='/biz/images/excel.gif'" onmouseover="this.src='/biz/images/excelover.gif'" style="left:155px;overflow:hidden;position:absolute;top:-3px;height:20px;">
+                    </label>
+                </div>
+                <div class="tabDiv" id="tabQuickCredit" style=" display:block;left:0px;width:876px;position:relative;top:4px;height:200px;">
+                    <div class="conditiontitle" style="top:6px;left:12px;">
+                        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+                        <label class="Mtitle">
+              Quick Credit
+            </label>
+                    </div>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:36px;height:30px;">
+            Enable?
+            <codecombo id="cbbQUICK_CREDIT_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_QUICK_CREDIT_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:36px;height:30px;">
+            Usage Date
+            <input id="txtUSAGE_DUE_DATE" clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_USAGE_DUE_DATE" style="left:155px;overflow:hidden;width:43px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:36px;height:30px;">
+                        <input id="txtUSAGE_DUE_TO" clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_USAGE_DUE_TO" style="left:200px;overflow:hidden;width:43px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:66px;height:30px;">
+            Minimum limit amount
+            <edit id="txtMIN_LIMIT_AMT_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_LIMIT_AMT_QC" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:66px;height:30px;">
+            Minimum Tenor Limit
+            <codecombo id="cbbMIN_TENOR_LIMIT_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_TENOR_LIMIT_QC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS50.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:96px;height:30px;">
+            Minimum Usage
+            <edit id="txtMIN_USAGE_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_USAGE_QC" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" lang="RepaymentType" style="left:407px;width:150px;position:absolute;top:96px;height:30px;">
+            Repayment Type
+            <codecombo id="cbbREPAYMENT_TYPE" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_REPAYMENT_TYPE_QC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS51.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:126px;height:30px;">
+            Minimum Tenor Installment
+            <codecombo id="cbbMIN_TENOR_INS_QC" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_TENOR_INS_QC" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS52.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:126px;height:30px;">
+            Minimum installment Converted
+            <input id="txtMIN_INS_CVT_QC" clientleft="2" clienttop="2" height="0" maxlength="6" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_MIN_INS_CVT_QC" style="left:155px;overflow:hidden;width:40px;position:absolute;top:-3px;">
+                    </label>
+                </div>
+                <div class="tabDiv" id="tabKTA" style=" display:block;left:0px;width:876px;position:relative;top:4px;height:150px;">
+          "
+          <div class="conditiontitle" style="top:6px;left:12px;">
+                        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+                        <label class="Mtitle">
+              KTA
+            </label>
+                    </div>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:36px;height:30px;">
+            Enable?
+            <codecombo id="cbbKTA_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_KTA_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:66px;height:30px;">
+            Minimum Loan Amount
+            <edit id="txtMIN_LOAN_AMT_KTA" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_LOAN_AMT_KTA" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:96px;height:30px;">
+            Minimum Tenor
+            <codecombo id="cbbMIN_TENOR_KTA" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MIN_TENOR_KTA" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS53.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 160px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                </div>
+                <div class="tabDiv" id="tabPortofolio" style=" display:block;left:0px;width:876px;position:relative;top:4px;height:90px;">
+          "
+          <div class="conditiontitle" style="top:6px;left:12px;">
+                        <img height="20" hspace="0" src="/biz/images/title_arrow.gif" vspace="0" width="14">
+                        <label class="Mtitle">
+              Portofolio
+            </label>
+                    </div>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:36px;height:30px;">
+            Enable?
+            <codecombo id="cbbPORTOFOLIO_FLAG" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_PORTOFOLIO_FLAG" labelStyle="vertical-align: top; margin-left: 2px; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box; width: 90px; height: 100%;" labelWidth="90px" url="/jsondb/DS15.json" cbDisplayTextField="false" panelWidth="170px" panelHeight="100px" dropdownkeycode="145" style="left: 155px; width: 150px; position: absolute; top: -3px; height: 20px;">
+                            "columns":[{"field":"CODE","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CODE_NM","title":"CODE_NAME","sortable":true,"width":-42}],
+                            "data":[]
+                        </codecombo>
+                    </label>
+                    <label class="search" style="left:7px;width:150px;position:absolute;top:66px;height:30px;">
+            Minimum Loan Amount
+            <edit id="txtMIN_LOAN_AMT_PFP" dsoName="DSO2900.prmQueryCheckOut" fldName="FODS29_MINIMUM_LOAN_AMT_PFP" type="CURRENCY" value="0.00" maxlength="50" style="left: 155px; overflow: hidden; width: 120px; position: absolute; top: -3px; text-align: right;"></edit>
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:66px;height:30px;">
+            Contracted Date
+            <input id="txtCONTRACTED_DUE_DATE" clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_CONTRACTED_DUE_DATE" style="left:155px;overflow:hidden;width:43px;position:absolute;top:-3px;">
+                    </label>
+                    <label class="search" style="left:407px;width:150px;position:absolute;top:66px;height:30px;">
+                        <input id="txtCONTRACTED_DUE_TO" clientleft="2" clienttop="2" height="0" maskformatstring="0;0" maxlength="2" size="1" type="text" width="0" dsoname="DSO2900.prmQueryCheckOut" fldname="FODS29_CONTRACTED_DUE_TO" style="left:200px;overflow:hidden;width:43px;position:absolute;top:-3px;">
+                    </label>
+                </div>
+                <grid id="ExcelGridLOAN" dsoName="prmExcelQR" style="display: block; top: 190px; left: 0px; width: 1076px; height: 540px; position: absolute;">
+                    "options" : {
+                      "fixColumn":0
+                      ,"columns" : [
+                        {"text":"MID","field":"FODS291_LN_MERCHANT_ID","alignment":"center","width":80,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                        ,{"text":"Merchant Name","field":"FODS291_LN_MERCHANT_NM","alignment":"center","width":120,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                        ,{"text":"Terminal ID","field":"FODS291_LN_TERMINAL_ID","alignment":"center","width":80,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                        ,{"text":"Terminal Name","field":"FODS291_LN_TERMINAL_NM","alignment":"center","width":200,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                        ,{"text":"Location","field":"FODS291_LOCATION","alignment":"center","width":200,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"lang":"Location","style":"custSty1"}
+                        ,{"text":"Reg dt","field":"FODS291_REG_DT","alignment":"center","width":200,"sortable":"True","editable":"false","focusing":"false","editor":{"type":"text","alignment":"center","url":""},"style":"custSty1"}
+                      ]
+                      ,"style":{"custSty1":{"header":{"color":"#289088","font":"normal 8px arial white"}}}
+                    }
+                </grid>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

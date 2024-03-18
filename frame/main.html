@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Hana Bank-Main-1</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <script type="text/javascript" src="./js/tabCtrl/tabCtrl.js"></script>
+    <link rel="stylesheet" href="./js/tabCtrl/tabCtrl.css" />
+    <script type="text/javascript" src="./js/popupCtrl/popupCtrl.js"></script>
+    <link rel="stylesheet" href="./js/popupCtrl/popupCtrl.css" />
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/main.css" />
+    <script type="text/javascript">
+        /*-- Global Variables --*/
+        const SysInfo = top.LIB.CDO.SysInfo;
+        const EtcInfo = top.LIB.CDO.EtcInfo;
+        let accessToken = "";
+        var DetailURL = "";
+        var gTreeDialog;
+        var gBefWorkID;
+        var divMenuPop = null;
+        var PreventCodes = "112;113;114;115;116;117;118;119;120;121;122;20";
+        var gOPNO = "";
+        var gLinkName = "";
+        var gLinkValue = "";
+        var AlertLinkRef = "";
+
+        /*-- Passbook Printer --*/
+        var PrintBuffer = new Array();
+        var PBMsgWnd       = null;
+
+        /*-- Initialize --*/
+        var tabCtrl = null;
+        var tabIcons = null;
+        /*
+        var tabIcons = new $wai.classes.imageLoader(
+            [
+                {'id':'_more','url':'./img/icon-moreItem.png'},
+                {'id':'_close','url':'./img/icon-tabClose.png'},
+                {'id':'_closeOver','url':'./img/icon-tabCloseOn.png'},
+                {'id':'CI','url':'./img/bizTab_CI.png'},
+                {'id':'DI','url':'./img/bizTab_DI.png'},
+                {'id':'LI','url':'./img/bizTab_LI.png'},
+                {'id':'II','url':'./img/bizTab_II.png'},
+                {'id':'TI','url':'./img/bizTab_TI.png'},
+                {'id':'FI','url':'./img/bizTab_FI.png'},
+                {'id':'CE','url':'./img/bizTab_CE.png'},
+                {'id':'DE','url':'./img/bizTab_DE.png'},
+                {'id':'LE','url':'./img/bizTab_LE.png'},
+                {'id':'IE','url':'./img/bizTab_IE.png'},
+                {'id':'TE','url':'./img/bizTab_TE.png'},
+                {'id':'FE','url':'./img/bizTab_FE.png'}
+            ],
+            function(){
+            }
+        );
+        */
+        var tabOption = {
+            icons : tabIcons,
+            onContext: function(e, tab){
+                tabCtrl.selectTab(tab.id);
+
+                $("#onTabContextMenu").menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            onAddTab: function() {
+                if (tabCtrl.tabs.length > 0) {
+                    document.getElementById('liReloadBizScrn').style.display = '';
+                } else {
+                    document.getElementById('liReloadBizScrn').style.display = 'none';
+                }
+            },
+            onChanging: function(oldTab, newTab) {
+                //console.log('onChanging~', oldTab, newTab);
+                if (newTab) {
+                    idMenuName.innerText = newTab.data?.job_nm ?? '';
+                    idMenuName.title = newTab.data?.job_nm ?? '';
+                    WorkIDEdit.value = newTab.id ?? '';
+                }
+            },
+            onCloseIcon: function(tab) {
+                tabCtrl.selectTab(tab.id);
+				tabCtrl.closeCurrent();
+            },
+            onClosing: function() {
+                if (tabCtrl.tabs.length > 0) {
+                    document.getElementById('liReloadBizScrn').style.display = '';
+                } else {
+                    document.getElementById('liReloadBizScrn').style.display = 'none';
+                }
+                if (tabCtrl.curOnTab < 0) {
+                    idMenuName.innerText = '';
+                    idMenuName.title = '';
+                    WorkIDEdit.value = '';
+                }
+            }
+        };
+        
+        $(document).ready(function(){
+            tabCtrl = new $tabCtrl(document.getElementById('tabDiv'), tabOption);
+            WorkIDEdit.focus();
+        });
+
+        function fSetTime() {
+            //var d = new Date();
+            //MainDT.innerHTML = d.format("yyyy-MM-dd a/p hh:mm:ss");
+
+            let now = new Date();
+            let year = now.getFullYear();
+            let month = ('0' + (now.getMonth() + 1)).slice(-2);
+            let date = ('0' + (now.getDate())).slice(-2);
+            let hour = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+
+            mainDate.value = `${year}${month}${date}`;
+            
+            MainDT.innerText = 
+            mainDate.getValue() +
+            ` ${hour < 10 ? `0${hour}` : hour}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+        }
+
+        function fOpenMyFavorite() {
+            var DArg = new DArgument();
+            DArg.Args = new Array(1);
+
+            DArg.Args[0] = SysInfo.userId;
+            if(tabCtrl.tabs.length > 0){
+                DArg.Args[1] = tabCtrl.tabs[tabCtrl.curOnTab].data.job_nm_cd;
+                DArg.Args[2] = tabCtrl.tabs[tabCtrl.curOnTab].data.fn.substr(0,2);
+                DArg.Args[3] = tabCtrl.tabs[tabCtrl.curOnTab].data.fn;
+                DArg.Args[4] = tabCtrl.tabs[tabCtrl.curOnTab].data.job_nm;
+            }
+
+            /*
+            var TrCode = window.showModalDialog("/frame/myFavorite.html", DArg, "status=no;resizable=no;scroll=no,center=yes;dialogHeight=420px;dialogWidth=518px");
+            if (TrCode) {
+                WorkIDEdit.value = TrCode[0];
+                GoWork(TrCode[0], TrCode[1]);
+            }
+            */
+            openPopup("/frame/myFavorite.html", DArg, "status=no;resizable=no;scroll=no,center=yes;dialogHeight=321px;dialogWidth=520px", function(TrCode) {
+                if (TrCode) {
+                    WorkIDEdit.value = TrCode[0];
+                    GoWork(TrCode[0], TrCode[1]);
+                }
+            });
+        }
+
+        function fOpenNotice() {
+            /*
+                var tOpNo ;
+                var tIbil ;
+                var tStr;
+
+                lHNDC.SectionName = "FXFIG_COM";
+                lHNDC.RecordIndex = 0;
+                tOpNo = lHNDC.GetItemValue("FXFIG_OPNO");
+                tIbil = lHNDC.GetItemValue("FXFIG_IBIL");
+
+                tStr  = "select * from acom_com_notify ";
+                tStr += " where sts = '0' and reg_gb not in  ('1', '4') ";
+                tStr += " and   apl_il_from <= to_date('" + tIbil + "', 'YYYY/MM/DD')";
+                tStr += " and   apl_il_to >= to_date('" + tIbil + "', 'YYYY/MM/DD')";
+                tStr += " and  (dest_op_no = 'ALL' or dest_op_no = '" + tOpNo + "') ";
+
+                wasSQLDSO.SQL = tStr;
+
+                if (wasSQLDSO.recordset.RecordCount > 0) {
+                    params[0] = wasSQLDSO;
+                    var TrCode = window.showModalDialog("/Notice.html", params, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=480px;dialogWidth=510px");
+                }
+            */
+            const tIbil = SysInfo.procBascDt;
+            const tOpNo = SysInfo.userId;
+
+            const inputData = {
+                dvCd: '20',
+                param1: tIbil,
+                param2: tOpNo
+            };
+
+            callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                let rtnArr = output.output20?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    let DArg     = new DArgument();
+                    DArg.Args    = new Array(1);
+                    DArg.Args[0] = rtnArr;
+                    openPopup("/frame/notice.html", DArg, "dialogHeight=480px;dialogWidth=510px");
+                }
+            }, null, {skipProg: true});
+        }
+
+        function InitMain() {
+            fSetTime();
+            window.setInterval(fSetTime, 1000);
+
+            //Notice Messege Time..
+            fOpenNotice_tablet();
+
+            //Notice Messege First default..
+            window.setInterval(fOpenNotice_tablet, 300000);
+
+            //Notice Messege Time..
+            fOpenNotice_rollover();
+
+            //Notice Messege First default..
+            window.setInterval(fOpenNotice_rollover, 300000);
+
+            //Notice Message Time for Bond Transaction
+            fOpenNotice_BondTrx();
+
+            //Notice Messege First default for Bond Transaction
+            window.setInterval(fOpenNotice_BondTrx, 300000);
+
+            //Notice Message Time for Speed Remittance
+            fOpenNotice_SpdRemit();
+
+            //Notice Messege First default for Speed Remittance
+            window.setInterval(fOpenNotice_SpdRemit, 300000);
+
+            //Notice Message Time for Outgoing Remittance LLD Checking
+            fOpenNotice_LldCheck();
+
+            //Notice Messege First default for Outgoing Remittance LLD Checking
+            window.setInterval(fOpenNotice_LldCheck, 300000);
+
+            //Notice Message First Default for Foreign Ccy Retail Bond Transaction
+            fOpenNotice_BondForeign();
+
+            //Notice Messege First default for Foreign Ccy Retail Bond Transaction
+            window.setInterval(fOpenNotice_BondForeign, 300000);
+
+            LoadHotKey();
+
+            SysInfo.procBascDt = SysInfo.trscDt; // procBaseDt 셋팅
+
+            // TO-DO: 임시 이미지서버 정보 셋팅 제거 필요
+            // if (LIB().runType == 'DEV') {
+            //     EtcInfo.scanSvrIp = "58.228.223.58";
+            //     EtcInfo.scanSvrPort = "12345";
+            // } else {
+            //     EtcInfo.scanSvrIp = "172.16.90.146";
+            //     EtcInfo.scanSvrPort = "12345";
+            // }
+
+            InitLog();
+
+            botSts1.innerText = SysInfo.trscBrNo;
+            botSts2.innerText = SysInfo.userId;
+            botSts3.innerText = SysInfo.sysDvCd;
+            botSts4.innerText = EtcInfo.edcTrmId ?? '';
+            botSts5.innerText = SysInfo.tlrNo;
+            botSts6.innerText = SysInfo.usrNm;
+
+            const tIbil = SysInfo.procBascDt;
+            const tOpNo = SysInfo.userId;
+
+            const inputData = {
+                dvCd: '23',
+                param1: tIbil
+            };
+
+            callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                let rtnArr = output.output23?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    let DArg     = new DArgument();
+                    DArg.Args    = new Array(1);
+                    DArg.Args[0] = rtnArr[0].fileNm;
+                    DArg.Args[1] = rtnArr[0].srcUrl;
+                    openPopup("/frame/loadImg.html", DArg, "dialogWidth: 3000px; dialogHeight: 2500px;");
+                }
+            }, () => {}, {skipProg: true});
+
+            // Connect to APM deamon (The port is specified in APM daemon start.sh)
+            let wsUrl;
+            const ini = new waiBrowser.classes.ini(_waiBrowser.getLocation() + "/waiBrowser.ini");
+            if (ini.GetValue(_waiBrowser.getTarget(), 'Screen_Path')) {
+                wsUrl = '10.25.90.210'; // waiServer (DEV)
+            } else {
+                let startPage = ini.GetValue(_waiBrowser.getTarget(), 'START_PAGE');
+                if (startPage.startsWith('https://')) {
+                    startPage = startPage.replace('https://', '');
+                } else if (startPage.startsWith('http://')) {
+                    startPage = startPage.replace('http://', '');
+                }
+                wsUrl = startPage.split(':')[0];
+            }
+            APM().connector(`ws://${wsUrl}:50051`, SysInfo.userId);
+
+            WorkIDEdit.focus();
+
+            fOpenNotice();
+
+            // Menu Visiblity set
+            /*
+            if( getCookie("menuvisible") == "1" ) {
+                toggleMenuFrame();
+            }
+            */
+        }
+
+        let bAlertLoaded = false;
+
+        function InitLog() {
+            gOPNO = SysInfo.userId;
+
+            const sysDvCd = SysInfo.sysDvCd;
+
+            if( sysDvCd == "I1" ) {
+                fntSysNm.innerText = "IDC";
+                //LogoImage.src = "/imgs/logo.gif";
+            }
+            else if( sysDvCd == "I2" ) {
+                fntSysNm.innerText = "DR";
+                //LogoImage.src = "/imgs/logo-DR.gif";
+            }
+            else if( sysDvCd == "I3" ) {
+                fntSysNm.innerText = "DEV";
+                //LogoImage.src = "/imgs/logo-TEST.gif";
+            }
+            else if( sysDvCd == "I4" ) {
+                fntSysNm.innerText = "UAT";
+                //LogoImage.src = "/imgs/logo-UAT.gif";
+            } 
+            else if( sysDvCd == "I9" ) {
+                fntSysNm.innerText = "TRN";
+            } 
+            else {
+                fntSysNm.innerText = "KOR";
+                //LogoImage.src = "/imgs/logo-REAL.gif";
+            };
+
+            mainBizDate.value = SysInfo.procBascDt ?? '';
+            MainBizDT.innerHTML = mainBizDate.getValue();
+
+            // LIB().InitHAOS();
+
+            /* window.setTimeout("fCheckPBPrinter()", 25000); */
+            // window.setTimeout("fCheckPBPrinter()", 1000);   /* 20150624_Rizky*/
+
+            fInquiryAlert('C', function() {
+                bAlertLoaded = true;
+            });
+        }
+
+        function GoWork(workid = '', workmenuid) {
+            if (!workid || workid.length < 4) {
+                return;
+            }
+
+            //console.log('GoWork',workid, workmenuid);
+            const upperWorkId = workid.toUpperCase();
+            
+            let tMenuCode;
+            let tSrcUrl;
+            let tOrgName;
+            let tMenuName;
+            let tTrType;
+            let tButtonFlag;
+
+            /* TO-DO: 메뉴 오픈 시 마다 DB에서 메뉴 정보 확인 (속도 이슈로 인하여 주석)
+            const inputData = {
+                dvCd: '21',
+                param1: SysInfo.userId,
+                param2: upperWorkId
+            };
+
+            comCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                const rtnArr = output.output21?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    tMenuCode   = rtnArr[0].menuId;
+                    tSrcUrl     = rtnArr[0].srcUrl;
+                    tOrgName    = rtnArr[0].menuName;
+                    tMenuName   = rtnArr[0].menuName;
+                    tTrType     = rtnArr[0].trType;
+                    tButtonFlag = rtnArr[0].buttonFlag;
+
+                    try {
+                        idMenuName.innerText = tMenuName;
+                        idMenuName.title     = tOrgName;
+                    } catch(E){}
+
+                    DetailURL = LIB().GetTransURL(tSrcUrl) + '?nocache=' + (new Date()+'').replace(/ /gi,'');
+                    if ($wai.debug > 0) console.log('DetailURL',DetailURL);
+                    AddTab(tTrType.substr(0, 1), tMenuCode, tMenuName, upperWorkId, tSrcUrl, DetailURL, tButtonFlag);
+                } else {
+                    top.LIB.ShowInfoDialog("TRX CODE [" + upperWorkId + "] Not found.");
+                    WorkIDEdit.value = gBefWorkID;
+                    WorkIDEdit.focus();
+                }
+            });
+            */
+
+            // 로그인 시 가져온 메뉴 데이터로 처리
+            const menuElem = LIB().CDO.MenuData.find(elem => elem.upmuCode == upperWorkId);
+            if (menuElem) {
+                tMenuCode   = menuElem.menuId;
+                tSrcUrl     = menuElem.srcUrl;
+                tOrgName    = menuElem.menuName;
+                tMenuName   = menuElem.menuName;
+                tTrType     = menuElem.trType;
+                tButtonFlag = menuElem.buttonFlag;
+
+                try {
+                    idMenuName.innerText = tMenuName;
+                    idMenuName.title     = tOrgName;
+                } catch(E){}
+
+                // DetailURL = LIB().GetTransURL(tSrcUrl) + '?nocache=' + (new Date()+'').replace(/ /gi,'');
+                DetailURL = LIB().GetTransURL(tSrcUrl);
+                if ($wai.debug > 0) console.log('DetailURL',DetailURL);
+                AddTab(tTrType.substr(0, 1), tMenuCode, tMenuName, upperWorkId, tSrcUrl, DetailURL, tButtonFlag);
+            } else {
+                top.LIB.ShowInfoDialog("TRX CODE [" + upperWorkId + "] Not found.");
+                WorkIDEdit.value = gBefWorkID;
+                WorkIDEdit.focus();
+            }
+        }
+
+        function AddTab(_TrType,_JOB_NM_CD,_JOB_NM,_FN,_URL,_Detail,_BTNFLG) {
+            //AddTab('I', '02135', 'ledger detail inquiry', 'AD01', 'ad/AD01.html', '/biz/ad/AD01.html', '000000');
+            //AddTab('E', '02140', 'Ledger modify', 'AD09', 'ad/AD09.html', '/biz/ad/AD09.html', '011000');
+
+            var tab = tabCtrl.getTab(_FN);
+            if (tab) {
+                tabCtrl.selectTab(_FN);
+                return false;
+            }
+
+            var RtoC = {
+                '00100':'C',
+                '00102':'D',
+                '00101':'L',
+                '00103':'I',
+                '00104':'T',
+                '00105':'F'
+            };
+            var tabData = {
+                'trType'    : _TrType,
+                'job_nm_cd' : _JOB_NM_CD,
+                'job_nm'    : _JOB_NM,
+                'fn'        : _FN,
+                'url'       : _URL,
+                'detail'    : _Detail,
+                'btnFlag'   : _BTNFLG,
+                'desc'      : _JOB_NM_CD+'|'+_JOB_NM
+            };
+
+            if (_TrType == 'E') {
+                tabData.desc = tabData.desc+'|'+_BTNFLG;
+            }
+
+            let root = '';
+
+            /*
+            const MenuData = top.LIB.CDO.MenuData;
+            const menuElem = MenuData.find(elem => elem.menuId == _JOB_NM_CD);
+            root = menuElem?.menuPath?.split('|')[0] ?? '';
+            */
+
+            // 아이콘 사용 안함
+            if (!root) {
+                root = '00100';
+            }
+
+            var icon = RtoC[root]+_TrType;
+
+            switch (_TrType){
+                case 'E':
+                    //console.log('AddTab.subEntry',_TrType,_JOB_NM_CD, _JOB_NM, _FN, _URL, _Detail);
+                    AddTabpage(_FN,'/frame/subEntry.html',tabData,icon);
+                    break;
+                case 'I':
+                    //console.log('AddTab.subInquiry',_TrType,_JOB_NM_CD, _JOB_NM, _FN, _URL, _Detail);
+                    AddTabpage(_FN,'/frame/subInquiry.html',tabData,icon);
+                    break;
+                default :
+                    AddTabpage(_FN,'/frame/subInquiry.html',tabData,icon);
+                    break;
+            }
+            return true;
+        }
+
+        function AddTabpage(argTitle,htmlUrl,argData,iconTp) {
+            var elem = $('#SubFrame').append(
+                "<iframe src='"+htmlUrl+"' frameborder='0' name='"+argTitle+"'><iframe>"
+            );
+
+            //console.log('AddTabpage.argData',argData);
+
+            var ifElem = elem[0].lastElementChild;
+            tabCtrl.addTab({
+                id: argTitle,
+                text: argTitle,
+                data: argData,
+                pageElem: ifElem,
+                img: iconTp
+            });
+        }
+
+        function OnFrmLoadSync(SubWnd) {
+            const tabData = tabCtrl.tabs.find(tab => tab.id == SubWnd.name)?.data;
+            if (tabData) {
+                SubWnd.document.all.WorkFrame.src = tabData.detail;
+            }
+        }
+
+        function WorkIDSave() {
+            gBefWorkID = WorkIDEdit.value;
+        }
+
+        function WorkIDEditKeyDown(elem) {
+            //console.log('WorkIDEditKeyDown',event.keyCode);
+            let bizCode = '';
+
+            if (WorkIDEdit.value.length != 4 && event.keyCode == 13) {
+                bizCode = (elem.value+'').trim().toUpperCase();
+
+                var DArg = new DArgument();
+                DArg.Args = new Array(1);
+                DArg.Args[0] = bizCode;
+
+                openPopup("/frame/menuList.html", DArg, "status=no;resizable=no;scroll=no,center=yes;dialogHeight=460px;dialogWidth=650px", function(TrCode) {
+                    if (TrCode) {
+                        WorkIDEdit.value = TrCode[0];
+                        GoWork(TrCode[0], TrCode[1]);
+                    }
+                });
+            } else {
+            }
+        }
+
+        function WorkIDEditKeyUp(elem) {
+            if (!(event.keyCode >=37 && event.keyCode<=40)) {
+                var inputVal = elem.value;
+                elem.value = inputVal.replace(/[^a-zA-Z0-9]/gi, '');
+            }
+
+            let bizCode = (WorkIDEdit.value+'').trim().toUpperCase();
+            //console.log('bizCode',bizCode.length,bizCode);
+            if (bizCode.length >= 4) {
+                //console.log('GoWork',bizCode);
+                GoWork(bizCode, 'EMPTY');
+            }
+        }
+
+        function toggleMenuFrame() {
+            if ($('#divMenu').css('visibility') == 'visible') {
+                $('#divMenu').stop().animate({ left: -350 }, 300).css({ visibility: '' }).next().fadeOut(400);
+            } else {
+                $('#divMenu').stop().animate({ left: 0 }, 300).css({ visibility: 'visible' }).next().fadeIn(400);
+                document.getElementById('MenuFrame').contentDocument.getElementById('search_name').focus();
+            }
+        }
+
+        function menuVisible(val) {
+            var expdate = new Date();
+            expdate.setTime(expdate.getTime() + 1000 * 3600 * 24 * 30);
+            setCookie("menuvisible", val, expdate);
+        }
+
+        /*-- TOP MENU Buttons event --*/
+        function BizMenuToggle() {
+            toggleMenuFrame();
+        }
+
+        function fReloadBizScrn() {
+            tabCtrl.getCurrentTab()?.pageElem?.contentDocument.location.reload();
+        }
+
+        function Logout() {
+            try {
+                let curLibWins = top.LIB._openPopupWins;
+                let curSubWins = ActiveWindow()?._openPopupWins ?? [];
+                let curBizWins = ActiveWindow()?.WorkFrame.contentWindow._openPopupWins ?? [];
+                _openPopupWins = [..._openPopupWins, ...curLibWins, ...curSubWins, ...curBizWins];
+
+                var _pops = [];
+                findChild(_openPopupWins);
+                for (var i=0; i<_pops.length; i++) { _pops[i].close(); }
+                _openPopupWins = [], curLibWins = [], curTabWins = [];
+
+                function findChild(pops) {
+                    let rs = false;
+                    for (var i=0; i<pops.length; i++) {
+                        if ((pops[i]._openPopupWins) && (pops[i]._openPopupWins.length != 0)) {
+                            _pops.push(pops[i]);
+                            if (findChild(pops[i]._openPopupWins)) { rs = true; }
+                        } else {
+                            _pops.push(pops[i]);
+                            rs = true;
+                        }
+                    }
+                    return rs;
+                }
+            } catch(E) { console.warn(E); }
+            top.open('/frame/logout.html', '_top');
+        }
+
+        function ExecuteCalc() {
+            //LIB().WINMAN1.ProcFile("","Calc");
+            waiBrowser.modules.process.exec('calc.exe');
+        }
+
+        function DArgument() {
+            if (!window.dialogArguments)
+                this.topWindow = window.top;
+            else
+                this.topWindow = window.dialogArguments.topWindow;
+            this.openWindow = window;
+            this.Args = null;
+        }
+
+        function FrameClose() {
+            WorkIDEdit.value = "";
+            idMenuName.innerText = "";
+            tabCtrl.closeCurrent();
+        }
+
+        function LoadHotKey() {
+            var HotKeyInfos = top.LIB.HotKeyInfos;
+            var isCtrl  = false;
+            var isShift = false;
+            var isAlt   = false;
+            var Key     = 0;
+            var Func    = 0;
+
+            comCallService('/HANABANK/V1/COM/CG/COMCGO2000I.SVC', {opNo: SysInfo.userId}, output => {
+                const rtnData = output.grid01 ?? [];
+                if (rtnData.length == 9) {
+                    rtnData.forEach(elem => {
+                        Func    = Number(elem.keyIdxCd) - 1;
+                        isCtrl  = elem.ctrlIncYn == "Y";
+                        isShift = elem.shiftIncYn == "Y";
+                        isAlt   = elem.altIncYn == "Y";
+                        Key     = Number(elem.keyVal);
+
+                        HotKeyInfos[Func] = new top.LIB.HotKeyInfo(isCtrl, isShift, isAlt, Key, Func);
+                    });
+                } else {
+                    HotKeyInfos[0] = new top.LIB.HotKeyInfo(false, false, false, 112, 0); //Entry                         : F11
+                    HotKeyInfos[1] = new top.LIB.HotKeyInfo(false, false, false, 113, 1); //Cancel                        : F4
+                    HotKeyInfos[2] = new top.LIB.HotKeyInfo(false, false, false, 114, 2); //CNF Inquiry                   : F1
+                    HotKeyInfos[3] = new top.LIB.HotKeyInfo(false, false, false, 116, 3); //Customer Contact              : F2
+                    HotKeyInfos[4] = new top.LIB.HotKeyInfo(false, false, false, 117, 4); //Set Description for postion   : F3
+                    HotKeyInfos[5] = new top.LIB.HotKeyInfo(false, false, false, 118, 5); //Compass Process               : F5
+                    HotKeyInfos[6] = new top.LIB.HotKeyInfo(false, false, false, 119, 6); //Scan                          : F6
+                    HotKeyInfos[7] = new top.LIB.HotKeyInfo(false, false, false, 120, 7); //Excecute                      : PauseBreak
+                    HotKeyInfos[8] = new top.LIB.HotKeyInfo(false, false, false, 121, 8); //Clear                         : F12
+                }
+
+                SetHotKey();
+            }, null, {skipProg: true});
+        }
+
+        function SetHotKey() {
+            _waiBrowser.clearHotkey();
+
+            const codes = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 20];
+
+            codes.forEach(code => {
+                _waiBrowser.addHotkey(function() {
+                    execHotKey(code);
+                }, code, false, false, false);
+            });
+
+            function execHotKey(code) {
+                const hotKeyInfo = top.LIB.HotKeyInfos.find(elem => elem.Key == code);
+                if (hotKeyInfo) {
+                    top.LIB.ExecuteShortCut(hotKeyInfo.Func);
+                }
+            }
+        }
+
+        function fInquiryAlert(InquiryType, callback) {
+            let tOpNo = SysInfo.userId;
+            let tIbil = SysInfo.procBascDt;
+            let tGrpNo = SysInfo.grpNo ?? '';
+
+            const inputData = {
+                dvCd: '24',
+                param1: InquiryType,
+                param2: tIbil,
+                param3: tGrpNo,
+                param4: tOpNo
+            };
+            $("#liAlert").addClass("loader");
+            callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                try {
+                    $("#liAlert").removeClass("loader");
+                    if (InquiryType == 'C') {
+                        let cnt = output.output24?.cnt ?? 0;
+                        if (cnt > 0) {
+                            liAlert.classList.add('red');
+                        } else {
+                            liAlert.classList.remove('red');
+                        }
+                        callback();
+                    } else {
+                        let rtnArr = output.output24?.grid01 ?? [];
+                        if (rtnArr.length > 0) {
+                            liAlert.classList.add('red');
+                        } else {
+                            liAlert.classList.remove('red');
+                        }
+                        callback(rtnArr);
+                    }
+                } catch {
+                    $("#liAlert").removeClass("loader");
+                    bAlertLoaded = true;
+                }
+            }, function(output) {
+                $("#liAlert").removeClass("loader");
+                bAlertLoaded = true;
+                onSvcErrorDialog(output);
+            }, {skipProg: true});
+        }
+
+        function ShowAlertList(elemObj, callback) {
+            let clickEvt = elemObj.onclick;
+            elemObj.onclick = null;
+
+            fInquiryAlert('D', function(alertData = []) {
+                let htmlText = 'Alert';
+                if (alertData.length > 0) {
+                    htmlText += '<ul class="lnb">';
+                    alertData.forEach(elem => {
+                        htmlText += 
+                        `<li onclick="AlertCellClick('${elem.refNo}', '${elem.menuId}')">[${elem.menuId}] ${elem.content}</li>`;
+                    });
+                    htmlText += '<ul class="lnb">';
+                }
+
+                /*
+                htmlText += 
+                    `<ul class="lnb">
+                        <li onclick="AlertCellClick('111', 'AA01')">[AA01] Sample Screen 01</li>
+                    </ul>
+                    `;
+                */
+
+                elemObj.innerHTML = htmlText;
+
+                elemObj.onclick = clickEvt;
+
+                callback(elemObj);
+            });
+        }
+
+        function AlertCellClick(refNo, menuId) {
+            AlertLinkRef = refNo;
+            GoWork(menuId, 'EMPTY');
+        }
+
+        /*
+        function SysTermCellClick() {
+            var DArg = new DArgument();
+            DArg.Args = new Array(1);
+            DArg.Args[0] = "";
+            
+            openPopup("/frame/terminalInfo.html", DArg, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=180px;dialogWidth=500px", function(Ret) {
+                if (Ret) {
+
+                }
+            });
+        }
+        */
+
+        function onSvcErrorDialog(recv) {
+            let errMsg = '';
+            // const errOutput = outputData?.output;
+            const errOutput = recv.xhr?.responseJSON?.output;
+            if (errOutput) {
+                // let subMsg = (errOutput.subMessage ?? [])[0];
+                // errMsg = `${errOutput.message ?? 'Error'}${subMsg ? '\n' + subMsg : ''}\n\n${errOutput.error ?? ''}`;
+                errMsg = `${errOutput.message ?? 'Error'}\n\n${errOutput.error ?? ''}`;
+            } else {
+                errMsg = (recv.errThrown?.message ?? recv.errThrown) || "Service Error";
+            }
+            ShowErrorDialog(errMsg);
+        }
+    </script>
+
+    <script type="text/javascript">
+        /*=======================================*/
+        /* Main Control                          */
+        /*=======================================*/
+
+        //메인-풀다운메뉴
+        $(function () {
+            const $menu = $('header .top-menu>ul>li');
+
+            //풀다운메뉴 클릭 시 메뉴show
+            $menu.on('click', function (e) {
+                const $gnb = $('#header > .top-menu > ul.gnb > li');
+                const $lnb = $('header .lnb');
+
+                const menuWnd = this.querySelector('#mnuWindows');
+                if (menuWnd) {
+                    menuWnd.innerHTML = '';
+
+                    tabCtrl.tabs.forEach(tab => {
+                        const menuElem = document.createElement('li');
+                        //console.log('tab.data --> ', tab.data);
+                        menuElem.style.textAlign = 'left';
+                        menuElem.innerText = `[${tab.data?.fn ?? ''}] ${tab.data?.job_nm ?? ''}`;
+                        menuElem.title = `[${tab.data?.fn ?? ''}] ${tab.data?.job_nm ?? ''}`;
+                        menuElem.onclick = () => {
+                            tabCtrl.selectTab(tab.id);
+                        }
+                        menuWnd.appendChild(menuElem);
+                    });
+                    
+                    const menuElem = document.createElement('li');
+                    menuElem.classList.add('line');
+                    menuElem.innerText = 'All Close';
+                    menuElem.onclick = () => {
+                        tabCtrl.closeAll(true);
+                    }
+                    menuWnd.appendChild(menuElem);
+                }
+
+                if (bAlertLoaded && (e.target.id == 'liAlert' || e.target.id == 'liAlertRed')) {
+                    bAlertLoaded = false;
+                    ShowAlertList(this, function(obj) {
+                        $(obj).stop().toggleClass('play').siblings().stop().removeClass('play');
+                        $(obj).find('ul').stop().toggle().parent().siblings().find('ul').hide();
+                        bAlertLoaded = true;
+                    });
+                } else {
+                    $(this).stop().toggleClass('play').siblings().stop().removeClass('play');
+                    $(this).find('ul').stop().toggle().parent().siblings().find('ul').hide();
+                }
+            });
+
+            //메뉴 외 영역 클릭 시 사라짐
+            $('html').click(function(e){
+                const $gnb = $('#header > .top-menu > ul.gnb > li');
+                const $lnb = $('header .lnb');
+
+                if( !$menu.has(e.target.querySelector('.lnb')).length ) $lnb.hide();
+                if( !$gnb.has(e.target.querySelector('.lnb')).length ) $gnb.removeClass('play');
+            });
+
+            //iframe 영역 클릭 시 사라짐
+            window.addEventListener("blur", (e) => {
+                const $gnb = $('#header > .top-menu > ul.gnb > li');
+                const $lnb = $('header .lnb');
+
+                if (document.activeElement.tagName === "IFRAME") {
+                    $lnb.hide();
+                    $gnb.removeClass('play');
+                }
+            });
+
+            //esc키 눌렀을 때 lnb사라짐
+            $(document).on('keyup', function (evt) {
+                const $gnb = $('#header > .top-menu > ul.gnb > li');
+                const $lnb = $('header .lnb');
+
+                if (evt.which === 27) {
+                    $lnb.hide();
+                    $gnb.removeClass('play');
+                }
+            });
+        });
+
+        //Menu show & hide
+        $(function () {
+            const $close = $('.btnclose');
+            const $shadow = $('.shadow');
+
+            /*
+            $close.on('click', function (evt) {
+                toggleMenuFrame();
+                //evt.preventDefault();
+                //$('aside').stop().animate({ left: -350 }, 300).next().fadeOut(400)
+            });
+            */
+
+            $shadow.on('click', function(evt){
+                //toggleMenuFrame();
+                $('#divMenu').stop().animate({ left: -350 }, 300).css({ visibility: '' }).next().fadeOut(400);
+                evt.preventDefault();
+            });
+
+            $(document).on('keyup', function (evt) {
+                if (evt.which === 27) {
+                    //$('aside').stop().animate({ left: -350 }, 300).next().fadeOut(400)
+                    if ($('#divMenu').css('visibility') == 'visible') {
+                        $('#divMenu').stop().animate({ left: -350 }, 300).css({ visibility: '' }).next().fadeOut(400);
+                    }
+                }
+            });
+        });
+
+        //서브 entry
+        $(()=>{
+            $('#side li').on('click', function(){
+                $(this).stop().toggleClass('on').siblings().stop().removeClass('on').parent().next().find('li').removeClass('on')
+            })
+        });
+    </script>
+    <script type="text/javascript">
+        /*=======================================*/
+        /* Login-out Timer                       */
+        /*=======================================*/
+        var LogOutTimer = function(){
+            var S = {
+                timer : null,
+                timerStartDT : null,
+                limit : 60*60, // 60분(초단위)
+                current :  0,
+                fnc   : function() {},
+                start : function() {
+                    timer = window.setInterval(S.fnc,1000);
+                },
+                reset : function() {
+                    S.current = S.limit;
+                    S.timerStartDT = new Date();
+                },
+                stop : function() {
+                    window.clearInterval(timer);
+                }
+            };
+
+            S.current = S.limit;
+            S.timerStartDT = new Date();
+
+            window.onmousemove = function() { S.reset(); };
+            window.onkeydown   = function() { S.reset(); };
+
+            return S;
+        }();
+
+        // 로그아웃 함수 설정
+        LogOutTimer.fnc = function() {
+
+            logouttime.innerHTML = parseInt(LogOutTimer.current/60) +"m " + parseInt(LogOutTimer.current%60) +"s";
+
+            let currentDT = new Date();
+            let timerStartDT = LogOutTimer.timerStartDT;
+            let diffTime = (currentDT.getTime() - timerStartDT.getTime()) / (1000);
+            if ((diffTime > LogOutTimer.limit) || (LogOutTimer.current <= 0)) {
+                LogOutTimer.current = LogOutTimer.limit;
+                LogOutTimer.stop();
+
+                //화면을 가리는 레이어를 보여준다 (0.5초동안 30%의 농도의 투명도)
+                backLayer.style.display = "";
+                var ctx = backLayer.getContext("2d");
+                ctx.fillStyle = "rgba(0,0,0,0.3)";
+                ctx.fillRect(0,0,100,100);
+
+                var DArg     = new DArgument();
+                DArg.Args    = new Array(2);
+                DArg.Args[0] = "";
+                DArg.Args[1] = "";
+
+                // var PWDWnd =
+                //     window.showModalDialog("/common/PWDCOM.html",
+                //         DArg,
+                //         "dialogHeight: 280px; dialogWidth: 290px;center: yes;" +
+                //         "edge: raised; help: no; resizable: no; status: off; scroll: no");
+
+                backLayer.style.display = "none";
+
+                // if(PWDWnd == 3){
+                //     $("#loadingDiv").fadeOut(300);
+                //     $(".backLayer").fadeOut(1000);
+                //     LogOutTimer.start();
+                // }else{
+                    Logout();
+                // }
+
+            } else {
+                LogOutTimer.current -= 1;
+            }
+
+        }
+
+        // 로그아웃 타이머 실행
+        LogOutTimer.start();
+
+        // SubEntry, SubInquiry 및 이하 iframe(업무화면)에서 접근하도록 생성
+        function fResetTimer(){
+            LogOutTimer.reset();
+        }
+
+        function fSetSysMsg(msg){
+            sysmsg.innerHTML = msg;
+        }
+
+        //윈도우가 resize될때마다 backLayer를 조정
+        $(window).resize(function(){
+            var width = $(window).width();
+            var height = $(window).height();
+            $(".backLayer").width(width).height(height);
+        });
+
+        function fLogOut() {
+            try {
+                if (top.LIB.MGRReject == true) {
+                    return;
+                }
+                
+                $.ajax({
+                    type: 'POST',
+                    url: `${top.LIB.serverUrl}/LOGOUT.SVC`,
+                    contentType: 'application/json',
+                    headers:{"X-Auth-Token": `Bearer ${top.LIB.accessToken}`},
+                    data: JSON.stringify({
+                        input: {
+                            userId: btoa(SysInfo.userId),
+                            password: '',
+                            opDvCd: '0'
+                        },
+                        SysInfo: {
+                            brNo: '',
+                            userId: SysInfo.userId,
+                            trscDt: '',
+                            lnkIndvCanYn: '',
+                            scrnMsgPrnYn: '',
+                            sysLnggCd: '',
+                            dtFrmt: '',
+                            orgScrnId: ''
+                        },
+                        EtcInfo: {
+                            thid: getMainCommData('EtcInfo').thid ?? ''
+                        }
+                    })
+                });
+            } catch(e) {
+            }
+        }
+
+        
+        function fOpenNotice_tablet() {
+            /*
+            var params = new Array();
+
+            var tOpNo ;
+            var tIbil ;
+            var tStr;
+            var test2 = "";
+
+            HNDC.SectionName = "FXFIG_COM";
+            HNDC.RecordIndex = 0;
+            tOpNo = HNDC.GetItemValue("FXFIG_OPNO");
+            tIbil = HNDC.GetItemValue("FXFIG_IBIL");
+
+            if(tOpNo == "0001347" ||
+                tOpNo == "0001008" ||
+                tOpNo == "0001955" ||
+                tOpNo == "0002235" ||
+                tOpNo == "HR00021" ||
+                tOpNo == "HR00020" ||
+                tOpNo == "WBDC001" ||
+                tOpNo == "0001455")
+            {
+                tStr  = "SELECT A.* FROM ACOM_COM_NOTIFY A, ";
+                tStr += " AEBK_ECH_ETC_APC_BASE B ";
+                tStr += " WHERE A.MSGM5 = B.DTP_REF_NO ";
+                tStr += " AND   A.STS = '0' AND A.REG_GB = '4' ";
+                tStr += " AND   A.DEST_OP_NO = 'TBL' AND B.STS = '0' ";
+                tStr += " ORDER BY B.DTP_REF_NO ";
+
+                wasSQLDSO.SQL = tStr;
+
+                if (wasSQLDSO.recordset.RecordCount > 0) {
+                    params[0] = wasSQLDSO;
+                    PlayMGRRequest();
+                    var TrCode = window.showModalDialog("/Notice_tablet.html", params, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=480px;dialogWidth=510px");
+                }
+            }
+            */
+            
+            if (['0001347', 
+                 '0001008', 
+                 '0001955', 
+                 '0002235', 
+                 'HR00021', 
+                 'HR00020', 
+                 'WBDC001', 
+                 '0001455'
+                ].includes(top.LIB.CDO.SysInfo.userId)) {
+                
+                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '17'}, output => {
+                    let rtnArr = output.output17?.grid17 ?? [];
+                    if (rtnArr.length > 0) {
+                        let DArg     = new DArgument();
+                        DArg.Args    = new Array(1);
+                        DArg.Args[0] = rtnArr;
+                        top.LIB.PlayMGRRequest();
+                        openPopup("/frame/noticeTablet.html", DArg, "dialogHeight=480px;dialogWidth=510px");
+                    }
+                });
+            }
+        }
+        
+        /*20180123_Rani*/
+        function fOpenNotice_rollover() {
+            // var params = new Array();
+
+            // var tOpNo ;
+            // var tIbil ;
+            // var tStr;
+            // var test2 = "";
+
+            // HNDC.SectionName = "FXFIG_COM";
+            // HNDC.RecordIndex = 0;
+            // tOpNo = HNDC.GetItemValue("FXFIG_OPNO");
+            // tIbil = HNDC.GetItemValue("FXFIG_IBIL");
+
+            // if(tOpNo == "0001286" || //Sausan
+            //     tOpNo == "0000965" || //DIAN EKA SRI WULANDARI
+            //     tOpNo == "0002021" || //Sofyan Ikhsan
+            //     tOpNo == "0002062" || //Mochammad Hangga Tohjaya
+            //     tOpNo == "0002763"    //Rezky Gama Aprilestiarto /*20180404_Rani*/
+            // ) 
+            // {
+            //     tStr  = "SELECT trunc(sysdate)                 AS apl_il_from    "; 
+            //     tStr  += "     , trunc(sysdate)                AS apl_il_to      ";
+            //     tStr  += "     , 'Rollover'                    AS upmu_buseo     ";
+            //     tStr  += "     , 'CG45'                        AS upmu_ge        ";
+            //     tStr  += "     , 'Loan Admin User'             AS op_no          ";
+            //     tStr  += "     , 'Execute CG45 for Rollover'   AS msgm1          ";
+            //     tStr  += "     , ref_no                        AS msgm2          ";
+            //     tStr  += "     , to_char(exp_il,'dd-Mon-yyyy') AS msgm3          ";
+            //     tStr  += "     , b.prd_eng_nm                  AS msgm4          ";
+            //     tStr  += "     , ''                            AS msgm5          ";
+            //     tStr  += "  FROM adst_lnb_rgstr a                                ";
+            //     tStr  += "     , aftr_pfh_base b                                 ";
+            //     tStr  += " WHERE a.prd_cd  = b.prd_cd                            ";
+            //     tStr  += "   AND a.type_cd = '3'                                 ";
+            //     tStr  += "   AND a.sts     = 0                                   ";
+            //     tStr  += "   AND rownum    <= 100                                ";
+                
+            //     wasSQLDSO.SQL = tStr;
+
+            //     if (wasSQLDSO.recordset.RecordCount > 0) {
+            //         params[0] = wasSQLDSO;
+            //         PlayMGRRequest();
+            //         var TrCode = window.showModalDialog("/Notice_rollover.html", params, "status=no;resizeable=no;scroll=yes,center=yes;dialogHeight=480px;dialogWidth=510px");
+            //     }
+            // }
+            
+            if (['0001286', //Sausan
+                 '0000965', //DIAN EKA SRI WULANDARI
+                 '0002021', //Sofyan Ikhsan
+                 '0002062', //Mochammad Hangga Tohjaya
+                 '0002763'  //Rezky Gama Aprilestiarto /*20180404_Rani*/
+                ].includes(top.LIB.CDO.SysInfo.userId)) {
+                
+                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '18'}, output => {
+                    let rtnArr = output.output18?.grid18 ?? [];
+                    if (rtnArr.length > 0) {
+                        let DArg     = new DArgument();
+                        DArg.Args    = new Array(1);
+                        DArg.Args[0] = rtnArr;
+                        top.LIB.PlayMGRRequest();
+                        openPopup("/frame/noticeRollover.html", DArg, "dialogHeight=480px;dialogWidth=510px");
+                    }
+                });
+            }
+        }
+        
+        function fOpenNotice_BondTrx() {
+            /*
+            var params = new Array();
+        
+            var tOpNo ;
+            var tIbil ;
+            var tStr;
+            var test2 = "";
+        
+            HNDC.SectionName = "FXFIG_COM";
+            HNDC.RecordIndex = 0;
+            tOpNo = HNDC.GetItemValue("FXFIG_OPNO");
+            tIbil = HNDC.GetItemValue("FXFIG_IBIL");
+        
+            if(tOpNo == "0001008" ||
+            tOpNo == "0002235" ||
+            tOpNo == "0002135" ||
+            tOpNo == "0002531" 
+            )
+            {
+                tStr  = "SELECT trunc(sysdate) AS apl_il_from ";
+                tStr  += "     , trunc(sysdate) AS apl_il_to ";
+                tStr  += "     , 'CTP Register' AS upmu_buseo ";
+                tStr  += "     , 'Buy' AS upmu_ge ";
+                tStr  += "     , lst_upd_emp_no AS op_no ";
+                tStr  += "     , 'New Transaction need to register CTP' AS msgm1 ";
+                tStr  += "     , '' AS msgm2 ";
+                tStr  += "     , '' AS msgm3 ";
+                tStr  += "     , '' AS msgm4 ";
+                tStr  += "     , acct_no AS msgm5 ";
+                tStr  += "  FROM fbcd_bond_buy_apc_bal ";
+                tStr  += " WHERE trad_procss_sta_cd = '4' ";
+                tStr  += "   AND can_yn = 'N' ";
+                tStr  += "UNION ALL ";
+                tStr  += "SELECT trunc(sysdate) AS apl_il_from ";
+                tStr  += "     , trunc(sysdate) AS apl_il_to ";
+                tStr  += "     , 'CTP Register' AS upmu_buseo ";
+                tStr  += "     , 'Sell' AS upmu_ge ";
+                tStr  += "     , lst_upd_emp_no AS op_no ";
+                tStr  += "     , 'Sell Transaction need to register CTP' AS msgm1 ";
+                tStr  += "     , '' AS msgm2 ";
+                tStr  += "     , '' AS msgm3 ";
+                tStr  += "     , '' AS msgm4 ";
+                tStr  += "     , acct_no AS msgm5 ";
+                tStr  += "  FROM fbcd_bond_sell_apc_setl ";
+                tStr  += " WHERE trad_procss_sta_cd = '4' ";
+                tStr  += "   AND can_yn = 'N' ";
+                
+                wasSQLDSO.SQL = tStr;
+                
+                if (wasSQLDSO.recordset.RecordCount > 0) {
+                    params[0] = wasSQLDSO;
+                    PlayMGRRequest();
+                    var TrCode = window.showModalDialog("/Notice_tablet.html", params, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=480px;dialogWidth=510px");
+                }
+            }
+            */
+
+            if (['0001008',
+                 '0002235',
+                 '0002135',
+                 '0002531'
+                ].includes(top.LIB.CDO.SysInfo.userId)) {
+                
+                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '19'}, output => {
+                    let rtnArr = output.output19?.grid19 ?? [];
+                    if (rtnArr.length > 0) {
+                        let DArg     = new DArgument();
+                        DArg.Args    = new Array(1);
+                        DArg.Args[0] = rtnArr;
+                        top.LIB.PlayMGRRequest();
+                        openPopup("/frame/noticeBondTrx.html", DArg, "dialogHeight=480px;dialogWidth=510px");
+                    }
+                });
+            }
+        }   
+        
+        /*-------------------------------------------------------------------------*/
+        /* Notice For Speed Remitance                                              */
+        /*-------------------------------------------------------------------------*/        
+        function fOpenNotice_SpdRemit() {
+            // var params = new Array();
+
+            // var tOpNo ;
+            // var tIbil ;
+            // var tStr;
+            // var test2 = "";
+
+            // HNDC.SectionName = "FXFIG_COM";
+            // HNDC.RecordIndex = 0;
+            // tOpNo = HNDC.GetItemValue("FXFIG_OPNO");
+            // tIbil = HNDC.GetItemValue("FXFIG_IBIL");
+
+            // if(tOpNo == "0001285" ||
+            //     tOpNo == "0000869" ||
+            //     tOpNo == "0001283" ||
+            //     tOpNo == "0001282" ||
+            //     tOpNo == "0001711" ||
+            //     tOpNo == "0001791" ||
+            //     tOpNo == "0001586" ||
+            //     tOpNo == "0001695" ||
+            //     tOpNo == "0001264"
+            //     )
+            // {
+            //     tStr  = "SELECT trunc(sysdate) AS apl_il_from ";
+            //     tStr = tStr + "     , trunc(sysdate) AS apl_il_to ";
+            //     tStr = tStr + "     , 'Speed Remittance' AS upmu_buseo ";
+            //     tStr = tStr + "     , 'Alert' AS upmu_ge ";
+            //     tStr = tStr + "     , z.proc_by AS op_no ";
+            //     tStr = tStr + "     , 'Speed Remittace Alert' AS msgm1 ";
+            //     tStr = tStr + "     , '' AS msgm2 ";
+            //     tStr = tStr + "     , '' AS msgm3 ";
+            //     tStr = tStr + "     , '' AS msgm4 ";
+            //     tStr = tStr + "     , z.ref_no AS msgm5 ";
+            //     tStr = tStr + "FROM";
+            //     tStr = tStr + "(SELECT /*+ INDEX(A AFEX_ROH_BASE_I8) INDEX(G ACOM_COMH_USER_PK)*/ DISTINCT A.ref_no, E.act_dtyp, A.speed_yn, A.appl_nm1, A.appl_nm2, A.ccy, to_char(A.famt,'999,999,999,999.00') famt, A.gis_il, decode(A.fx_ccy, '', A.ccy, A.fx_ccy) fx_ccy,";
+            //     tStr = tStr + "decode(A.fx_amt, 0, to_char(A.famt,'999,999,999.00'), to_char(A.fx_amt,'999,999,999,999.00')) fx_amt, ";
+            //     tStr = tStr + "decode(A.rt_cd,'1','D/D','3','M/T','4','T/T','5','KEB', '6','D0M', '') rt_cd, A.rcv_nm1, A.rcv_acct_no, A.dd_no, ";
+            //     tStr = tStr + "decode(c.comm_biz_key,NULL,'N',(CASE WHEN c.apcl_comm > 0 OR (c.apcl_comm = 0 AND c.comm_prim_meth_cd = '03') THEN 'Y' ELSE 'N' END)) as sdv, decode(B.sts, '0', 'Normal', '1', 'Cancel', '9', 'Complete') sts, D.ib_time, ";
+            //     tStr = tStr + "decode(F.sts, NULL, 'NOT SCANNED', 'SCANNED') as scan_sts, decode(substr(G.grp_no,1,5), 'HOPTF', G.FNM, NULL) as proc_by ";
+            //     tStr = tStr + "from AFEX_ROH_BASE A, afex_roh_his D, aftr_ffh_comm_trsc_ptcl C, ACOM_CONT_BASE B, AACT_TRX_BASE E, ACOM_SCAN_HIS F, ACOM_COMH_USER G";
+            //     tStr = tStr + " WHERE A.gis_il = trunc(sysdate) ";
+            //     tStr = tStr + "   AND A.ref_no = B.ref_no ";
+            //     tStr = tStr + "   AND a.ref_no = d.ref_no ";
+            //     tStr = tStr + "   AND c.comm_biz_key(+) = d.ref_no||'|'||d.his_no ";
+            //     tStr = tStr + "   AND c.comm_cd(+) = '42880901007' ";
+            //     tStr = tStr + "   AND d.his_no = (SELECT MAX(his_no) FROM afex_roh_his WHERE ref_no = a.ref_no)";
+            //     tStr = tStr + "   AND A.ref_no = E.ref_no and E.his_no = '1'";
+            //     tStr = tStr + "   AND A.ref_no = F.ref_no(+) ";
+            //     tStr = tStr + "   AND F.upd_emp_no = G.op_no(+) ";
+            //     tStr = tStr + "   AND A.speed_yn = 'Y' ";
+            //     tStr = tStr + "   AND B.sts = '0' ORDER BY A.gis_il,A.ref_no";
+            //     tStr = tStr + ")z";
+
+            //     wasSQLDSO.SQL = tStr;
+
+            //     if (wasSQLDSO.recordset.RecordCount > 0) {
+            //         params[0] = wasSQLDSO;
+            //         PlayMGRRequest();
+            //         var TrCode = window.showModalDialog("/Notice_SpdRemit.html", params, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=480px;dialogWidth=510px");
+            //     }
+            // }
+
+            if (['0001285',
+                 '0000869',
+                 '0001283',
+                 '0001282',
+                 '0001711',
+                 '0001791',
+                 '0001586',
+                 '0001695',
+                 '0001264'
+                ].includes(top.LIB.CDO.SysInfo.userId)) {
+                
+                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '37'}, output => {
+                    let rtnArr = output.output37?.grid37 ?? [];
+                    if (rtnArr.length > 0) {
+                        let DArg     = new DArgument();
+                        DArg.Args    = new Array(1);
+                        DArg.Args[0] = rtnArr;
+                        top.LIB.PlayMGRRequest();
+                        openPopup("/frame/noticeSpdRemit.html", DArg, "dialogHeight=480px;dialogWidth=510px");
+                    }
+                });
+            }
+        }
+        
+        function fOpenNotice_LldCheck() {
+            /*
+            var params = new Array();
+        
+            var tOpNo ;
+            var tIbil ;
+            var tStr;
+            var test2 = "";
+        
+            HNDC.SectionName = "FXFIG_COM";
+            HNDC.RecordIndex = 0;
+            tOpNo = HNDC.GetItemValue("FXFIG_OPNO");
+            tIbil = HNDC.GetItemValue("FXFIG_IBIL");
+        
+            if(tOpNo == "0000588" ||
+            tOpNo == "0000921" ||
+            tOpNo == "0000568" ||
+            tOpNo == "0001258" ||
+            tOpNo == "0002310" ||
+            tOpNo == "0001530"
+            )
+            {
+                tStr   = "SELECT trunc(sysdate) AS apl_il_from ";                   
+                tStr  += "     , trunc(sysdate) AS apl_il_to ";                     
+                tStr  += "     , 'LLD Document Checking' AS upmu_buseo ";           
+                tStr  += "     , 'Remittance' AS upmu_ge ";                         
+                tStr  += "     , a.reg_emp_no AS op_no ";                           
+                tStr  += "     , a.ref_no || ' Need to check' AS msgm1 ";           
+                tStr  += "     , '' AS msgm2 ";                                     
+                tStr  += "     , '' AS msgm3 ";                                     
+                tStr  += "     , '' AS msgm4 ";                                     
+                tStr  += "     , b.ref_no AS msgm5 ";                                
+                tStr  += "  FROM acom_cont_base a ";
+                tStr  += "     , afex_roh_base b ";
+                //tStr  += "     , aact_trx_base b ";                                 
+                tStr  += " WHERE a.sts = '2' ";                                     
+                tStr  += "   AND a.subj_cd = 'RT' ";                                
+                tStr  += "   AND a.ref_no = b.ref_no ";                             
+                //tStr  += "   AND b.upmu_cd || b.geor_cd = 'RT11' ";                    
+                
+                wasSQLDSO.SQL = tStr;
+                
+                if (wasSQLDSO.recordset.RecordCount > 0) {
+                    params[0] = wasSQLDSO;
+                    PlayMGRRequest();
+                    var TrCode = window.showModalDialog("/Notice_tablet.html", params, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=480px;dialogWidth=510px");
+                }
+            }
+            */
+
+            if (['0000588',
+                 '0000921',
+                 '0000568',
+                 '0001258',
+                 '0002310',
+                 '0001530'
+                ].includes(top.LIB.CDO.SysInfo.userId)) {
+                
+                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '38'}, output => {
+                    let rtnArr = output.output38?.grid38 ?? [];
+                    if (rtnArr.length > 0) {
+                        let DArg     = new DArgument();
+                        DArg.Args    = new Array(1);
+                        DArg.Args[0] = rtnArr;
+                        top.LIB.PlayMGRRequest();
+                        openPopup("/frame/noticeTablet.html", DArg, "dialogHeight=480px;dialogWidth=510px");
+                    }
+                });
+            }
+        }
+        
+        /* 20180305_Anthony */
+        function fOpenNotice_BondForeign() {
+            /*
+            var params = new Array();
+        
+            var tOpNo ;
+            var tIbil ;
+            var tStr;
+            var test2 = "";
+            
+            HNDC.SectionName = "FXFIG_COM";
+            HNDC.RecordIndex = 0;
+            tOpNo = HNDC.GetItemValue("FXFIG_OPNO");
+            tIbil = HNDC.GetItemValue("FXFIG_IBIL");
+            
+            if(tOpNo == "0002473" ||
+            tOpNo == "0002475" ||
+            tOpNo == "0002622" ||
+            tOpNo == "0000987" ||
+            tOpNo == "0002591" ||
+            tOpNo == "0001249"
+            )
+            {
+                tStr   = "SELECT trunc(sysdate) AS apl_il_from ";
+                tStr  += "     , trunc(sysdate) AS apl_il_to ";
+                tStr  += "     , 'Foreign Bond Transaction Amount Information' AS upmu_buseo ";
+                tStr  += "     , 'Retail Bond' AS upmu_ge ";
+                tStr  += "     , 'Treasury' AS op_no ";
+                tStr  += "     , 'Foreign Bond Transaction Information' AS msgm1 ";
+                tStr  += "     , '' AS msgm2 ";
+                tStr  += "     , b.PRODUCT_NO||' : '||SUM(a.TRSC_FACE_VAL_AMT)||' '||b.CUR_CD AS msgm3 ";
+                tStr  += "     , '' AS msgm4 ";
+                tStr  += "     , '' AS msgm5 ";
+                tStr  += "  FROM fbcd_bond_buy_apc_bal a ";
+                tStr  += "     , fbcd_bond_cum_acct b ";
+                tStr  += " WHERE a.acct_no = b.acct_no ";
+                tStr  += "   AND b.cur_cd ='USD' ";
+                tStr  += "   AND a.TRAD_PROCSS_STA_CD = '1' ";
+                tStr  += "   AND a.CAN_YN = 'N' ";
+                tStr  += "GROUP BY b.PRODUCT_NO, b.CUR_CD ";
+
+                wasSQLDSO.SQL = tStr;
+
+                if (wasSQLDSO.recordset.RecordCount > 0) {
+                    params[0] = wasSQLDSO;
+                    PlayMGRRequest();
+                    var TrCode = window.showModalDialog("/Notice_tablet.html", params, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=480px;dialogWidth=510px");
+                }
+            }
+            */
+
+            if (['0002473',
+                 '0002475',
+                 '0002622',
+                 '0000987',
+                 '0002591',
+                 '0001249'
+                ].includes(top.LIB.CDO.SysInfo.userId)) {
+                
+                callBasicService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', {dvCd: '39'}, output => {
+                    let rtnArr = output.output39?.grid39 ?? [];
+                    if (rtnArr.length > 0) {
+                        let DArg     = new DArgument();
+                        DArg.Args    = new Array(1);
+                        DArg.Args[0] = rtnArr;
+                        top.LIB.PlayMGRRequest();
+                        openPopup("/frame/noticeTablet.html", DArg, "dialogHeight=480px;dialogWidth=510px");
+                    }
+                });
+            }
+        }
+    </script>
+
+</head>
+<body style="overflow: hidden;" onload="InitMain()" onbeforeunload="fLogOut()">
+    <div id="wrap">
+        <header>
+            <div id="header">
+                <div class="top-menu">
+                    <div class="time">
+                        <img src="./images/clock2.png" alt="clock" class="clock">
+                        <label for="datetime" id="MainDT"></label>
+                        <dateedit id="mainDate" style="display: none;"></dateedit>
+                    </div>
+                    
+                    <div id="fntSysNm"></div>
+
+                    <ul class="gnb">
+                        <li id="liAlert">Alert</li>
+                        <li id="liAlertRed" style="display:none;">Alert</li>
+                        <!--
+                        <li>System
+                            <ul class="lnb">
+                                <li onclick="SysTermCellClick();">Terminal Information</li>
+                            </ul>
+                        </li>
+                         -->
+                        <li onclick="top.LIB.ShowHotKeyDefsWindow();">Shortcut</li>
+                        <li>
+                            Windows
+                            <ul class="lnb" id="mnuWindows">
+                                <!--                                 
+                                <li class="line">All Close</li>
+                                 -->
+                            </ul>
+                        </li>
+                        <!-- <li>Help</li> -->
+                    </ul>
+
+                    <div class="logo">
+                        <img src="./images/hana_logo - white.png" alt="#">
+                    </div>
+                </div>
+
+                <div class="bottom-menu">
+                    <div id="inner">
+                        <div class="code-wrapper">
+                            <div class="code">
+                                <input type="search" id="WorkIDEdit" name="code" class="searchinput" maxlength="4" minlength="4" autocomplete="off" spellcheck="false" onkeydown="WorkIDEditKeyDown(this)" onkeyup="WorkIDEditKeyUp(this)" onfocus="WorkIDSave()" style="text-transform: uppercase;">
+                                <button class="search" onclick="GoWork((WorkIDEdit.value+'').trim().toUpperCase(), 'EMPTY');"></button>
+                            </div>
+                        </div>
+
+                        <div class="title">
+                            <label for="title" id="idMenuName"></label>
+                        </div>
+                        
+                        <div class="hotkey">
+                            <ul class="key_container">
+                                <li id="liReloadBizScrn" style="display: none;">
+                                    <button onclick="fReloadBizScrn()">
+                                        <img src="./images/reload.png" alt="#"> 
+                                        <span class="tooltip">Reload Biz Screen</span>
+                                    </button>
+                                </li>
+                                <li class="key_menu">
+                                    <button onclick="BizMenuToggle()">
+                                        <img src="./images/find.png" alt="#"> 
+                                        <span class="tooltip">Menu Screen Open</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="fOpenMyFavorite();">
+                                        <img src="./images/star.png" alt="#"> 
+                                        <span class="tooltip">My Favorite</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="APM().MGRListWndShow();">
+                                        <img src="./images/writing.png" alt="#">
+                                        <span id="APMReqAlert" class="New" style="display: none;"></span>
+                                        <span class="tooltip">Approval</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="top.LIB.ScreenPrint()">
+                                        <img src="./images/printer.png" alt="#">
+                                        <span class="tooltip">Screen Print</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="ExecuteCalc();">
+                                        <img src="./images/calculator.png" alt="#"> 
+                                        <span class="tooltip">Calculator</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onclick="Logout()">
+                                        <img src="./images/delete.png" alt="#">
+                                        <span class="tooltip">Logout</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="biz-date">
+                        <label for="name">Biz Date : <span id="MainBizDT"></span></label>
+                        <dateedit id="mainBizDate" style="display: none;"></dateedit>
+                        <!-- <label for="datetime" id="datetime">dd/mm/yyyy</label> -->
+                        <label for="name" style="display: none;">Log Out : <span id="logouttime">15m 0s</span></label>
+                        </td>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <aside id="divMenu">
+            <nav id="nav">
+                <iframe id="MenuFrame" src="/frame/menu.html" frameborder="0" style="width: 100%; height: 100%; background-color: white;"></iframe>
+            </nav>
+        </aside>
+
+        <div class="shadow">
+            <button type="button" class="btnclose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <section>
+            <div class="bi">
+                
+            </div>     
+
+            <div id="main-frame">
+                <div class="main_btn">
+                    <button class="main_close" onclick="tabCtrl.closeAll(true);"> 
+                        <img src="./images/main_close.png" alt="#">
+                        <span class="tooltip">All Close</span>
+                    </button>
+                </div>
+                <div id="tabDiv">
+                    <!--
+                    <div class="nav_container">
+                        <ul class="tabs">
+                            <li class="tab-link current" data-tab="tab-1">
+                                <span class="unlock"></span>
+                                <span class="menuName">AD11</span>
+                                <span class="close"></span>
+                            </li>
+                            <li class="tab-link" data-tab="tab-2"> 
+                                <span class="unlock"></span>
+                                <span class="menuName">FF11</span>
+                                <span class="close"></span>
+                            </li>
+                            <li class="tab-link" data-tab="tab-3">
+                                <span class="unlock"></span>
+                                <span class="menuName">DP31</span>
+                                <span class="close"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    -->
+                </div>
+                <div id="SubFrame" style="width: 100%; height: 100%;"></div>
+            </div>
+        </section>
+
+        <footer>
+            <ul id="status-bar">
+                <li class="status">
+                    <label for="branch">BRNo : <span id="botSts1"></span></label>
+                </li>
+                <li class="status">
+                    <label for="screen">OPNo : <span id="botSts2"></span></label>
+                </li>
+                <li class="status">
+                  <label for="code">SystemID : <span id="botSts3"></span></label>
+                </li>
+                <li class="status">
+                    <label for="id">EDC : <span id="botSts4"></span></label>
+                </li>
+                <li class="status">
+                    <label for="teller">Teller : <span id="botSts5"></span>&nbsp;<span id="botSts6"></span></label>
+                </li>
+                <li class="status">
+                    <label for="name">SME RE 85</label>
+                </li>
+            </ul>
+        </footer>   
+    </div>
+    <!-- <canvas id="backLayer" width="100px" height="100px" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; display: none;"></canvas> -->
+
+    <div style="display: none; position: absolute; left: 0px; top: 0px;">
+		<div id="onTabContextMenu" class="easyui-menu" style="width: 120px;" onselectstart="return false">
+			<div onclick="tabCtrl.closeCurrent();" >Close</div>
+			<div onclick="tabCtrl.closeOther();">Close Others</div>
+			<div onclick="tabCtrl.closeAll(true);" >Close All</div>
+		</div>
+	</div>
+    
+    <canvas id="backLayer" width="100px" height="100px" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; display: none;"></canvas>
+    <canvas id="scrnCapture" style="display: none;"></canvas>
+</body>
+</html>

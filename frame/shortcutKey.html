@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortcut Key Setup</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="/wai/default.css">
+    <link rel="stylesheet" href="/css/Base.css">
+    <link rel="stylesheet" href="./css/Shortcut_Key.css" />
+    <script type="text/javascript">
+        var inpList = new Array();
+        var valList = new Array();
+        var actEle;
+
+        var HKD_EDIT_IMGELEM = null;
+        var HKD_EDIT_TXTELEN = null;
+        var HKD_HOTKEYINFOS  = null;
+        var HKD_TOPWIN       = null;
+
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                HKD_TOPWIN      = dialogArguments.openWindow;
+	            HKD_HOTKEYINFOS = dialogArguments.Args;
+
+                for (var i = 0; i < HKD_HOTKEYINFOS.length; i++) {
+                    SetItem(HKD_HOTKEYINFOS[i].Ctrl.toString(),
+                            HKD_HOTKEYINFOS[i].Shift.toString(),
+                            HKD_HOTKEYINFOS[i].Alt.toString(),
+                            HKD_HOTKEYINFOS[i].Key.toString(),
+                            HKD_HOTKEYINFOS[i].Func);
+                }
+
+                fSetEvent();
+            }
+        }
+
+        function SetItem(Ctrl, Shift, Alt, Key, FuncIdx) {
+            switch(eval(FuncIdx)) {
+                case 0 : 
+                    txtentryKey.value  = fChgKeyToText(Key);
+                    break;
+                case 1 : 
+                    txtcancelKey.value = fChgKeyToText(Key);
+                    break;
+                case 2 : 
+                    txtCNFKey.value    = fChgKeyToText(Key);
+                    break;
+                case 3 : 
+                    txtCCntctKey.value = fChgKeyToText(Key);
+                    break;
+                case 4 : 
+                    txtFXInfoKey.value = fChgKeyToText(Key);
+                    break;
+                case 5 : 
+                    txtCmpssKey.value  = fChgKeyToText(Key);
+                    break;
+                case 6 : 
+                    txtScanKey.value   = fChgKeyToText(Key);
+                    break;
+                case 7 : 
+                    txtexecKey.value   = fChgKeyToText(Key);
+                    break;
+                case 8 : 
+                    txtcanjobKey.value = fChgKeyToText(Key);
+                    break;
+                default :
+                    break;
+            }
+        }
+
+        function fChgKeyToText(Key) {
+            if (Key == 112)
+                return "F1";
+            else if (Key == 113)
+                return "F2";
+            else if (Key == 114)
+                return "F3";
+            else if (Key == 115)
+                return "F4";
+            else if (Key == 116)
+                return "F5";
+            else if (Key == 117)
+                return "F6";
+            else if (Key == 118)
+                return "F7";
+            else if (Key == 119)
+                return "F8";
+            else if (Key == 120)
+                return "F9";
+            else if (Key == 121)
+                return "F10";
+            else if (Key == 122)
+                return "F11";
+            else if (Key == 123)
+                return "F12";
+            else if (Key == 19)
+                return "PauseBreak"
+            else return "";
+        }
+
+        function fChgTextToKey(pText) {
+            if  (pText == "F1")
+                return 112;
+            else if (pText == "F2")
+                return 113;
+            else if (pText == "F3")
+                return 114;
+            else if (pText == "F4")
+                return 115;
+            else if (pText == "F5")
+                return 116;
+            else if (pText == "F6")
+                return 117;
+            else if (pText == "F7")
+                return 118;
+            else if (pText == "F8")
+                return 119;
+            else if (pText == "F9")
+                return 120;
+            else if (pText == "F10")
+                return 121;
+            else if (pText == "F11")
+                return 122;
+            else if (pText == "F12")
+                return 123;
+            else if (pText == "PauseBreak")
+                return 19
+            else return 0;
+        }
+
+        function fSetEvent() {
+            document.all.body.addEventListener('click',function(event){
+                if(event.target.className != "save") {
+                    if (actEle) {
+                        actEle.focus();
+                    }
+                }
+            });
+            
+            inpList = document.getElementsByTagName('input');
+
+            for(var inp = 0; inp < inpList.length; inp++){
+                valList.push(inpList[inp].value);
+                inpList[inp].readOnly = true;
+            }
+
+            for(var i = 0; i < document.getElementsByTagName('li').length; i++){
+                if(document.getElementsByTagName('li')[i].parentElement.id == "left"
+                || document.getElementsByTagName('li')[i].parentElement.id == "center"
+                || document.getElementsByTagName('li')[i].parentElement.id == "right"
+                ){
+                    document.getElementsByTagName('li')[i].addEventListener('click',function(){
+                        this.getElementsByTagName('input')[0].focus();
+                        actEle = this.getElementsByTagName('input')[0];
+                    });
+                    document.getElementsByTagName('li')[i].children[1].addEventListener('keydown',function(event){
+                        event.preventDefault();
+                        if(event.keyCode > 111 && event.keyCode < 124){//F1~F12
+                            var idx = valList.indexOf(event.key);
+                            if(idx != -1) inpList[idx].value = "";
+                            this.value = event.key;
+                        } else if(event.keyCode == 19){//pause break
+                            var idx = valList.indexOf("Pause Break");
+                            if(idx != -1) inpList[idx].value = "";
+                            this.value = "Pause Break";
+                        }
+                        valList = [];
+                        for(var put = 0; put < inpList.length; put++){
+                            valList.push(inpList[put].value);
+                        }
+                    });
+                } else {
+                    if(document.getElementsByTagName('li')[i].getElementsByClassName("no").length == 0){
+                        document.getElementsByTagName('li')[i].addEventListener('click',function(){
+                            var txt = this.getElementsByTagName('span')[0].innerHTML.replace("<br>","").replace("  ", " ");
+                            if(actEle != null){
+                                var idx = valList.indexOf(txt); 
+                                if(idx != -1) inpList[idx].value = "";
+                                actEle.value = txt;
+                                valList = [];
+                                for(var put = 0; put < inpList.length; put++){
+                                    valList.push(inpList[put].value);
+                                }
+                            }
+                        }); 
+                    }
+                }
+            }
+        }
+
+        function fSaveBtn_onClick() {
+            const procType = '2'; // AS-IS: U
+            const opNo = getMainCommData('SysInfo').opNo;
+            const inputArr = [];
+            
+            //Entry
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0001',
+                keyVal: fChgTextToKey(txtentryKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //Cancel
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0002',
+                keyVal: fChgTextToKey(txtcancelKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //CNF Inquiry 
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0003',
+                keyVal: fChgTextToKey(txtCNFKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //Customer Contact            
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0004',
+                keyVal: fChgTextToKey(txtCCntctKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //Set Description for postion 
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0005',
+                keyVal: fChgTextToKey(txtFXInfoKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //Compass Process             
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0006',
+                keyVal: fChgTextToKey(txtCmpssKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //Scan                        
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0007',
+                keyVal: fChgTextToKey(txtScanKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //Excecute                    
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0008',
+                keyVal: fChgTextToKey(txtexecKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+
+            //Clear                       
+            inputArr.push({
+                procType,
+                opNo,
+                keyIdxCd: '0009',
+                keyVal: fChgTextToKey(txtcanjobKey.value),
+                altIncYn: 'N',
+                shiftIncYn: 'N',
+                ctrlIncYn: 'N',
+            });
+        
+            const inputData = {
+                grid01: inputArr
+            };
+
+            comCallService('/HANABANK/V1/COM/CG/COMCGO2000A.SVC', inputData, output => {
+                HKD_HOTKEYINFOS[0].Key = fChgTextToKey(txtentryKey .value); //Entry
+                HKD_HOTKEYINFOS[1].Key = fChgTextToKey(txtcancelKey.value); //Cancel                        
+                HKD_HOTKEYINFOS[2].Key = fChgTextToKey(txtCNFKey   .value); //CNF Inquiry                   
+                HKD_HOTKEYINFOS[3].Key = fChgTextToKey(txtCCntctKey.value); //Customer Contact              
+                HKD_HOTKEYINFOS[4].Key = fChgTextToKey(txtFXInfoKey.value); //Set Description for postion   
+                HKD_HOTKEYINFOS[5].Key = fChgTextToKey(txtCmpssKey .value); //Compass Process               
+                HKD_HOTKEYINFOS[6].Key = fChgTextToKey(txtScanKey  .value); //Scan                          
+                HKD_HOTKEYINFOS[7].Key = fChgTextToKey(txtexecKey  .value); //Excecute                      
+                HKD_HOTKEYINFOS[8].Key = fChgTextToKey(txtcanjobKey.value); //Clear    
+                
+                window.close();
+            });
+        }
+    </script>
+</head>
+<body style="overflow: hidden;">
+
+    <div id="body">
+        <ul id="key-container">
+            <li class="space esc">
+                <img src="./images/keybtn_no.png" alt="#">
+                <span class="no">Esc</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F1</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F2</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F3</span>
+            </li>
+            <li class="space">
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F4</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F5</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F6</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F7</span>
+            </li>
+            <li class="space">
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F8</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F9</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F10</span>
+            </li>
+            <li>
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F11</span>
+            </li>
+            <li class="space">
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>F12</span>
+            </li>
+            <li class="txt">
+                <img src="./images/keybtn_no.png" alt="#">
+                <span class="no">PrtSc <br> ScrLK</span>
+            </li>
+            <li class="txt">
+                <img src="./images/keybtn_no.png" alt="#">
+                <span class="no">Scroll <br> Lock</span>
+            </li>
+            <li class="txt">
+                <img src="./images/keybtn.png" alt="#" class="off">
+                <img src="./images/keybtn_hover.png" alt="#" class="on" >
+                <span>Pause <br> Break</span>
+            </li>
+        </ul>
+        <div id="container">
+            <ul id="left">
+                <li>
+                    <button class="entry" id="entryBtn" title="Entry">Entry</button>
+                    <input type="text" id="txtentryKey">
+                </li>
+                <li>
+                    <button class="cancel" id="cancelBtn" title="Cancel">Cancel</button>
+                    <input type="text" id="txtcancelKey">
+                </li>
+                <li><button class="CNFInquiry" title="CNF Inquiry">
+                    <img src="./images/CNFkey.png" alt="#" class="off">
+                    <img src="./images/CNFkey_hover.png" alt="#" class="on">
+                    </button>
+                    <input type="text" id="txtCNFKey">
+                </li> 
+            </ul>
+            <ul id="center">
+                <li>
+                    <button class="CustContact" title="Customer Contact">
+                    <img src="./images/CusCntct.png" alt="#" class="off">
+                    <img src="./images/CusCntct_hover.png" alt="#"  class="on">
+                    </button>
+                    <input type="text" id="txtCCntctKey">
+                </li> 
+                <li>
+                    <button class="FXInfo" title="FX Information">
+                    <img src="./images/exchange-rate.png" alt="#" class="off">
+                    <img src="./images/exchange-rate-hover.png" alt="#" class="on">
+                    </button>
+                    <input type="text" id="txtFXInfoKey">
+                </li> 
+                <li><button class="compass" title="Compass">
+                    <img src="./images/compass.png" alt="#" class="off">
+                    <img src="./images/compass_hover.png" alt="#" class="on">
+                    </button>
+                    <input type="text" id="txtCmpssKey">
+                </li> 
+            </ul>
+            <ul id="right"> 
+                <li>
+                    <button class="scan" title="Scan">Scan</button>
+                    <input type="text" id="txtScanKey">
+                </li>
+                <li class="btn">
+                    <button class="excute" title="Excute">Excute</button>
+                    <input type="text" id="txtexecKey">
+                </li>
+                <li class="btn">
+                    <button class="clear" title="Clear">Clear</button>
+                    <input type="text" id="txtcanjobKey">
+                </li>
+            </ul>
+            <div id="btn">
+                <button class="save" onclick="fSaveBtn_onClick();">Save</button>
+            </div>
+        </div>
+    </div>
+    </body>
+</html> 

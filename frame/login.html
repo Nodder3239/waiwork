@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEST</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/tempMenuData.js"></script>
+    <script src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/login.css" />
+    <script type="text/javascript">
+        var LoginAble   = true;
+        var AlreadyProc = false;
+		var LoginITV    = "";
+        var ChgPwd      = "";
+        var objDateFormat = {
+            'EN': 'mmddyyyy',
+            'ID': 'mmddyyyy'
+        };
+
+        function InitLogin() {
+            // 초기값 셋팅
+            txtUserId.value = getCookie("saveid") ?? '';
+            langCD.value = getCookie("langcd") || 'ID';
+            SetInputFocus();
+
+            // console.log('serverUrl -> ', top.LIB.serverUrl);
+
+            /*
+            if (top.LIB.LibraryInited !== true) return;
+            window.clearInterval(LoginITV);
+
+            LoginDS = new $wai.classes.dataService('LoginDS',
+                                                    {
+                //serviceUrl  : '/svct/CDService',
+                mapUrl      : '/tis/CMO0100.xml',
+                serviceName : 'CMO0100',
+                dsoNames    : 'loginIn=SCR_INPUT;loginOut=SCR_OUTPUT',
+                onResultError : function(err) {
+                    // ProcLoginError(err.ERR_STR);
+                }
+            });
+
+            LoginDS.initialize();
+
+            MenuDS = new $wai.classes.dataService('MenuDS',
+                                                    {
+                //serviceUrl  : '/svct/CDService',
+                mapUrl      : '/tis/CMO0200.xml',
+                serviceName : 'CMO0200',
+                dsoNames    : 'MenuIn=SCR_INPUT;MenuOut=SCR_OUTPUT_ARR'
+            });
+            MenuDS.initialize();
+
+            top.LIB.info.ipaddr = top.LIB.UtilSvc('ipaddress');
+
+            var RS = loginIn.recordset;
+            RS.clear();
+            RS.addNew();
+            RS.fields('FICM01_OP_GB').value = '1';
+            RS.fields('FICM01_TERM_IP').value = top.LIB.info.ipaddr;
+            RS.fields('FICM01_REJECT_LOGIN').value = 'N'; 
+
+            var MIN = MenuIn.recordset;
+            MIN.clear();
+            MIN.addNew();
+            MIN.fields("FICM02_SEP_ID").value = "0";
+            */
+        }
+
+        function initPage() {
+            if (top.LIB && top.APM) {
+                HideProgress();
+            }
+        }
+
+        function LoginProc() {
+            if (!txtUserId.value) {
+                alert(`Please input user id.`);
+                txtUserId.focus();
+                return;
+            } else if (!txtPassWd.value) {
+                alert(`Please input password.`);
+                txtPassWd.focus();
+                return;
+            }
+
+            if (!LoginAble) {
+                return;
+            }
+            ShowProgress();
+            LoginAble = true;
+            LoginITV  = window.setTimeout("TimeOutLogin()",500);
+        }
+
+        function TimeOutLogin() {
+            try {
+                if ( LoginAble ) {
+                    LoginAble = false;
+                    try {
+                        DoLoginProc();
+                    }
+                    catch(e) {
+                        AlreadyProc = false;
+                        alert(e.message);
+                    }
+                }
+            }
+            catch(e) {
+                console.log('TimeOutLogin Exception',e);
+            }
+        }
+
+        const objLoginInput = {
+            input: {
+                userId: '',
+                password: ''
+            },
+            SysInfo: {
+                brNo: '',
+                userId: '',
+                trscDt: '',
+                lnkIndvCanYn: '',
+                scrnMsgPrnYn: '',
+                sysLnggCd: '',
+                dtFrmt: ''
+            },
+            EtcInfo: {
+                passwdLock: '0',
+                loginDvCd: '1',
+                opDvCd: '1'
+            }
+        };
+
+        function DoLoginProc() {
+            saveid();
+            langcd();
+
+            let menuData = null;
+
+            const userId = (txtUserId.value+'').trim().toUpperCase();
+            const passWs = txtPassWd.value;
+
+            showLoadTime('callService : Login', false);
+
+            objLoginInput.input.userId = btoa(txtUserId.value);
+            if (ChgPwd != "") {
+                objLoginInput.input.password = btoa(ChgPwd);
+                ChgPwd = "";
+            } else {
+                objLoginInput.input.password = btoa(txtPassWd.value);
+            }
+
+            const sysLnggCd = langCD.value ?? '';
+
+            objLoginInput.SysInfo.userId = txtUserId.value;
+            objLoginInput.SysInfo.sysLnggCd = sysLnggCd;
+            objLoginInput.SysInfo.dtFrmt = objDateFormat[sysLnggCd] ?? '';
+
+            // 로그인 서비스 (LOGIN.SVC)
+            $.ajax({
+                type: 'POST',
+                url: `${top.LIB.serverUrl}/LOGIN.SVC`,
+                contentType: 'application/json',
+                data: JSON.stringify(objLoginInput),
+                success: loginCallback,
+                error: function(xhr) {
+                    showLoadTime('callService : Login', true);
+
+                    //console.log(`${xhr.status} ${xhr.statusText}`);
+                    let errMsg = `${xhr.status} ${xhr.statusText}`;
+                    if (xhr.status == 401) {
+                        const failType = xhr.responseJSON?.output?.failCount;
+                        if (failType == "L") {
+                            /* 20151028 - Jimmy_1 */
+                            // throw new Error("Password is locked.");
+                            errMsg = 'Password is locked.';
+                        } else if (failType == "I") {
+                            // throw new Error("Service call failed.\n0\nInvalid User-ID.");
+                            errMsg = 'Invalid User-ID.';
+                        } else if (failType >= 1) {
+                            // throw new Error("Service call failed.\n0\n(CMO0100:1000)PASSWD|Invalid Password!");
+                            errMsg = 'Invalid Password!';
+                        }
+                    }
+                    HideProgress();
+                    ProcLoginError(errMsg);
+                }
+            });
+
+            function loginCallback(loginData) {
+                showLoadTime('callService : Login', true);
+
+                const errorCode = loginData.output?.errorCode;
+                if (errorCode) {
+                    let errMsg = 'Service Error';
+                    const errOutput = loginData.output;
+                    if (errOutput) {
+                        let failMsg = ((errOutput.subMessage ?? [''])[0]).trim();
+                        if (failMsg.startsWith('[') && failMsg.endsWith(']')) {
+                            failMsg = failMsg.substring(1, failMsg.length-1);
+                        }
+                        errMsg = failMsg;
+
+                        const arrFailMsg = failMsg.split('|');
+                        if (arrFailMsg.length > 1) {
+                            LoginAble = true;
+                            AlreadyProc = false;
+                            
+                            const errType = arrFailMsg[0].toUpperCase();
+                            const errDesc = arrFailMsg[1];
+                            if (errType == 'REJECT') {
+                                showConfirmDialog('Login in other seat. Reject that login?', function(result) {
+                                    if (result) {
+                                        objLoginInput.EtcInfo.rejectLogin = 'Y';
+                                        LoginProc();
+                                    }
+                                });
+                            } else if (errType == 'CHGPWD') {
+                                var DArg  = new DArgument();
+                                DArg.Args = new Array(1);
+                                DArg.Args[0] = txtUserId.value;
+                                DArg.Args[1] = txtPassWd.value;
+
+                                var strWindowStatus = "status:no; resizable:no; scroll:no; center:yes; dialogHeight:250px; dialogWidth:460px;";
+                                openPopup('/frame/changePwd.html', DArg, strWindowStatus, function(ModalResult) {
+                                    if (ModalResult != null) {
+                                        ChgPwd = ModalResult[0] ?? '';
+                                        LoginProc();
+                                    }
+                                });
+                            }
+                            errMsg = '';
+                        }
+                    }
+                    HideProgress();
+                    ProcLoginError(errMsg);
+                    return;
+                }
+
+                // Make Common Data Object
+                // 공통 데이터 (SysInfo, EtcInfo 등) 셋팅 -> 목록이 정해지지 않아서 모두 등록
+                //top.LIB.CDO.SysInfo = {...loginData.SysInfo};
+                for (let x in loginData) {
+                    if (!['output', 'GlobalId'].includes(x) && typeof loginData[x] == 'object') {
+                        top.LIB.CDO[x] = loginData[x];
+                    }
+                }
+
+                if (top.LIB.CDO.SysInfo?.globId) {
+                    delete top.LIB.CDO.SysInfo.globId;
+                }
+
+                top.LIB.CDO.EtcInfo = top.LIB.CDO.EtcInfo ?? {}; // 임시 처리
+
+                console.log('loginData --> ', loginData);
+
+                top.LIB.accessToken = loginData.output?.accessToken ?? '';
+
+                showLoadTime('callService : Menu', false);
+
+                ShowProgress();
+
+                // 메뉴 조회 서비스 (/HANABANK/V1/COM/CM/COMCMO0200A.SVC)
+                $.ajax({
+                    type: "POST",
+                    url: `${top.LIB.serverUrl}/HANABANK/V1/COM/CM/COMCMO0200A.SVC`,
+                    contentType: "application/json",
+                    headers:{"X-Auth-Token": `Bearer ${top.LIB.accessToken}`},
+                    data: JSON.stringify({
+                        "input": {
+                            "sepId": 'M',
+                            "opNo": userId,
+                            "brNo": '',
+                            "grpNo": top.LIB.CDO.SysInfo?.grpNo ?? ''
+                        },
+                        "SysInfo": top.LIB.CDO.SysInfo ?? {}
+                    }),
+                    success: menuCallback,
+                    error: function(xhr, code, errMsg) {
+                        showLoadTime('callService : Menu', true);
+                        HideProgress();
+                        ProcLoginError(`${xhr.status} ${xhr.statusText}`);
+                    }  
+                });
+
+                function menuCallback(menuData) {
+                    showLoadTime('callService : Menu', true);
+                    // console.log('menuData --> ', menuData);
+
+                    if (menuData == null) {
+                        HideProgress();
+                        LoginAble = true;
+                        return;
+                    }
+
+                    let sampleMenu = [];
+                    if (['DEV', 'SIT', 'UAT'].includes(top.LIB.runType)) {
+                        sampleMenu = sampleMenuData;
+                    }
+                    const mData = menuData.output?.grid01 ?? [];
+                    top.LIB.CDO.MenuData = [...sampleMenu, ...(mData.filter(elem => elem.menuId != '00000'))];
+                    // top.LIB.CDO.MenuData = tempMenuData;
+
+                    // 메뉴 권한 결과가 없어서 구현 불가 (MAGRANTS)
+                    /*
+                    try {
+                        lHNDC.DelSection("MAGRANTS");
+                    }
+                    catch (e) {}
+                    lHNDC.AddSection("MAGRANTS", Nodes[i]);
+                    lHNDC.SectionName = "MAGRANTS";
+                    for (var j = 0; j < lHNDC.RecordCount; j++) {
+                    lHNDC.RecordIndex = j;
+                    top.LIB.MAGSQLCond = top.LIB.MAGSQLCond + "'" +
+                        lHNDC.GetItemValue("FOCM02_MA_UPMU") + "',";
+                    }
+                    top.LIB.MAGSQLCond = top.LIB.MAGSQLCond.substr(0,
+                                        top.LIB.MAGSQLCond.length-1);
+                    if (top.LIB.MAGSQLCond.length == 0)
+                    top.LIB.MAGSQLCond = "''";
+
+                    // wasMAGDSO 사용 안함
+                    top.LIB.wasMAGDSO.SQL = "select code, code_nm "  +
+                                            "from   acom_comh_code " +
+                                            "where  type = 'F69' "   +
+                                            "and    code in ("       +
+                                            top.LIB.MAGSQLCond      +
+                                            ") order by sort_seq";
+                    */
+
+                    console.log('top.LIB.CDO --> ', top.LIB.CDO);
+
+                    //20130613_Cho_1
+                    // LoadHotKey(); -> Main에서 처리
+
+                    // top.CONST.popMENU = top.CONST.window.createPopup();
+                    // top.CONST.dwnSrc.startDownload("/Menu.html",top.CONST.onDone);
+                    
+                    LoginAble = true;
+                    HideProgress();
+
+                    top.FRM_MAIN.src = "/frame/main.html";
+                }
+            }
+        }
+
+        function saveid() {
+            var expdate = new Date();
+            expdate.setTime(expdate.getTime() + 1000 * 3600 * 24 * 30);
+            setCookie("saveid", txtUserId.value, expdate);
+        }
+
+        function langcd() {
+            var expdate = new Date();
+            expdate.setTime(expdate.getTime() + 1000 * 3600 * 24 * 30);
+            // setCookie("langcd", langCD.selectedIndex, expdate);
+            setCookie("langcd", langCD.value, expdate);
+        }
+
+        function setCookie( name, value, expires ) {
+            document.cookie = name + "=" + escape (value) + "; path=/; expires=" + expires.toGMTString();
+        }
+
+        function getCookie(name) {
+            try {
+                var search = name + "="
+                if (document.cookie.length > 0) {
+                    offset = document.cookie.indexOf(search);
+
+                    if (offset != -1) {
+                        offset += search.length
+                        end = document.cookie.indexOf(";", offset)
+                        if (end == -1) end = document.cookie.length
+                        return unescape(document.cookie.substring(offset, end))
+                    }
+                }
+            }
+            catch(E) {
+                alert(E.message);
+            }
+        }
+
+        function ShowProgress() {
+            loader.style.display = "";
+            prog.style.display = "";
+            /*
+            var ctx = prog.getContext("2d");
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fillRect(0,0,100,100);
+            */
+        }
+
+        function HideProgress() {
+            loader.style.display = "none";
+            prog.style.display = "none";
+        }
+        
+        function SetInputFocus() {
+            if (txtUserId.value != '') {
+                txtPassWd.focus();
+            } else {
+                txtUserId.focus();
+            }
+        }
+
+        function ProcLoginError(ErrMsg) {
+            try {
+                LoginAble = true;
+                //window.clearInterval(LoginITV);
+                AlreadyProc = false;
+                if (ErrMsg != '') top.LIB.ShowInfoDialog2("BEST Login", ErrMsg, () => {
+                    try {
+                        txtPassWd.focus();
+                    }
+                    catch(E) {}
+                });
+            }
+            catch(E) {
+                alert("ProgLoginError : "+E.message);
+            }
+        }
+
+        function fInitPassword() {
+            if (window.confirm('Would you like to reset your password?')) {
+                ShowProgress();
+                
+                $.ajax({
+                    type: 'POST',
+                    url: `${top.LIB.serverUrl}/FORGET.SVC`,
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        input: {
+                            userId: btoa(txtUserId.value),
+                            opDvCd: "R"
+                        },
+                        SysInfo: {
+                            brNo: '',
+                            userId: txtUserId.value,
+                            trscDt: '',
+                            chnlTypCd: '',
+                            lnkIndvCanYn: '',
+                            scrnMsgPrnYn: ''
+                        }
+                    }),
+                    success: function(outputData) {
+                        try {
+                            console.log('outputData --> ', outputData);
+                            const errorCode = outputData.output?.errorCode;
+                            if (errorCode) {
+                                let errMsg = '';
+                                const errOutput = outputData.output;
+                                if (errOutput) {
+                                    let mainMsg = (errOutput.message ?? 'Error').trim();
+                                    if (mainMsg.startsWith('[') && mainMsg.endsWith(']')) {
+                                        mainMsg = mainMsg.substring(1, mainMsg.length-1);
+                                    }
+                                    let subMsg = (errOutput.subMessage ?? [])[0];
+                                    errMsg = `${mainMsg}${subMsg ? '\n' + subMsg : ''}`;
+                                } else {
+                                    errMsg = (recv.errThrown?.message ?? recv.errThrown) ?? 'Error';
+                                }
+                                top.LIB.ShowInfoDialog2("BEST Login", errMsg);
+                                return;
+                            }
+
+                            top.LIB.ShowInfoDialog2("BEST Login", "Success initializing password");
+                        } catch (e) {
+                            throw e;
+                        } finally {
+                            HideProgress();
+                        }
+                    },
+                    error: function(xhr, code, errMsg) {
+                        try {
+                            showLoadTime('callService : Login', true);
+    
+                            //console.log(`${xhr.status} ${xhr.statusText}`);
+                            ProcLoginError(`${xhr.status} ${xhr.statusText}`);
+                        } catch (e) {
+                            throw e;
+                        } finally {
+                            HideProgress();
+                            LoginAble = true;
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+<body onload="initPage()">
+    <div id="wrap">
+        <div class="bg"></div>
+
+        <div id="login-wrapper">
+            <div class="title">
+               <h1><img src="./images/logo1.png" alt="#" class="login-icon">
+                </h1>
+            </div>
+            <div id="login-form">
+                <div class="input-boxes">
+                    <div class="input-container">
+                     <div class="input-box">
+                        <i class="user">
+                            <img src="./images/user.png" alt="#">
+                        </i>
+                    <input type="text" id="txtUserId" placeholder="USER ID" name="id" autocomplete="off" spellcheck="false" tabIndex="1">
+                  </div>
+                  <div class="input-box">
+                    <i class="lock">
+                        <img src="./images/lock.png" alt="#">
+                    </i>
+                    <input type="password" id="txtPassWd" placeholder="PASSWORD" name="password" tabIndex="2" onkeydown="if (event.keyCode == 13) {LoginProc();}">
+                  </div>
+                    </div>
+                  <div class="input-button">
+                    <button value="LOGIN" onClick="LoginProc();" style="text-align: center;" tabIndex="3">LOGIN</button>
+                  </div>  
+                </div>
+                <div class="text"><a id="btnPassword" href="#" onclick="fInitPassword()">Reset password</a></div>
+
+                <div class="language">
+                    <p>Language</p>
+                    <select name="lang" id="langCD">
+                        <option value="EN" >EN</option>
+                        <option value="ID" >ID</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div id="footer">
+                <div class="logo">
+                    <img src="./images/footerlogo.png" alt="#">
+                </div>    
+                <address>
+                    <p>
+                        PT Bank KEB Hana Indonesia, MANGKULUHUR CITY - TOWER ONE, JL, JEND. GATOT SUBROTO KAV. 1-3, JAKARTA 12930
+                    </p>    
+                    <p>
+                        Copyright (c) 2023.All Rights Reserved.
+                    </p>
+                </address>
+            </div>
+        </footer>      
+    </div>
+    <!-- <canvas id="prog" width="100px" height="100px" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; display: none;"></canvas> -->
+    <div id="prog" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: rgba(0,0,0,0.3);"></div>
+    <div id="loader"></div>
+</body>
+</html>

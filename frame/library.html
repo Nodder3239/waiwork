@@ -1,0 +1,3557 @@
+<!-- Library Function List
+
+function LinkPage(PageName,CallFuncName,FuncData)
+function LinkDataClear()
+// function SetCB(CB,CodeType) -> Delete
+function InitCB() -> Do not use
+function GetBicCode(argCode, callback) -> Return the result through a callback function
+function GetBicCode2(argCode, callback) -> Return the result through a callback function
+function GetBicInfoRec(argCode, callback) -> Return the result through a callback function
+function GetCIXInfo(CIXNO, callback) -> Return the result through a callback function
+function GetUserInfo(OPNO, callback) -> Return the result through a callback function
+function GetNewCifNo(argCode, callback) -> Return the result through a callback function
+function GetLibor(argDate, argCcy, argTerm, callback) -> Return the result through a callback function
+function GetMenuGrpId() -> Do not use
+function OpenMenu(workId)
+function GetFeert(argLcd, argMcd, argScd, argDate, callback) -> Return the result through a callback function
+function GetCustFeert(argLcd, argMcd, argScd, argDate, argCixNo, callback) -> Return the result through a callback function
+function GetEquival(argBfccy, argBfamt, argAfccy, argDate, callback) -> Return the result through a callback function
+function GetEquivalTT(argBfccy, argBfamt, argAfccy, argDate, argCalGb, callback) -> Return the result through a callback function
+function GetEquivalPrime(argBfccy, argBfamt, argAfccy, argDate, argCalGb, argCixNo, argPrimeCd, callback) -> Return the result through a callback function
+function GetCodeNm(argCodeType, argCode, callback) -> Return the result through a callback function
+function GetCodeNmAsync(argCodeType, argCode)
+function CalDays(fr_date, to_date, callback) -> Return the result through a callback function
+function CalBizDays(fr_date, to_date, callback) -> Return the result through a callback function
+function IsHoliday(fr_date, callback) -> Return the result through a callback function
+function AddDays(argDate, argDays, callback) -> Return the result through a callback function
+function AddBuzDays(fr_date, argDays, callback) -> Return the result through a callback function
+function AddInterBuzDays(fr_date, argDays, argCtry, callback) -> Return the result through a callback function
+function BetweenMonthsDays(fr_date, to_date, callback) -> Return the result through a callback function
+function AddMonthsOvbr(fr_date, argDays, callback) -> Return the result through a callback function
+function AddMonthsDaysOvbr(fr_date, argMons, argDays, callback) -> Return the result through a callback function
+function GetDateFirstLast(fr_date, argKind, callback) -> Return the result through a callback function
+function GetActnm(br_no, bspl_gb, ac_cd, callback) -> Return the result through a callback function
+function GetDEPOInfo(Depo_Cd, callback) -> Return the result through a callback function
+function GetDEPOInfoRec(Depo_Cd, callback) -> Return the result through a callback function
+function GetFeeNm(code, code1, callback) -> Return the result through a callback function
+function GetSysDate(callback) -> Return the result through a callback function
+function GetSysTime(callback) -> Return the result through a callback function
+function GetFDateYear(srcdate, callback) -> Return the result through a callback function
+function GetLDateYear(srcdate, callback) -> Return the result through a callback function
+function GetFBDateYear(srcdate, callback) -> Return the result through a callback function
+function GetLBDateYear(srcdate, callback) -> Return the result through a callback function
+function ScreenCapture()
+function ScreenCaptureTM(callback)
+function ScreenPrint()
+function PBPRTEnabled()
+function GetTransURL(srcURL)
+function InitReportData( ReportViewer )
+function InitVoucher( ReportViewer )
+function GetDepoID(aMngBr, aCodeKind, aCodeId, aCCY, callback) -> Return the result through a callback function
+function FXConverter(FrCCY, FrAmt, AplRTKind, ToCCY, ToAmt, CalMtd, callback) -> Return the result through a callback function
+function fOpenNotice_tablet()
+function fOpenNotice_rollover()
+function fOpenNotice_BondTrx()
+function fOpenNotice_SpdRemit()
+function fOpenNotice_LldCheck()
+function fOpenNotice_BondForeign()
+function GetCurrentMenuName()
+function GetDocID(pRefno, pHisNo, callback) -> Return the result through a callback function
+function GetDocID2(pRefno, pHisNo, pScanCd, callback) -> Return the result through a callback function
+function IS_EXIST_IN_EBANKING(pCifNo, callback)
+function CALL_EBANKING_REQUEST_MESSAGE(pCifNo, callback) -> Return the result through a callback function
+function CALL_CRS_REQUEST_MESSAGE(pCifNo, callback)
+function CHECK_CUST_MANDATORY(pCifNo, callback)
+function CALL_POA_REQUEST_MESSAGE(pCifNo, callback)
+function execWaiReport( rptOpt, isPrint )
+function getWaiReportVendor(rptOpt)
+function IRR(values, guess)
+function GetCtryInfo(BIC, callback)
+
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>COMMON GBS LIBRARY for Y[wai]</title>
+	
+<script type="text/javascript" src="/waiReport/waiReportAgent.js"></script>
+<script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+	
+<!-- <script type="text/javascript" src="/wai/lib/showModalDialog.js"></script> -->
+<!-- <script type="text/javascript" src="/wai/lib/lz-string.js"></script> -->
+<!-- <script type="text/javascript" src="/wai/lib/html2canvas.js"></script> -->
+<script type="text/javascript" src="/js/GBS.js"></script>
+<script type="text/javascript" src="/js/browser.js"></script>
+<script type="text/javascript" src="/js/ServerInfo.js"></script>
+<script type="text/javascript">
+    const testServerUrl = TestServer ?? 'http://localhost:8080';
+    const serverInfo = {
+        SIT: 'http://10.133.161.10:1012', // 임시 테스트용
+        UAT: 'http://10.133.161.10:7000',
+        PROD: testServerUrl, // TO-DO: PROD 서버 생성된 후 변경 예정
+    };
+    window['runType'] = serverInfo[_waiBrowser.getTarget()] ? _waiBrowser.getTarget() : 'DEV';
+    window['serverUrl'] = serverInfo[runType] ?? testServerUrl;
+</script>
+<script type="text/javascript">
+    {
+        /* 사용안함 -> CDO로 처리
+        const FXFIG_COM = [
+            {
+                "FSYSINFO_SESS": "",
+                "FXFIG_CJUM": "",
+                "FXFIG_BRGB": "",
+                "FXFIG_GYO": "",
+                "FXFIG_NET": "",
+                "FXFIG_AJUM": "",
+                "FXFIG_SJUM": "",
+                "FXFIG_TYPE": "",
+                "FXFIG_TSEQ": "",
+                "FXFIG_OPNO": "BRAN051",
+                "FXFIG_OPGB": "",
+                "FXFIG_IBIL": "",
+                "FXFIG_AMOD": "",
+                "FXFIG_ACIL": "",
+                "FXFIG_TIME": "",
+                "FXFIG_IBGB": "",
+                "FXFIG_THGB": "",
+                "FXFIG_TELL": "",
+                "FXFIG_MNCM": "",
+                "FXFIG_MNTN": "",
+                "FXFIG_MNNO": "",
+                "FXFIG_SSID": "",
+                "FXFIG_SSIL": "",
+                "FXFIG_MUJP": "",
+                "FXFIG_MUT": "",
+                "FXFIG_STGU": "",
+                "FXFIG_TELLNM": "",
+                "FXFIG_JUM_CD": 93,
+                "FXFIG_THID": "",
+                "FXFIG_BPIP": "",
+                "FXFIG_BPPT": "",
+                "FXFIG_OPNM": "",
+                "FXFIG_CCY": "",
+                "FXFIG_BKNM": "",
+                "FXFIG_BRNM": "",
+                "FXFIG_BRA1": "",
+                "FXFIG_BRA2": "",
+                "FXFIG_BRA3": "",
+                "FXFIG_BRTN": "",
+                "FXFIG_BRFN": "",
+                "FXFIG_SFCD": "",
+                "FXFIG_TLXN": "",
+                "FTERMINFO_PB_PRT_YN": "",
+                "FTERMINFO_PB_DEV_NO": "",
+                "FTERMINFO_PB_PORT_NO": "",
+                "FSYSINFO_LANG": "",
+                "FXFIG_OVRD_APV_NO": "",
+                "FSYSINFO_MIG_DT": "",
+                "FSYSINFO_SPCMN_SVR_PATH": "",
+                "FSYSINFO_FTP_SVR_IP": "",
+                "FSYSINFO_FTP_SVR_USER": "",
+                "FSYSINFO_FTP_SVR_PWD": "",
+                "FXFIG_GRP_NO": "",
+                "FXFIG_BANK_CD": "",
+                "FSYSINFO_SCAN_SVR_IP": "",
+                "FSYSINFO_SCAN_SVR_PORT": ""
+            }
+        ];
+        const FXFIG_SCR = [
+            {
+                "FXFIG_CJUM": "",
+                "FXFIG_AJUM": "",
+                "FXFIG_IBCD": "",
+                "FXFIG_GWAM": "",
+                "FXFIG_GEOR": "",
+                "FXFIG_CIX_NO": "",
+                "FXFIG_REF_NO": "",
+                "FXFIG_HIS_NO": "",
+                "FXFIG_TRX_DT": "",
+                "FXFIG_IBF_GB": "",
+                "FXFIG_OVGB": "",
+                "FXFIG_OVCC": 0,
+                "FXFIG_OVC1": "",
+                "FXFIG_OVC2": "",
+                "FXFIG_OVC3": "",
+                "FXFIG_OVC4": "",
+                "FXFIG_OVC5": "",
+                "FXFIG_OVC6": "",
+                "FXFIG_OVC7": "",
+                "FXFIG_OVC8": "",
+                "FXFIG_OVC9": "",
+                "FXFIG_OVN1": "",
+                "FXFIG_OVN2": "",
+                "FXFIG_OVN3": "",
+                "FXFIG_OVN4": "",
+                "FXFIG_OVN5": "",
+                "FXFIG_OVN6": "",
+                "FXFIG_OVN7": "",
+                "FXFIG_OVN8": "",
+                "FXFIG_OVN9": "",
+                "FXFIG_OVR1": "",
+                "FXFIG_OVR2": "",
+                "FXFIG_OVR3": "",
+                "FXFIG_OVR4": "",
+                "FXFIG_OVR5": "",
+                "FXFIG_OVR6": "",
+                "FXFIG_OVR7": "",
+                "FXFIG_OVR8": "",
+                "FXFIG_OVR9": "",
+                "FXFIG_OVRD_APV_NO": "",
+                "FXFIG_EDC_YN": "",
+                "FXFIG_EDC_REF_NO": "",
+                "FXFIG_EDC_HIS_NO": "",
+                "FXFIG_EDC_TICKET_NO": "",
+                "FXFIG_CLLD_MTH_CD": "",
+                "FXFIG_SCAN_DOC_ID1": "",
+                "FXFIG_SCAN_DOC_ID2": "",
+                "FXFIG_SCAN_DOC_ID3": "",
+                "FXFIG_SCAN_CODE1": "",
+                "FXFIG_SCAN_CODE2": "",
+                "FXFIG_SCAN_CODE3": "",
+                "FXFIG_SCAN_CODE4": "",
+                "FXFIG_SCAN_DOC_ID4": ""
+            }
+        ];
+        const FIGLBASE = [
+            {
+                "FIGLBASE_ROUTE_GB": "",
+                "FIGLBASE_PL_ADD_YN": ""
+            }
+        ];
+        const FIGLINF = [
+            {
+                "FIGLINF_ADD_GB": "",
+                "FIGLINF_MAIN_BS_IDX": "",
+                "FIGLINF_MAIN_PL_IDX": "",
+                "FIGLINF_MAIN_ACTCD": "",
+                "FIGLINF_MAIN_ACTNAME": "",
+                "FIGLINF_MAIN_UPMUCD": "",
+                "FIGLINF_MAIN_FEECD": "",
+                "FIGLINF_MAIN_CCY": "",
+                "FIGLINF_MAIN_FAMT": "",
+                "FIGLINF_MAIN_BAMT": "",
+                "FIGLINF_MAIN_APPL_HRT": "",
+                "FIGLINF_MAIN_BASIC_HRT": "",
+                "FIGLINF_MAIN_BOOK_HRT": "",
+                "FIGLINF_MAIN_DEMI_HRT": "",
+                "FIGLINF_MAIN_GOSI_HRT": "",
+                "FIGLINF_MAIN_IBJI_CD": "",
+                "FIGLINF_MAIN_KIND": "",
+                "FIGLINF_SUB_TYPE": "",
+                "FIGLINF_SUB_DOC": "",
+                "FIGLINF_SUB_IBJI_CD": "",
+                "FIGLINF_SUB_CCY": "",
+                "FIGLINF_SUB_EXRT": "",
+                "FIGLINF_SUB_FEXAMT": "",
+                "FIGLINF_SUB_BEXAMT": "",
+                "FIGLINF_SUB_APPL_HRT": "",
+                "FIGLINF_SUB_BASIC_HRT": "",
+                "FIGLINF_SUB_BOOK_HRT": "",
+                "FIGLINF_SUB_DEMI_HRT": "",
+                "FIGLINF_SUB_GOSI_HRT": "",
+                "FIGLINF_SUB_DP_NO": "",
+                "FIGLINF_SUB_PW": "",
+                "FIGLINF_SUB_DEPO_CD": "",
+                "FIGLINF_SUB_ABA_NO": "",
+                "FIGLINF_SUB_BR_NO": "",
+                "FIGLINF_SUB_REMARK": ""
+            }
+        ];
+        const FIGLCHK = [
+            {
+                "FIGLCHK_CHECK_BANK": "",
+                "FIGLCHK_CHECK_NO": "",
+                "FIGLCHK_CHECK_CCY": "",
+                "FIGLCHK_CHECK_AMT": "",
+                "FIGLCHK_CHECK_BENE": "",
+                "FIGLCHK_CHECK_ADDR": ""
+            }
+        ];
+        const FIGLDUETO = [
+            {
+                "FIGLDUETO_ID_NO": "",
+                "FIGLDUETO_DUETO_DPNO": "",
+                "FIGLDUETO_CCY": "",
+                "FIGLDUETO_UNIT": "",
+                "FIGLDUETO_DIGIT": "",
+                "FIGLDUETO_BASIC_HRT": "",
+                "FIGLDUETO_BOOK_HRT": "",
+                "FIGLDUETO_TTS_HRT": "",
+                "FIGLDUETO_TTB_HRT": "",
+                "FIGLDUETO_CASHS_HRT": "",
+                "FIGLDUETO_CASHB_HRT": "",
+                "FIGLDUETO_CROSS_HRT": "",
+                "FIGLDUETO_TCS_HRT": "",
+                "FIGLDUETO_SIGHT_HRT": "",
+                "FIGLDUETO_DEMI_HRT": "",
+                "FIGLDUETO_TTS_DIFF": "",
+                "FIGLDUETO_TTB_DIFF": "",
+                "FIGLDUETO_POSB_HRT": "",
+                "FIGLDUETO_POSS_HRT": ""
+            }
+        ];
+        const FMGRINFO = [
+            {
+                "FMGRINFO_MNID1": "",
+                "FMGRINFO_MNID2": "",
+                "FMGRINFO_MNID3": "",
+                "FMGRINFO_MNNM1": "",
+                "FMGRINFO_MNNM2": "",
+                "FMGRINFO_MNNM3": "",
+                "FMGRINFO_MNIP1": "",
+                "FMGRINFO_MNIP2": "",
+                "FMGRINFO_MNIP3": ""
+            }
+        ];
+        const FGINP = [
+            {
+                "FGINP_TR_GB": ""
+            }
+        ];
+        const FXINFO = [
+            {
+                "FXINFO_REF_NO": "",
+                "FXINFO_HIS_NO": "",
+                "FXINFO_BUY_YN": "",
+                "FXINFO_SELL_YN": "",
+                "FXINFO_CNTPTY_CD": "",
+                "FXINFO_NONBK_CD": "",
+                "FXINFO_BIS_TY": "",
+                "FXINFO_TRX_RSN": "",
+                "FXINFO_NPWP_CD": "",
+                "FXINFO_DOC_TYPE": "",
+                "FXINFO_DOC_NOTES": "",
+                "FXINFO_DOC_KIND_RCV": ""
+            }
+        ];
+        const FXDOCBASE = [
+            {
+                "FXDOCBASE_REF_NO1": "",
+                "FXDOCBASE_REF_NO2": "",
+                "FXDOCBASE_REF_NO3": "",
+                "FXDOCBASE_REF_NO4": "",
+                "FXDOCBASE_REF_NO5": "",
+                "FXDOCBASE_REF_NO6": "",
+                "FXDOCBASE_REF_NO7": "",
+                "FXDOCBASE_REF_NO8": "",
+                "FXDOCBASE_REF_NO9": "",
+                "FXDOCBASE_REF_NO10": "",
+                "FXDOCBASE_REF_NO11": "",
+                "FXDOCBASE_REF_NO12": "",
+                "FXDOCBASE_REF_NO13": "",
+                "FXDOCBASE_REF_NO14": "",
+                "FXDOCBASE_REF_NO15": "",
+                "FXDOCBASE_REF_NO16": "",
+                "FXDOCBASE_REF_NO17": "",
+                "FXDOCBASE_REF_NO18": "",
+                "FXDOCBASE_REF_NO19": "",
+                "FXDOCBASE_REF_NO20": "",
+                "FXDOCBASE_REF_NO21": "",
+                "FXDOCBASE_REF_NO22": "",
+                "FXDOCBASE_REF_NO23": "",
+                "FXDOCBASE_REF_NO24": "",
+                "FXDOCBASE_REF_NO25": "",
+                "FXDOCBASE_REF_NO26": "",
+                "FXDOCBASE_REF_NO27": "",
+                "FXDOCBASE_REF_NO28": "",
+                "FXDOCBASE_REF_NO29": "",
+                "FXDOCBASE_REF_NO30": "",
+                "FXDOCBASE_REF_NO31": "",
+                "FXDOCBASE_REF_NO32": "",
+                "FXDOCBASE_REF_NO33": "",
+                "FXDOCBASE_REF_NO34": "",
+                "FXDOCBASE_REF_NO35": "",
+                "FXDOCBASE_REF_NO36": "",
+                "FXDOCBASE_REF_NO37": "",
+                "FXDOCBASE_REF_NO38": "",
+                "FXDOCBASE_REF_NO39": "",
+                "FXDOCBASE_REF_NO40": "",
+                "FXDOCBASE_REF_NO41": "",
+                "FXDOCBASE_REF_NO42": "",
+                "FXDOCBASE_REF_NO43": "",
+                "FXDOCBASE_REF_NO44": "",
+                "FXDOCBASE_REF_NO45": "",
+                "FXDOCBASE_REF_NO46": "",
+                "FXDOCBASE_REF_NO47": "",
+                "FXDOCBASE_REF_NO48": "",
+                "FXDOCBASE_REF_NO49": "",
+                "FXDOCBASE_REF_NO50": ""
+            }
+        ];
+        const SrcXML = [];
+        const TranXSL = [];
+        const PrintData = [
+            {
+                "PRINTDATA": ""
+            }
+        ];
+
+        window['xmlCInitData'] = new $gbsLib.genMultiDsoByJson({
+            FXFIG_COM,
+            FXFIG_SCR,
+            FIGLBASE,
+            FIGLINF,
+            FIGLCHK,
+            FIGLDUETO,
+            FMGRINFO,
+            FGINP,
+            FXINFO,
+            FXDOCBASE,
+        });
+        window['SrcXML'] = new $gbsLib.genDsoByJson('SrcXML', SrcXML);
+        window['TranXSL'] = new $gbsLib.genDsoByJson('TranXSL', TranXSL);
+        window['PrintData'] = new $gbsLib.genDsoByJson('PrintData', PrintData);
+        */
+    }
+</script>
+
+<script type="text/javascript">
+    /* --------------- COMMON GBS LIBRARY : Y[wai] --------------- */
+    var isLibrary = true;
+    
+    // var G_CALL_CNT = 0;
+    // var G_PROG_DIV = null;
+    // var G_LOADER_DIV = null;
+    var G_PROG_OBJ = {
+        callCnt: 0,
+        progDiv: null,
+        loaderDiv: null
+    };
+
+    var waiRptVendor = null;
+
+    var BillScan = waiBrowser.modules.scanner;
+
+    var MGRReplyY = null;
+    var MGRReplyN = null;
+    var MGRNotRespond = null;
+    var MGRListWnd = null;
+    var MGRListWndStat = "no";
+    var MGRMessage = null;
+    var MGRMessages = [];
+    var HotKeyInfos = [];
+    var MGRReject  = false;
+    var PRTLoaded  = false;
+    //var LibraryInited = false;
+
+    var NoNextMessage = false;
+    var NoticeMessage = "";
+    var NoticeSTS = "";
+
+    var NoticeSTSBondTrx = "";
+
+    function ExcuteNotice_tablet() {
+        NoticeSTS = window.setInterval("fOpenNotice_tablet()", 300000);  
+    }
+    
+    /*20180123_Rani*/
+    function ExcuteNotice_rollover() {   
+        NoticeSTS = window.setInterval("fOpenNotice_rollover()", 300000);  
+    }
+
+    function NoticeERR() {
+        window.clearInterval(NoticeSTS);
+    }
+    
+    function ExcuteNotice_BondTrx() {
+        NoticeSTS = window.setInterval("fOpenNotice_BondTrx()", 300000);  
+    }
+    
+    function ExcuteNotice_SpdRemit() {
+        NoticeSTS = window.setInterval("fOpenNotice_SpdRemit()", 300000);  
+    }
+    
+    /* 20180125_Stancent */
+    function ExcuteNotice_LldCheck() {
+        NoticeSTS = window.setInterval("fOpenNotice_LldCheck()", 300000);
+    }
+    
+    /* 20180305_Anthony */
+    function ExcuteNotice_BondForeign() {
+        NoticeSTS = window.setInterval("fOpenNotice_BondForeign()", 3600000);
+    }
+
+    // var GDC = new $gbsLib.dataControl();
+    var CDO = {}; // Common Data Object
+    var MAGSQLCond = "";
+
+    /*-------------------------------------------------------------------------*/
+    /*   PageLink                                                              */
+    /*-------------------------------------------------------------------------*/
+    var LinkPageName = "";
+    var LinkPageFunc = null;
+    var LinkPageData = null;
+
+    function LinkPage(PageName,CallFuncName,FuncData) {
+        LinkPageName = PageName;
+        LinkPageFunc = CallFuncName;
+        LinkPageData = FuncData;
+
+        top.MAIN.GoWork(PageName,"EMPTY");
+
+        try {
+            // var CWnd = top.MAIN.WVMF.selected.contentWindow.document.all.WorkFrame.contentWindow;
+            var CWnd = top.MAIN.tabCtrl.getCurrentTab().pageElem.contentWindow.document.getElementById('WorkFrame').contentWindow;
+            eval("CWnd."+LinkPageFunc+"();" );
+        } catch(E) {
+        }
+    }
+
+    function LinkDataClear() {
+        LinkPageName = "";
+        LinkPageFunc = null;
+        LinkPageData = null;
+    }
+
+    function InitDC() {
+        /* CDO로 대신 처리
+        var XND_FXFIG     = xmlCInitData.getSectionData('FXFIG_COM');
+        var XND_FMGRINFO  = xmlCInitData.getSectionData('FMGRINFO');
+
+        // Section(s) Add
+        try {
+            GDC.setSectionValue('FXFIG_COM',XND_FXFIG);
+            GDC.setSectionValue('FMGRINFO',XND_FMGRINFO);
+        } catch (e) { alert(e.description) }
+        */
+        PRTLoaded = false;
+    }
+
+    function InitCB() {
+        // No need to use
+    }
+
+    function libCallService(svcUrl, data, onResult, onError, options) {
+        const callService = this.callWnd?.callBasicService ?? callBasicService;
+        callService(svcUrl, data, onResult, onError, options);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // MISC function
+    //------------------------------------------------------------------------------------------------------------------
+    {
+        function FindCBNMAll(doc)
+        {   // 사용 금지
+            try {
+                var i;
+                if (!doc) return;
+
+                var cbs = doc.all.tags("CB");
+                if (cbs != null) {
+                    for (i = 0; i < cbs.length; i++) {
+                        cbs[i].FindMatch();
+                    }
+                }
+            } catch(e) {
+                //alert('Library.FindCBNMAII : '+e.message);
+            }
+        }
+    }
+
+    function GetBicCode(argCode, callback) {
+        /*
+        var tSQL;
+        var tVal = "";
+
+        tSQL = "SELECT co_bknm1 FROM acom_coh_base WHERE co_bkcd LIKE '" + argCode + "%' ";
+        wasSQLDSO.SQL = tSQL;
+
+        if (wasSQLDSO.recordset.recordCount > 0) {
+            tVal = wasSQLDSO.recordset.fields("CO_BKNM1").value;
+        }
+        return tVal;
+        */
+
+        const inputData = {
+            dvCd: '30',
+            param1: argCode
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnVal = "";
+                let rtnArr = output.output30?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    rtnVal = rtnArr[0].coBknm1;
+                }
+                callback(rtnVal);
+            }
+        });
+    }
+
+    function GetBicCode2(argCode, callback) {
+        /*
+        var tSQL;
+        var tVal = "";
+
+        tSQL = "SELECT co_bknm2 FROM acom_coh_base WHERE co_bkcd LIKE '" + argCode + "%' ";
+        wasSQLDSO.SQL = tSQL;
+
+        if (wasSQLDSO.recordset.recordCount > 0) {
+            tVal = wasSQLDSO.recordset.fields("CO_BKNM2").value;
+        }
+        return tVal;
+        */
+
+        const inputData = {
+            dvCd: '31',
+            param1: argCode
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnVal = "";
+                let rtnArr = output.output31?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    rtnVal = rtnArr[0].coBknm2;
+                }
+                callback(rtnVal);
+            }
+        });
+    }
+
+    function GetBicInfoRec(argCode, callback) {
+        /*
+        var tSQL;
+        var tVal = "";
+        var rInfo = new Array(11);
+
+        tSQL = "SELECT * FROM acom_coh_base WHERE co_bkcd LIKE '" + argCode + "%' ";
+        wasSQLDSO.SQL = tSQL;
+
+        with (wasSQLDSO.recordset) {
+            if (recordCount > 0) {
+                moveFirst();
+                rInfo[0]  = fields("CO_BKCD").value;
+                rInfo[1]  = fields("CO_BKNM1").value;
+                rInfo[2]  = fields("CO_BKNM2").value;
+                rInfo[3]  = fields("CO_ADDR1").value;
+                rInfo[4]  = fields("CO_GB").value;
+                rInfo[5]  = fields("SEND_GB").value;
+                rInfo[6]  = fields("CTRY_CD").value;
+                rInfo[7]  = fields("BEX_CD").value;
+                rInfo[8]  = fields("TKEY_CD").value;
+                rInfo[9]  = fields("CO_ADDR2").value;
+                rInfo[10] = fields("CO_ADDR3").value;
+
+                return rInfo;
+            }
+            else return null;
+        }
+        */
+        
+        const inputData = {
+            dvCd: '32',
+            param1: argCode
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnVal = null;
+                let rtnArr = output.output32?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    let rInfo = new Array(11);
+                    rInfo[0]  = rtnArr[0].coBkcd;
+                    rInfo[1]  = rtnArr[0].coBknm1;
+                    rInfo[2]  = rtnArr[0].coBknm2;
+                    rInfo[3]  = rtnArr[0].coAddr1;
+                    rInfo[4]  = rtnArr[0].coGb;
+                    rInfo[5]  = rtnArr[0].sendGb;
+                    rInfo[6]  = rtnArr[0].ctryCd;
+                    rInfo[7]  = rtnArr[0].bexCd;
+                    rInfo[8]  = rtnArr[0].tkeyCd;
+                    rInfo[9]  = rtnArr[0].coAddr2;
+                    rInfo[10] = rtnArr[0].coAddr3;
+                    rtnVal = rInfo;
+                }
+                callback(rtnVal);
+            }
+        });
+    }
+
+    function GetCIXInfo(CIXNO, callback) {
+        //wasSQLDSO.SQL = "select * from acom_cix_base where cix_no = '" + CIXNO + "'";
+
+        const inputData = {
+            dvCd: '33',
+            param1: CIXNO
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output33 || null);
+            }
+        });
+    }
+
+    function GetUserInfo(OPNO, callback) {
+        /*
+        wasSQLDSO.SQL = "select * from acom_comh_user where op_no = '" + OP_NO + "'";
+        return wasSQLDSO.recordset;
+        */
+
+        const inputData = {
+            dvCd: '34',
+            param1: OPNO
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output34 || null);
+            }
+        });
+    }
+
+    function GetNewCifNo(argCode, callback) {
+        /*
+        var tSQL;
+        var tVal = "";
+
+        tSQL = "SELECT CHREF_HNB_REF FROM acom_com_chref WHERE chref_use_ref ='" + argCode + "' AND upmu_cd='CH' AND chref_dv='10'";
+        wasSQLDSO.SQL = tSQL;
+
+        if (wasSQLDSO.recordset.recordCount > 0) {
+            tVal = wasSQLDSO.recordset.fields("CHREF_HNB_REF").value;
+        }
+        return tVal;
+        */
+
+        const inputData = {
+            dvCd: '35',
+            param1: argCode
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnVal = "";
+                let rtnArr = output.output35?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    rtnVal = rtnArr[0].chrefHnbRef;
+                }
+                callback(rtnVal);
+            }
+        });
+    }
+
+    function RTrim(Str) {
+        var S = Str;
+        /* Right " " Trim */
+        while (/ $/g.test(S)){
+            S = S.replace(/ $/g, "");
+        }
+        return S;
+    }
+
+    /* LIBOR 구하기 : 환율적용일, 통화, 주기(1W,1M,2M,3M,6M,9M,1Y   */
+    function GetLibor(argDate, argCcy, argTerm, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+        var tTO;
+
+        tFR = Util.LocalToDate(argDate);
+		
+        //tSQL = "SELECT * FROM acom_com_exrt WHERE seq_no = 0 AND make_il = '" + tFR + "' AND ccy = '" + argCcy + "'";
+        tSQL = "SELECT * FROM acom_com_exrt WHERE seq_no = 0 AND make_il = '" + tFR + "' AND base_ccy = '" + argCcy + "' AND ccy = '" + argCcy + "'";
+        wasSQLDSO.SQL = tSQL;
+
+        if(wasSQLDSO.recordset.recordCount == 0) {
+            ShowInfoDialog('No Libor data found. [' + tFR + '], [' + argCcy + ']');
+            return(0);
+        }
+
+        if (argTerm == "1W") {
+            return (wasSQLDSO.recordset.fields("LIBOR1W_RT").value);
+        }
+        else if (argTerm == "1M") {
+            return (wasSQLDSO.recordset.fields("LIBOR1M_RT").value);
+        }
+        else if (argTerm == "2M") {
+            return (wasSQLDSO.recordset.fields("LIBOR2M_RT").value);
+        }
+        else if (argTerm == "3M") {
+            return (wasSQLDSO.recordset.fields("LIBOR3M_RT").value);
+        }
+        else if (argTerm == "4M") {
+            // alert(wasSQLDSO.recordset.fields("LIBOR4M_RT").value);
+            return (wasSQLDSO.recordset.fields("LIBOR4M_RT").value);
+        }
+        else if (argTerm == "5M") {
+            return (wasSQLDSO.recordset.fields("LIBOR5M_RT").value);
+        }
+        else if (argTerm == "6M") {
+            return (wasSQLDSO.recordset.fields("LIBOR6M_RT").value);
+        }
+        else if (argTerm == "7M") {
+            return (wasSQLDSO.recordset.fields("LIBOR7M_RT").value);
+        }
+        else if (argTerm == "8M") {
+            return (wasSQLDSO.recordset.fields("LIBOR8M_RT").value);
+        }
+        else if (argTerm == "9M") {
+            return (wasSQLDSO.recordset.fields("LIBOR9M_RT").value);
+        }
+        else if (argTerm == "10M") {
+            return (wasSQLDSO.recordset.fields("LIBOR10M_RT").value);
+        }
+        else if (argTerm == "11M") {
+            return (wasSQLDSO.recordset.fields("LIBOR11M_RT").value);
+        }
+        else if (argTerm == "12M") {
+            return (wasSQLDSO.recordset.fields("LIBOR12M_RT").value);
+        }
+        else if (argTerm == "1Y") {
+            return (wasSQLDSO.recordset.fields("LIBOR12M_RT").value);
+        }
+        else if (argTerm == "PR") {
+            return (wasSQLDSO.recordset.fields("PRIME_RT").value);
+        }
+        */
+
+        let tFR = Util.LocalToDate(argDate);
+
+        const inputData = {
+            dvCd: '36',
+            param1: tFR,
+            param2: argCcy
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnObj = output.output36;
+                console.log('[GetLibor] rtnObj --> ', rtnObj);
+                if (!rtnObj) {
+                    ShowInfoDialog('No Libor data found. [' + tFR + '], [' + argCcy + ']', () => {
+                        callback(0);
+                    });
+                } else {
+                    if (argTerm == "1Y") {
+                        callback(rtnObj.libor12mRt);
+                    } else if (argTerm == "PR") {
+                        callback(rtnObj.primeRt);
+                    } else {
+                        callback(rtnObj[`libor${argTerm.toLowerCase()}Rt`]);
+                    }
+                }
+            }
+        });
+    }
+
+    /* RATE 구하기 : 환율적용일, BASE통화, 통화, 기간  */
+    function GetFlotRt(argDate, argBaseCcy, argCcy, argTerm, callback) 
+    {
+        let tFR = Util.LocalToDate(argDate);
+
+        const inputData = {
+            dvCd: '80',
+            param1: tFR,
+            param2: argBaseCcy,
+            param3: argCcy
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnObj = output.output80;
+                console.log('[GetFlotRt] rtnObj --> ', rtnObj);
+                if (!rtnObj) {
+                    callback(0);
+                } else {
+                    if (argTerm == "1Y") {
+                        callback(rtnObj.libor12mRt);
+                    } else if (argTerm == "PR") {
+                        callback(rtnObj.primeRt);
+                    } else {
+                        callback(rtnObj[`libor${argTerm.toLowerCase()}Rt`]);
+                    }
+                }
+            }
+        });
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // COMMON BIZ functions - 변환 작업 필요 구간 시작
+    //
+    // HNDC -> CDO  /  lHNDC -> BDO
+    //------------------------------------------------------------------------------------------------------------------
+
+    /* Obtaining individual screen permissions (Subgrp_id) */
+    function GetMenuGrpId() {
+        /*
+        GDC.setSectionName('MENUDATA');
+        GDC.recordIndex = 0;
+        var AJUM = GDC.getItemValue('FOCM02_SUBGRP_ID');
+        return AJUM;
+        */
+        // not used
+        return '';
+    }
+
+    function OpenMenu(workId) {
+        top.MAIN.GoWork(workId);
+    }
+
+    /* FEERT 구하기 : LCD, MCD, SCD, apply_date   */
+    function GetFeert(argLcd, argMcd, argScd, argDate, callback) {
+        /*
+        var tSQL;
+        var aSQL;
+        var tFR;
+        var oArgs  =  new Array(5);
+
+        tFR = Util.LocalToDate(argDate);
+
+        tSQL  = "select frt, max_fee, min_fee, etc_frt from acom_com_feert ";
+        tSQL += "where lcd = '" + argLcd + "' ";
+        tSQL += "and   mcd = '" + argMcd + "' ";
+        tSQL += "and   scd = '" + argScd + "' ";
+        tSQL += "and   apply_il = ( SELECT max(apply_il) from acom_com_feert ";
+        tSQL += "where lcd = '" + argLcd + "' ";
+        tSQL += "and   mcd = '" + argMcd + "' ";
+        tSQL += "and   scd = '" + argScd + "' ";
+        tSQL += "and   apply_il <= '" + tFR + "') ";
+
+        wasSQLDSO.SQL = tSQL;
+
+        if(wasSQLDSO.recordset.recordCount > 0)
+        {
+            oArgs[0]   = wasSQLDSO.recordset.fields("FRT").value;
+            oArgs[1]   = wasSQLDSO.recordset.fields("MAX_FEE").value;
+            oArgs[2]   = wasSQLDSO.recordset.fields("MIN_FEE").value;
+            oArgs[3]   = wasSQLDSO.recordset.fields("ETC_FRT").value;
+        }
+        else {
+            oArgs[0]   = 0.00;
+            oArgs[1]   = 0.00;
+            oArgs[2]   = 0.00;
+            oArgs[3]   = 0.00;
+        }
+        return oArgs;
+        */
+
+        let tFR = Util.LocalToDate(argDate);
+
+        const inputData = {
+            dvCd: '49',
+            param1: argLcd,
+            param2: argMcd,
+            param3: argScd,
+            param4: tFR
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let oArgs  = new Array(5);
+                let rtnObj = output.output49;
+                if (rtnObj) {
+                    oArgs[0]   = rtnObj.frt;
+                    oArgs[1]   = rtnObj.maxFee;
+                    oArgs[2]   = rtnObj.minFee;
+                    oArgs[3]   = rtnObj.etcFrt;
+                } else {
+                    oArgs[0]   = 0.00;
+                    oArgs[1]   = 0.00;
+                    oArgs[2]   = 0.00;
+                    oArgs[3]   = 0.00;
+                }
+                callback(oArgs);
+            }
+        });
+    }
+
+    /* Finding FEERT by customer : LCD, MCD, SCD, apply_date   */
+    function GetCustFeert(argLcd, argMcd, argScd, argDate, argCixNo, callback) {
+        /*
+        var tSQL;
+        var aSQL;
+        var tFR = Util.LocalToDate(argDate);
+        var oArgs = new Array(5);
+
+        tSQL  = "SELECT frt, max_fee, min_fee, etc_frt from acom_com_custfee ";
+        tSQL += " WHERE cix_no = '" + argCixNo + "' ";
+        tSQL += "   AND lcd    = '" + argLcd   + "' ";
+        tSQL += "   AND mcd    = '" + argMcd   + "' ";
+        tSQL += "   AND scd    = '" + argScd   + "' ";
+        tSQL += "   AND apply_il = ( SELECT max(apply_il) FROM acom_com_custfee ";
+        tSQL += "                     WHERE cix_no = '" + argCixNo + "' ";
+        tSQL += "                       AND lcd    = '" + argLcd   + "' ";
+        tSQL += "                       AND mcd    = '" + argMcd   + "' ";
+        tSQL += "                       AND scd    = '" + argScd   + "' ";
+        tSQL += "                       AND apply_il <= '" + tFR + "') ";
+
+        wasSQLDSO.SQL = tSQL;
+
+        if(wasSQLDSO.recordset.recordCount > 0)
+        {
+            oArgs[0]   = wasSQLDSO.recordset.fields("FRT").value;
+            oArgs[1]   = wasSQLDSO.recordset.fields("MAX_FEE").value;
+            oArgs[2]   = wasSQLDSO.recordset.fields("MIN_FEE").value;
+            oArgs[3]   = wasSQLDSO.recordset.fields("ETC_FRT").value;
+        }
+        else {
+            oArgs[0]   = 0.00;
+            oArgs[1]   = 0.00;
+            oArgs[2]   = 0.00;
+            oArgs[3]   = 0.00;
+        }
+        return oArgs;
+        */
+
+        let tFR = Util.LocalToDate(argDate);
+
+        const inputData = {
+            dvCd: '50',
+            param1: argCixNo,
+            param2: argLcd,
+            param3: argMcd,
+            param4: argScd,
+            param5: tFR
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let oArgs  = new Array(5);
+                let rtnObj = output.output50;
+                if (rtnObj) {
+                    oArgs[0]   = rtnObj.frt;
+                    oArgs[1]   = rtnObj.maxFee;
+                    oArgs[2]   = rtnObj.minFee;
+                    oArgs[3]   = rtnObj.etcFrt;
+                } else {
+                    oArgs[0]   = 0.00;
+                    oArgs[1]   = 0.00;
+                    oArgs[2]   = 0.00;
+                    oArgs[3]   = 0.00;
+                }
+                callback(oArgs);
+            }
+        });
+    }
+
+    /* Finding the Equivalance Amount */
+    function GetEquival(argBfccy, argBfamt, argAfccy, argDate, callback) {
+        var rValue = new Array(2);
+
+        const inputData = {
+            bfCcy: argBfccy,
+            bfAmt: argBfamt,
+            afCcy: argAfccy,
+            baseDate: argDate,
+            calDvCd: 'BAS'
+        };
+
+        try {
+            libCallService('/HANABANK/V1/COM/HF/COMHFO0300A.SVC', inputData, output => {
+                if (output) {
+                    rValue[0] = output.calAmt;
+                    rValue[1] = output.rate;
+                }
+                if (callback) {
+                    callback(rValue);
+                }
+            });
+        } catch(e) {
+            if (callback) {
+                callback(rValue);
+            }
+        }
+    }
+
+    /* Finding the Equivalance Amount by Category */
+    function GetEquivalTT(argBfccy, argBfamt, argAfccy, argDate, argCalGb, callback) {
+        var rValue   = new Array(2);
+
+        const inputData = {
+            bfCcy: argBfccy,
+            bfAmt: argBfamt,
+            afCcy: argAfccy,
+            baseDate: argDate,
+            calDvCd: argCalGb
+        };
+
+        try {
+            libCallService('/HANABANK/V1/COM/HF/COMHFO0300A.SVC', inputData, output => {
+                if (output) {
+                    rValue[0] = output.calAmt;
+                    rValue[1] = output.rate;
+                }
+                if (callback) {
+                    callback(rValue);
+                }
+            });
+        } catch(e) {
+            if (callback) {
+                callback(rValue);
+            }
+        }
+    }
+
+    /* Finding Equivalance Amount by Category - 20140223 PJH : Addition of preferential exchange rate related function */
+    function GetEquivalPrime(argBfccy, argBfamt, argAfccy, argDate, argCalGb, argCixNo, argPrimeCd, callback) {
+        var rValue = new Array(2);
+
+        const inputData = {
+            bfCcy: argBfccy,
+            bfAmt: argBfamt,
+            afCcy: argAfccy,
+            baseDate: argDate,
+            calDvCd: argCalGb,
+            custNo: argCixNo,
+            primeCd: argPrimeCd.substr(2,5)
+        };
+
+        try {
+            libCallService('/HANABANK/V1/COM/HF/COMHFO0300A.SVC', inputData, output => {
+                if (output) {
+                    rValue[0] = output.calAmt;
+                    rValue[1] = output.rate;
+                }
+                if (callback) {
+                    callback(rValue);
+                }
+            });
+        } catch(e) {
+            if (callback) {
+                callback(rValue);
+            }
+        }
+    }
+
+    /* Getting the code name: GetCodeNm */
+    function GetCodeNm(argCodeType, argCode, callback) {
+        /*
+        tSQL = "select get_code_nm('" + argCodeType + "','" + argCode + "') code_nm from dual";
+        wasSQLDSO.SQL = tSQL;
+
+        return (wasSQLDSO.recordset.fields("CODE_NM").value);
+        */
+
+        const inputData = {
+            dvCd: '51',
+            param1: argCodeType,
+            param2: argCode
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnVal = null;
+                let rtnArr = output.output51?.grid01 ?? [];
+                if (rtnArr.length > 0) {
+                    rtnVal = rtnArr[0].codeDesc;
+                }
+                callback(rtnVal);
+            }
+        });
+    }
+
+    function GetCodeNmAsync(argCodeType, argCode) {
+        return new Promise((resolve, reject) => {
+            GetCodeNm(argCodeType, argCode, resolve);
+        });
+    }
+
+    /* Counting the number of days */
+    function CalDays(fr_date, to_date, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+        var tTO;
+
+        tFR = "to_date('" + Util.LocalToDate(fr_date) + "', 'YYYY/MM/DD')";
+        tTO = "to_date('" + Util.LocalToDate(to_date) + "', 'YYYY/MM/DD')";
+
+        tSQL = "select cal_days(" + tFR + "," + tTO + ") aaa from dual";
+
+        wasSQLDSO.SQL = tSQL;
+        return (wasSQLDSO.recordset.Fields("aaa").Value);
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+        let tTO = Util.LocalToDate(to_date);
+
+        const inputData = {
+            dvCd: '52',
+            param1: tFR,
+            param2: tTO
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output52?.diff ?? null);
+            }
+        });
+    }
+
+    /* Counting business days */
+    function CalBizDays(fr_date, to_date, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+        var tTO;
+
+        tFR = Util.LocalToDate(fr_date);
+        tTO = Util.LocalToDate(to_date);
+
+        GDC.SectionName = "FXFIG_COM";
+        GDC.RecordIndex = 0;
+        var AJUM = GDC.getItemValue("FXFIG_AJUM");
+
+        tSQL = "select cal_biz_days('" + tFR + "','" + tTO + "','" + AJUM + "') days from dual";
+        wasSQLDSO.SQL = tSQL;
+
+        return (wasSQLDSO.recordset.fields("DAYS").value);
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+        let tTO = Util.LocalToDate(to_date);
+        let AJUM = CDO.SysInfo.acBrNo;
+
+        const inputData = {
+            dvCd: '53',
+            param1: tFR,
+            param2: tTO,
+            param3: AJUM
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output53?.day ?? null);
+            }
+        });
+    }
+
+    /* Holiday status */
+    /* return value : 1 (holiday), 0(weekday) */
+    function IsHoliday(fr_date, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+
+        tFR = Util.LocalToDate(fr_date);
+
+        tSQL = "SELECT gb FROM acom_com_holi WHERE ctry_cd = 'US' and il = '" + tFR + "'";
+        wasSQLDSO.SQL = tSQL;
+
+        if (wasSQLDSO.recordset.recordCount >= 1)
+            return 1;
+        else
+            return 0;
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+
+        const inputData = {
+            dvCd: '54',
+            param1: tFR
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output54?.gb ?? null);
+            }
+        });
+    }
+
+    /* 20130111_Park_1 - Add n days. If that is holiday, find next business day */
+    function AddDays(argDate, argDays, callback) {
+        /*
+        var tSQL = "";
+
+        HNDC.SectionName = "FXFIG_COM";
+        HNDC.RecordIndex = 0;
+        var AJUM = HNDC.GetItemValue("FXFIG_AJUM");
+
+        tSQL = "SELECT TO_CHAR(add_buz_days(TO_DATe('" + argDate +"','YYYY/MM/DD') + " + argDays
+             + ", DECODE(il, NULL, 0, 1), '" + AJUM + "'), 'YYYY/MM/DD') nw_dt"
+             + "  FROM dual, acom_com_holi "
+             + " WHERE dummy <> ctry_cd(+) "
+             + "   AND ctry_cd(+) = 'ID'   "
+             + "   AND il(+) = TO_DATe('" + argDate + "','YYYY/MM/DD') + " + argDays;
+
+        wasSQLDSO.SQL = tSQL;
+        return wasSQLDSO.recordset.Fields("nw_dt").Value;
+        */
+
+        let AJUM = CDO.SysInfo.acBrNo;
+
+        const inputData = {
+            dvCd: '55',
+            param1: Util.LocalToDate(argDate),
+            param2: argDays,
+            param3: AJUM
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output55?.newDate ?? null);
+            }
+        });
+    }
+
+    /* N일후 영업일 :  AddBuzDays (argDate, 날수);  */
+    function AddBuzDays(fr_date, argDays, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+        var tTO;
+
+        tFR = Util.LocalToDate(fr_date);
+
+        HNDC.SectionName = "FXFIG_COM";
+        HNDC.RecordIndex = 0;
+        var AJUM = HNDC.GetItemValue("FXFIG_AJUM");
+
+        tSQL = "select add_buz_days('" + tFR + "'," + argDays + ",'" +
+                AJUM + "') aaa from dual";
+        wasSQLDSO.SQL = tSQL;
+        return wasSQLDSO.recordset.Fields("aaa").Value;
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+        let AJUM = CDO.SysInfo.acBrNo;
+
+        const inputData = {
+            dvCd: '56',
+            param1: tFR,
+            param2: argDays,
+            param3: AJUM
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output56?.bizDate ?? null);
+            }
+        });
+    }
+
+    /* N일후 영업일 (국제) :  AddInterBuzDays (날짜,날수,국가코드)) */
+    /* 국가코드 : 두자리 (US, KR..)                                 */
+    function AddInterBuzDays(fr_date, argDays, argCtry, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+        var tTO;
+
+        tFR = Util.LocalToDate(fr_date);
+        tSQL = "select add_inter_buz_days('" + tFR + "'," + argDays + ",'" + argCtry +"') aaa from dual";
+        wasSQLDSO.SQL = tSQL;
+        return wasSQLDSO.recordset.Fields("aaa").Value;
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+
+        const inputData = {
+            dvCd: '57',
+            param1: tFR,
+            param2: argDays,
+            param3: argCtry
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output57?.interBuzDate ?? null);
+            }
+        });
+    }
+
+    /* 특정일 사이의 월수/일수 : BetweenMonthsDays (from date, to date) */
+    /* return value : NNNNNNNN (앞에 네자리 월수, 뒤에 네자리 일수 )           */
+    function BetweenMonthsDays(fr_date, to_date, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+        var tTO;
+        var kk;
+        var kk1;
+        var kk2;
+
+        tFR = Util.LocalToDate(fr_date);
+        tTO = Util.LocalToDate(to_date);
+
+        tSQL = "select between_months_days_func('" + tFR +
+                "',to_date('" + tTO + "')-1) aaa from dual";
+
+        wasSQLDSO.SQL = tSQL;
+
+        kk = wasSQLDSO.recordset.Fields("aaa").Value;
+
+        kk1 = kk.substr(0, 4); // month
+        kk2 = kk.substr(4, 4); // month
+
+        return (wasSQLDSO.recordset.Fields("aaa").Value);
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+
+        const inputData = {
+            dvCd: '58',
+            param1: tFR,
+            param2: argDays,
+            param3: argCtry
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output58?.diff ?? null);
+            }
+        });
+    }
+
+    /* Date after N months :   AddMonthsOvbr ("2004/05/05", 3)) */
+    function AddMonthsOvbr(fr_date, argDays, callback) {
+        /*
+        var tSQL;
+
+        var tFR;
+        var tTO;
+
+        tFR = Util.LocalToDate(fr_date);
+
+        tSQL = "select add_months_ovbr('" + tFR + "'," + argDays + ") aaa from dual";
+        wasSQLDSO.SQL = tSQL;
+        return (wasSQLDSO.recordset.Fields("aaa").Value);
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+
+        const inputData = {
+            dvCd: '02',
+            param1: tFR,
+            param2: argDays
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output02?.date ?? null);
+            }
+        });
+    }
+
+    /* Date after N months :   AddMonthsDaysOvbr ("2004/05/05", 3, 3)) */
+    function AddMonthsDaysOvbr(fr_date, argMons, argDays, callback) {
+        /*
+        var tSQL;
+    
+        var tFR;
+        var tTO;
+    
+        tFR = Util.LocalToDate(fr_date);
+    
+        tSQL = "select add_months_ovbr('" + tFR + "'," + argMons + ") + " +
+                argDays.toString() + " aaa from dual";
+        wasSQLDSO.SQL = tSQL;
+        return (wasSQLDSO.recordset.Fields("aaa").Value);
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+
+        const inputData = {
+            dvCd: '03',
+            param1: tFR,
+            param2: argMons,
+            param3: argDays
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output03?.date ?? null);
+            }
+        });
+    }
+	
+    /* First day/last day  :   GetDateFirstLast (Present day, Type)  */
+    /* Type : "F" -> first day, "L" -> last day               */
+    function GetDateFirstLast(fr_date, argKind, callback) {
+        /*
+        var tVal;
+        var tSQL;
+
+        var tFR;
+        var tTO;
+
+        if (argKind == "F") {
+            tFR = Util.LocalToDate(fr_date);
+            tVal = tFR.substr(0, 7) + "/01";
+            tFR = "to_date('" + tVal + "', 'YYYY/MM/DD')";
+            tSQL = "select " + tFR + " aaa from dual";
+            wasSQLDSO.SQL = tSQL;
+            return (wasSQLDSO.recordset.Fields("aaa").Value);
+        }
+        else if (argKind == "L") {
+            tFR = Util.LocalToDate(fr_date);
+            tSQL = "select last_day('" + tFR + "') aaa from dual";
+            wasSQLDSO.SQL = tSQL;
+            return (wasSQLDSO.recordset.Fields("aaa").Value);
+        }
+        */
+
+        let tFR = Util.LocalToDate(fr_date);
+
+        const inputData = {
+            dvCd: '04',
+            param1: tFR,
+            param2: argKind
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output04?.date ?? null);
+            }
+        });
+    }
+
+    /* ACT CODE Name  :  GetActnm (br_no, bspl_gb, ac_cd);  */
+    function GetActnm(br_no, bspl_gb, ac_cd, callback) {
+        /*
+        var tSQL;
+
+        br_no = "0000";
+
+        tSQL = "select substr(get_act_nm('" + br_no   + "', '" +
+                                                bspl_gb + "', '" +
+                                                ac_cd   + "'), 1, 50) esnm " +
+                "from dual";
+        wasSQLDSO.SQL = tSQL;
+        return (wasSQLDSO.recordset.Fields("esnm").Value);
+        */
+
+        br_no = "0000";
+
+        const inputData = {
+            dvCd: '05',
+            param1: br_no,
+            param2: bspl_gb,
+            param3: ac_cd
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output05?.esnm ?? null);
+            }
+        });
+    }
+
+    function GetDEPOInfo(Depo_Cd, callback) {
+        /*
+        var tSQL;
+
+        tSQL = "select bknm " +
+                "from afex_rch_base " +
+                "where cd = '" + Depo_Cd + "'";
+
+        wasSQLDSO.SQL = tSQL;
+        return (wasSQLDSO.recordset.Fields("bknm").Value);
+        */
+
+        const inputData = {
+            dvCd: '06',
+            param1: Depo_Cd
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnVal = null;
+                let rtnArr = output.output06?.grid06 ?? [];
+                if (rtnArr.length > 0) {
+                    rtnVal = rtnArr[0].bknm;
+                }
+                callback(rtnVal);
+            }
+        });
+    }
+
+    function GetDEPOInfoRec(Depo_Cd, callback) {
+        /*
+        var tSQL;
+
+        tSQL = "select * " +
+                "from afex_rch_base " +
+                "where cd = '" + Depo_Cd + "'";
+
+        wasSQLDSO.SQL = tSQL;
+        return wasSQLDSO.recordset;
+        */
+
+        const inputData = {
+            dvCd: '07',
+            param1: Depo_Cd
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnVal = {};
+                let rtnArr = output.output07?.grid07 ?? [];
+                if (rtnArr.length > 0) {
+                    rtnVal = rtnArr[0];
+                }
+                callback(rtnVal);
+            }
+        });
+    }
+
+    /* FEE Code Name  :  GetFeeNm (code, code1, callback);  */
+    function GetFeeNm(code, code1, callback) {
+        /*
+        var tSQL;
+
+        tSQL = "select code_nm " +
+                "from acom_comh_code " +
+                "where type  = 'F151' " +
+                    "and code  = '" + code  + "' " +
+                    "and code1 = '" + code1 + "'";
+
+        wasSQLDSO.SQL = tSQL
+        return (wasSQLDSO.recordset.Fields("code_nm").Value);
+        */
+
+        const inputData = {
+            dvCd: '08',
+            param1: code,
+            param2: code1
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output08?.codeNm ?? null);
+            }
+        });
+    }
+
+    /* System Date                                  */
+    function GetSysDate(callback) {
+        /*
+        var SQL;
+
+        SQL = "select sysdate sdate from dual";
+        wasSQLDSO.SQL = SQL;
+        return wasSQLDSO.recordset.Fields("sdate").Value;
+        */
+       
+        const inputData = {
+            dvCd: '09'
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output09?.sysDt ?? null);
+            }
+        });
+    }
+
+    /* 20130415_Agus_1 - System Time */
+    function GetSysTime(callback) {
+        /*
+        var SQL;
+
+        SQL = "select to_char(sysdate,'HH24:MI:SS') stime from dual";
+        wasSQLDSO.SQL = SQL;
+        return wasSQLDSO.recordset.Fields("stime").value;
+        */
+
+        const inputData = {
+            dvCd: '10'
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output10?.sysTm ?? null);
+            }
+        });
+    }
+
+    /* First date of year                           */
+    function GetFDateYear(srcdate, callback) {
+        /*
+        var SQL;
+
+        SQL = "select get_fdate_year('" + srcdate + "') rdate from dual";
+        wasSQLDSO.SQL = SQL;
+        if (wasSQLDSO.recordset.RecordCount == 0)
+            return null;
+        else
+            return wasSQLDSO.recordset.Fields("rdate").Value;
+        */
+
+        const inputData = {
+            dvCd: '11',
+            param1: srcdate
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output11?.firstDt || null);
+            }
+        });
+    }
+
+    /* Last date of year                            */
+    function GetLDateYear(srcdate, callback) {
+        /*
+        var SQL;
+
+        SQL = "select get_ldate_year('" + srcdate + "') rdate from dual";
+        wasSQLDSO.SQL = SQL;
+        if (wasSQLDSO.recordset.RecordCount == 0)
+            return null;
+        else
+            return wasSQLDSO.recordset.Fields("rdate").Value;
+        */
+
+        const inputData = {
+            dvCd: '12',
+            param1: srcdate
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output12?.lastDt || null);
+            }
+        });
+    }
+
+    /* First Biz date of year                       */
+    function GetFBDateYear(srcdate, callback) {
+        /*
+        var SQL;
+
+        HNDC.SectionName = "FXFIG_COM";
+        HNDC.RecordIndex = 0;
+        SQL = "select get_fbdate_year('" + srcdate + "','" +
+                        HNDC.GetItemValue("FXFIG_AJUM")      + "') rdate from dual";
+        wasSQLDSO.SQL = SQL;
+        if (wasSQLDSO.recordset.RecordCount == 0)
+            return null;
+        else
+            return wasSQLDSO.recordset.Fields("rdate").Value;
+        */
+
+        const inputData = {
+            dvCd: '13',
+            param1: srcdate,
+            param2: CDO.SysInfo.acBrNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output13?.fbDt || null);
+            }
+        });
+    }
+
+    /* Last Biz date of year                        */
+    function GetLBDateYear(srcdate, callback) {
+        /*
+        var SQL;
+
+        HNDC.SectionName = "FXFIG_COM";
+        HNDC.RecordIndex = 0;
+        SQL = "select get_lbdate_year('" + srcdate + "','" +
+                        HNDC.GetItemValue("FXFIG_AJUM")      + "') rdate from dual";
+        wasSQLDSO.SQL = SQL;
+        if (wasSQLDSO.recordset.RecordCount == 0)
+            return null;
+        else
+            return wasSQLDSO.recordset.Fields("rdate").Value;
+        */
+
+        const inputData = {
+            dvCd: '14',
+            param1: srcdate,
+            param2: CDO.SysInfo.acBrNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output14?.lbDt || null);
+            }
+        });
+    }
+
+    /** Dialog Arugments Construction function **/
+    function DArgument() {
+        if (!window.dialogArguments)
+            this.topWindow = window.top;
+        else
+            this.topWindow = window.dialogArguments.topWindow;
+        this.openWindow = window;
+        this.Args = null;
+    }
+    
+    {
+        // 미사용
+        /* FREE REPORT 출력 관련 */
+        /*
+        function prt_freeprt() {
+            
+			waiRptVendor = undefined;
+			waiRptVendor = new $waiReport.classes.reportVendor();
+			
+            var prt_gb;
+            var prt_kind;
+            var title_txt;
+            var head_txt;
+            var ref_no;
+            var cif_no;
+            var tx_name;
+            var tx_date;
+            var tellnm;
+            var op_no;
+            var op_name;
+            var cust_name;
+            var addr_nm1;
+            var addr_nm2;
+
+            // var BDC = top.MAIN.WVMF.selected.contentWindow.HNDC;
+            const BDO = top.MAIN.tab.getCurrentTab().pageElem.contentWindow.BDO;
+
+            // FFREEPRT 미존재
+            return;
+
+            try {
+                BDC.SectionName = "FFREEPRT";
+                BDC.RecordIndex = 0;
+                prt_gb   = BDC.GetItemValue("FFREEPRT_PRT_GB");
+                prt_kind = BDC.GetItemValue("FFREEPRT_PRT_KIND");
+            }
+            catch (e) {
+                prt_gb   = "";
+                prt_kind = "";
+            }
+
+            if (prt_gb == "0") {
+
+                with (PrtViewer) {
+
+					if( prt_kind == "1" ) {          // 백지장표
+                        ReportUrl = RptURL()+"/rpt/white.rpx";
+                        title_txt = BDC.GetItemValue("FFREEPRT_TITLE_TXT");
+                        head_txt  = BDC.GetItemValue("FFREEPRT_HEAD_TXT");
+                        ref_no    = BDC.GetItemValue("FFREEPRT_REF_NO");
+                        cif_no    = BDC.GetItemValue("FFREEPRT_CIF_NO");
+                        tx_name   = BDC.GetItemValue("FFREEPRT_TX_NAME");
+                        tx_date   = BDC.GetItemValue("FFREEPRT_TX_DATE");
+                        tellnm    = BDC.GetItemValue("FFREEPRT_TELLNM");
+                        op_no     = BDC.GetItemValue("FFREEPRT_OP_NO");
+                        op_name   = BDC.GetItemValue("FFREEPRT_OP_NAME");
+
+                        AddData("ReportHeader", "FFREEPRT_TITLE_TXT",
+                                "text", title_txt  );
+                        AddData("ReportHeader", "FFREEPRT_HEAD_TXT",
+                                "text", head_txt  );
+                        AddData("ReportHeader", "FXFIG_REF_NO",
+                                "text", ref_no    );
+                        AddData("ReportHeader", "FXFIG_TRX_NO",
+                                "text", tx_name    );
+                        AddData("ReportHeader", "FXFIG_REF_NO1",
+                                "text", ""    );
+                        AddData("ReportHeader", "FXFIG_TRX_DATE",
+                                "text", tx_date   );
+                        AddData("ReportHeader", "FXFIG_CIX_NO",
+                                "text", cif_no    );
+                        AddData("PageHeader", "FFREEPRT_TITLE_TXT1",
+                                "text", title_txt  );
+                        AddData("PageHeader", "FFREEPRT_HEAD_TXT1",
+                                "text", head_txt  );
+                        AddData("PageFooter", "Field17",
+                                "text", op_no  );
+                        AddData("PageFooter", "Field18",
+                                "text", op_name  );
+                    }
+                    else if( prt_kind == "2" ) {     // 고객통지장표
+                        ReportUrl = RptURL()+"/rpt/custnotice.rpx";
+                        title_txt = BDC.GetItemValue("FFREEPRT_TITLE_TXT");
+                        cust_name = BDC.GetItemValue("FFREEPRT_CUST_NAME");
+                        addr_nm1  = BDC.GetItemValue("FFREEPRT_ADDR_NM1");
+                        addr_nm2  = BDC.GetItemValue("FFREEPRT_ADDR_NM2");
+                        addr_nm3  = BDC.GetItemValue("FFREEPRT_ADDR_NM3");
+                        addr_nm4  = BDC.GetItemValue("FFREEPRT_ADDR_NM4");
+
+                        AddData("ReportHeader", "FFREEPRT_TITLE_TXT",
+                                "text", title_txt  );
+                        AddData("ReportHeader", "FFREEPRT_CUST_NAME",
+                                "text", cust_name  );
+                        AddData("ReportHeader", "FFREEPRT_ADDR_NM1",
+                                "text", addr_nm1  );
+                        AddData("ReportHeader", "FFREEPRT_ADDR_NM2",
+                                "text", addr_nm2  );
+                        AddData("ReportHeader", "FFREEPRT_ADDR_NM3",
+                                "text", addr_nm3  );
+                        AddData("ReportHeader", "FFREEPRT_ADDR_NM4",
+                                "text", addr_nm4  );
+                    }
+
+
+                    XML = BDC.GetSectionAsXML("FFREEPRT").xml;
+                    Show();
+                }
+            }
+        }
+        */
+
+        function ShowHotKeyDefsWindow() {
+            var DArg = new DArgument();         //Argument �궗�슜
+            DArg.Args = HotKeyInfos;
+            //window.showModalDialog('/frame/shortcutKey.html', DArg, "dialogWidth: 828px; dialogHeight: 468px; status: no; unadorned: 1; help: no");
+            openPopup('/frame/shortcutKey.html', DArg, "dialogWidth: 828px; dialogHeight: 468px; status: no; unadorned: 1; help: no");
+        }
+
+        function HotKeyInfo(Ctrl, Shift, Alt, Key, Func) {
+            this.Ctrl = Ctrl;
+            this.Shift = Shift;
+            this.Alt = Alt;
+            this.Key = Key;
+            this.Func = Func;
+        }
+
+        function ExecuteShortCut(Idx) {
+            //20130613_Cho_1
+            let ExecElem = null;
+            const curTabWnd = top.MAIN.tabCtrl?.getCurrentTab()?.pageElem?.contentWindow;
+
+            if (!curTabWnd?.ExecAct 
+                || top.MAIN.CHECK_CALL_SEVICE() 
+                || top.document.querySelector('.popupWrapper')) {
+                return;
+            }
+
+            if(curTabWnd.SUB_TYPE == "ENT") {
+                switch(Idx) {
+                    case 0 : //Entry
+                        ExecElem = curTabWnd.document.getElementById("entryBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        changeSwitchBtn(ExecElem);
+                        curTabWnd.ExecAct(0);
+                        break;
+                    case 1 : //Cancel
+                        ExecElem = curTabWnd.document.getElementById("cancelBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        changeSwitchBtn(ExecElem);
+                        curTabWnd.ExecAct(1);
+                        break;
+                    case 2 : //CNF
+                        ExecElem = curTabWnd.document.getElementById("CNFInqBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(7);
+                        break;
+                    case 3 : //Customer Contact
+                        ExecElem = curTabWnd.document.getElementById("CCntctBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(8);
+                        break;
+                    case 4 : //Set Description for postion
+                        ExecElem = curTabWnd.document.getElementById("FXInfoBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(9);
+                        break;
+                    case 5 : //Compass Process
+                        ExecElem = curTabWnd.document.getElementById("CmpssBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(10);
+                        break;
+                    case 6 : //Scan
+                        ExecElem = curTabWnd.document.getElementById("ScanBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(11);
+                        break;
+                    case 7 : //Excecute
+                        ExecElem = curTabWnd.document.getElementById("execBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(5);
+                        break;
+                    case 8 : //Clear
+                        ExecElem = curTabWnd.document.getElementById("canjobBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(6);
+                    case 9 : //Doc
+                        ExecElem = curTabWnd.document.getElementById("DocBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(13);
+                    default :
+                        break;
+                }
+            } else if(curTabWnd.SUB_TYPE == "INQ") {
+                switch(Idx) {
+                    case 2 : //CNF
+                        ExecElem = curTabWnd.document.getElementById("CNFInqBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(0);
+                        break;
+                    case 3 : //Customer Contact
+                        ExecElem = curTabWnd.document.getElementById("CCntctBtn");
+                        if (!chkBtn(ExecElem)) return;
+                        curTabWnd.ExecAct(1);
+                        break;
+                    default :
+                        break;
+                }
+            }
+
+            function chkBtn(btnElem) {
+                return (btnElem == null || btnElem.disabled || btnElem.parentElement.style.display == "none") ? false : true;
+            }
+
+            function changeSwitchBtn(btnElem) {
+                const ulElem = curTabWnd.document.querySelector('#sub_entry .top_btn');
+                Array.prototype.forEach.call(ulElem?.children ?? [], elem => {
+                    // console.log(elem, ' / ', btnElem.parentElement, elem == btnElem.parentElement);
+                    if (elem == btnElem.parentElement) {
+                        elem.classList.add('on');
+                    } else {
+                        elem.classList.remove('on');
+                    }
+                });
+            }
+
+            /*
+            const curTab = top.MAIN.tabCtrl.getCurrentTab();
+            if (Idx == 0)
+                top.MAIN.WorkIDEdit.focus();
+            else if (Idx == 1) {
+                if (curTab) {
+                    if (curTab.pageElem.contentWindow.ExecAct) {
+                        curTab.pageElem.contentWindow.ExecAct(0);
+                    }
+                }
+            }
+            else if (Idx == 2) {
+                if (curTab) {
+                    if (curTab.pageElem.contentWindow.ExecAct) {
+                        curTab.pageElem.contentWindow.ExecAct(1);
+                    }
+                }
+            }
+            else if (Idx == 3) {
+                if (curTab) {
+                    if (curTab.pageElem.contentWindow.ExecAct) {
+                        curTab.pageElem.contentWindow.ExecAct(2);
+                    }
+                }
+            }
+            else if (Idx == 4) {
+                if (curTab) {
+                    if (curTab.pageElem.contentWindow.ExecAct) {
+                        curTab.pageElem.contentWindow.ExecAct(5);
+                    }
+                }
+            }
+            // KDJ -- 2010. 6. 29
+            else if (Idx == 5) {
+                if (curTab) {
+                    if (curTab.pageElem.contentWindow.document) {
+                        var doc = top.MAIN.WVMF.selected.contentWindow.document.all.WorkFrame.contentWindow.document;
+                        for( var i = 0; i < doc.all.length; i++ ) {
+                            if( doc.all(i).isTextEdit && !doc.all(i).disabled
+                                    && (doc.all(i).value || doc.all(i).value == "") ) {
+                                try {
+                                    doc.all(i).focus();
+                                    break;
+                                } catch (e) {}
+                            }
+                        }
+                    }
+                }
+            }
+            */
+        }
+
+        function getBizPos(){
+            var doc = ActiveWindow();
+            let left = 0;
+            let top = 0;
+            if(doc == "undefined") 	return { left, top };
+            var sub_position = getAbsolutePosition(doc.window.frameElement);
+            var WorkFrame_position =  getAbsolutePosition(doc.WorkFrame);
+
+            left = WorkFrame_position.left + sub_position.left;
+            top = WorkFrame_position.top + sub_position.top;
+            return { left, top };
+        }
+
+        function getAbsolutePosition(element) {
+            let left = 0;
+            let top = 0;
+            while (element) {
+            left += element.offsetLeft;
+            top += element.offsetTop;
+            element = element.offsetParent;
+            }
+
+            return { left, top };
+        }
+
+        function ScreenCaptureTM(callback) {
+            /*
+			FCaptured = true;
+            var sub = ActiveWindow();
+            var wnd = (sub.WorkFrame.contentWindow !== undefined) ? sub.WorkFrame.contentWindow : sub.WorkFrame;
+
+            html2canvas(wnd.document.body, {
+                onrendered: function(canvas) {
+                    var data = canvas.toDataURL();
+                    var comp = LZString.compress(data);
+                    //console.log('ScreenCaptureTM : Captured Image Size : ',data.length,' => ',comp.length);
+                    //var decomp = LZString.decompress(comp);
+
+                    if (callback !== undefined){
+                        callback(comp);
+                    } else {
+                        ScreenCapture(comp);
+                    }
+                }
+            });
+            */
+
+            const curTab = top.MAIN.tabCtrl.getCurrentTab();
+            if (curTab) {
+                // waiBrowser.bizScreenCapture(ActiveWindow().WorkFrame.contentWindow, callback , getBizPos().left, getBizPos().top);
+                waiBrowser.bizScreenCapture(curTab.pageElem.contentWindow.WorkFrame.contentWindow, imgBlob => {
+                    callback(imgBlob);
+                }, getBizPos().left, getBizPos().top);
+            } else {
+                ShowInfoDialog("Biz screen to capture does not exist.");
+            }
+		}
+
+        function ScreenCapture() {
+            /*
+            if (top.MAIN.WVMF.selected) {
+                MGRStream.Clear();
+                top.MAIN.WVMF.selected.contentWindow.divCapture.setStartXY(9,40);
+                top.MAIN.WVMF.selected.contentWindow.divCapture.Capture(
+                        top.MAIN.WVMF.selected.contentWindow.document.all.WorkFrame.contentWindow.document.body);
+
+                if ( parseInt(MenuWidth) > 0 ) top.MAIN.toggleMenuFrame();
+            }
+            else {
+                ShowInfoDialog("Screen to capture does not exist.");
+            }
+            */
+
+            const curTab = top.MAIN.tabCtrl.getCurrentTab();
+            if (curTab) {
+                waiBrowser.bizScreenCapture(curTab.pageElem.contentWindow.WorkFrame);
+            } else {
+                ShowInfoDialog("Biz screen to capture does not exist.");
+            }
+        }
+
+        function ScreenPrint() {
+            const curTab = top.MAIN.tabCtrl.getCurrentTab();
+            if (curTab) {
+                waiBrowser.ScreenCapture(function(img) {
+                    // console.log('img -> ', img);
+                    const canvas = top.MAIN.scrnCapture;
+                    const ctx = canvas.getContext('2d');
+
+                    let winW = 1401;
+                    let winH = 934;
+                    let lineHeight = 22;
+                    let tabData = curTab.data ?? {};
+                    let scrnX = 45;
+                    let scrnY = 100;
+
+                    let paperW = winW + 100;
+                    let paperH = winH + 130;
+                    canvas.style.width = `${paperW}px`;
+                    canvas.style.height = `${paperH}px`;
+                    canvas.width = paperW;
+                    canvas.height = paperH;
+
+                    // background
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, paperW, paperH);
+                    ctx.fillStyle = "rgb(0,0,0)";
+                    ctx.font = "bold 1.2rem Arial";
+                    ctx.fillText("Screen Print", 10, 20);
+
+                    // Line 1
+                    ctx.fillStyle = "rgb(0,0,0)";
+                    ctx.fillRect(0, 30, paperW, 1);
+                    ctx.font = "bold 100% Arial";
+                    let firstTxt = 25;
+                    ctx.fillText(`TRX-CODE : ${tabData.fn}`, 10, firstTxt + lineHeight);
+                    ctx.fillText(`TRX-NAME : ${tabData.job_nm}`, 10, firstTxt + 2 * lineHeight);
+                    ctx.fillText(`OP-STATUS : ${tabData.trType ? 'Entry' : 'Inquiry'}`, 10, firstTxt + 3 * lineHeight);
+
+                    // Line 2
+                    ctx.fillStyle = "rgb(0,0,0)";
+                    ctx.fillRect(0, 1750, paperW, 1);
+                    let curDate = top.MAIN.MainDT.innerText;
+                    ctx.font = "bold 100% Arial";
+                    ctx.fillText(`Captured : ${curDate}`, 10, paperH - 6);
+
+                    var image = new Image();
+                    image.onload = () => {
+                        let imgX = scrnX + 1;
+                        let imgY = scrnY + 1;
+                        let scale_factor = Math.min(winW / image.width, winH / image.height);
+                        let imgW = image.width  * scale_factor;
+                        let imgH = image.height * scale_factor;
+
+                        // Image area
+                        ctx.fillStyle = "#666666";
+                        ctx.fillRect(scrnX, scrnY, imgW+2, imgH+2);
+
+                        ctx.drawImage(image, imgX, imgY, imgW, imgH);
+                        const pngUrl = canvas.toDataURL();
+                        const arrPrtData = _convertDataURIToBinary(pngUrl);
+                        waiBrowser.modules.file.addPrtBuff(arrPrtData);
+                        waiBrowser.modules.file.doPrint(true);
+                    }
+                    image.src = `data:image/png;base64,${_arrayBufferToBase64(img)}`;
+                });
+            } else {
+                ShowInfoDialog("Screen to print does not exist.");
+            }
+
+            function _arrayBufferToBase64( buffer ) {
+                var binary = '';
+                var bytes = new Uint8Array( buffer );
+                var len = bytes.byteLength;
+                for (var i = 0; i < len; i++) {
+                    binary += String.fromCharCode( bytes[ i ] );
+                }
+                return window.btoa( binary );
+            }
+
+            function _convertDataURIToBinary(dataURI) {
+                var BASE64_MARKER = ';base64,';
+                var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+                var base64 = dataURI.substring(base64Index);
+                var raw = window.atob(base64);
+                var rawLength = raw.length;
+                var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+                for(i = 0; i < rawLength; i++) {
+                    array[i] = raw.charCodeAt(i);
+                }
+                return array;
+            }
+        }
+
+        // function GetLeftPos(SElem)
+        // {
+        //     var StartElement = null;
+        //     var SLeft = 0;
+
+        //     StartElement = SElem;
+        //     SLeft = StartElement.offsetLeft;
+
+        //     while (StartElement.offsetParent &&
+        //     StartElement.offsetParent.tagName != SElem.document.body.tagName) {
+        //         StartElement = StartElement.offsetParent;
+        //         SLeft += StartElement.clientLeft;
+        //         SLeft += StartElement.offsetLeft;
+        //     }
+        //     if (StartElement.offsetParent)
+        //         SLeft += StartElement.offsetParent.clientLeft;
+        //     return SLeft;
+        // }
+
+        // function GetTopPos(SElem)
+        // {
+        //     var StartElement = null;
+        //     var STop = 0;
+
+        //     StartElement = SElem;
+        //     STop = StartElement.offsetTop;
+
+        //     while (StartElement.offsetParent &&
+        //     StartElement.offsetParent.tagName != SElem.document.body.tagName) {
+        //         StartElement = StartElement.offsetParent;
+        //         STop += StartElement.clientTop;
+        //         STop += StartElement.offsetTop;
+        //     }
+        //     if (StartElement.offsetParent)
+        //         STop += StartElement.offsetParent.clientTop;
+        //     return STop;
+        // }
+
+        function Logout() {
+            top.open('/frame/logout.html', '_top');
+        }
+
+        function RptURL() {
+            /*
+            var PT = "";
+
+            if ( ((location.port+"") != "80") &&
+                    ((location.port+"") != "443")) {
+                PT = ":"+location.port;
+            }
+            return (location.protocol+"//"+document.domain+PT);
+            */
+            return '/biz';
+        }
+
+        function PBPRTEnabled() {
+            return waiBrowser.modules.Passbook.connected;
+        }
+
+        function PlayMGRRequest() {
+            const audio = new Audio('/frame/audio/MGR.wav');
+            audio.play();
+        }
+
+        function GetTransURL(srcURL) {
+            /*
+            var mDetailURL = "";
+            GDC.setSectionName("FXFIG_COM");
+            //mDetailURL = "/translate.php?docname=biz/" + srcURL + "&lang=" + GDC.getItemValue("FSYSINFO_LANG") + "&syntaxchk=0";
+            mDetailURL = "/biz/"+srcURL+'?nocache='+(new Date()+'').replace(/ /gi,'');
+                        
+            return mDetailURL;
+            */
+            
+            if (srcURL.substring(0,1) != "/") srcURL = "/" + srcURL;
+            // return "/biz" + srcURL + '?nocache=' + (new Date()+'').replace(/ /gi,'');
+            return `/biz${srcURL}?docname=${srcURL}&lang=${CDO.SysInfo?.sysLnggCd ?? ''}&nocache=${(new Date()+'').replace(/ /gi,'')}`;
+        }
+        
+        /*************************************************/
+		/*                     EXCEL                     */
+		/*************************************************/
+        function ExportExcel(data, argHeader, argFields, argTitle, fileName){
+			if (data && argHeader && argFields) {
+                $wai.util.ExportExcelByData_HF(data, argHeader, argFields, argTitle, fileName);
+            } else if (data && argHeader) {
+                $wai.util.ExportExcelByData_H(data, argHeader, fileName);
+            } else {
+                $wai.util.ExportExcelByData(data, fileName);
+            }
+		}
+
+        /**
+         * (TO-BE) Integrate with ExportExcel function
+         */
+        // function ExportExcel(argDSO){
+		// 	$wai.util.ExportExcel(argDSO);
+		// }
+
+        /**
+         * (TO-BE) Integrate with ExportExcel function
+         */
+		// function ExportExcel_DSO(argDSO, argHeader){
+		// 	$wai.util.ExportExcel_DSO(argDSO, argHeader);
+		// }
+		
+        /**
+         * (TO-BE) Integrate with ExportExcel function
+         */
+		// function ExportExcelDSO(argDSO, argHeader, argFields, argTitle){
+		// 	$wai.util.ExportExcelDSO(argDSO, argHeader, argFields, argTitle);
+		// }
+
+        /*-------------------------------------------------------------------------*/
+        /* Initialize Report Data (Branch Infomation) : Hyunwoo, Hwang             */
+        /*-------------------------------------------------------------------------*/
+
+        function InitReportData( ReportViewer ) {
+            try {
+                const SysInfo = CDO.SysInfo ?? {};
+                const EtcInfo = CDO.EtcInfo ?? {};
+				
+				ReportViewer.AddDataForId("bknm%","Caption",EtcInfo.bknm); // FXFIG_BKNM
+				ReportViewer.AddDataForId("brnm%","Caption",EtcInfo.brnm); // FXFIG_BRNM
+				ReportViewer.AddDataForId("bra1%","Caption",EtcInfo.bra1); // FXFIG_BRA1
+				ReportViewer.AddDataForId("bra2%","Caption",EtcInfo.bra2); // FXFIG_BRA2
+				ReportViewer.AddDataForId("bra3%","Caption",EtcInfo.bra3); // FXFIG_BRA3
+				ReportViewer.AddDataForId("brtn%","Caption",EtcInfo.brtn); // FXFIG_BRTN
+				ReportViewer.AddDataForId("brfn%","Caption",EtcInfo.brfn); // FXFIG_BRFN
+				ReportViewer.AddDataForId("sfcd%","Caption",EtcInfo.sfcd); // FXFIG_SFCD
+				ReportViewer.AddDataForId("tlxn%","Caption",EtcInfo.tlxn); // FXFIG_TLXN
+
+                // 공통 필드 수정 안된 레포트 때문에 셋팅
+                ReportViewer.AddDataForId("FXFIG_BKNM%","Caption",EtcInfo.bknm);
+				ReportViewer.AddDataForId("FXFIG_BRNM%","Caption",EtcInfo.brnm);
+				ReportViewer.AddDataForId("FXFIG_BRA1%","Caption",EtcInfo.bra1);
+				ReportViewer.AddDataForId("FXFIG_BRA2%","Caption",EtcInfo.bra2);
+				ReportViewer.AddDataForId("FXFIG_BRA3%","Caption",EtcInfo.bra3);
+				ReportViewer.AddDataForId("FXFIG_BRTN%","Caption",EtcInfo.brtn);
+				ReportViewer.AddDataForId("FXFIG_BRFN%","Caption",EtcInfo.brfn);
+				ReportViewer.AddDataForId("FXFIG_SFCD%","Caption",EtcInfo.sfcd);
+				ReportViewer.AddDataForId("FXFIG_TLXN%","Caption",EtcInfo.tlxn);
+
+				//var Sig_Header = "For "+GDC.getItemValue("FXFIG_BKNM")+", "+ GDC.getItemValue("FXFIG_BRNM");
+                var Sig_Header = EtcInfo.bknm + ", "+ EtcInfo.brnm;
+				
+				ReportViewer.AddDataForId("SIG_HEADER%","Caption",Sig_Header);
+
+				//var BkBrNm     = GDC.getItemValue("FXFIG_BKNM")+", "+ GDC.getItemValue("FXFIG_BRNM");
+                var BkBrNm     = EtcInfo.bknm + ", "+ EtcInfo.brnm;
+				
+				ReportViewer.AddDataForId("BKBR_NM%"   ,"Caption",BkBrNm    );
+				
+            } catch(e) {
+                alert("InitReportData : "+e.message);
+            }
+        }
+
+        function InitVoucher( ReportViewer ) {
+            try {
+                const SysInfo = CDO.SysInfo ?? {};
+                const EtcInfo = CDO.EtcInfo ?? {};
+
+				ReportViewer.AddData("PageFooter", "brnm", "Caption", EtcInfo.brnm ); // FXFIG_BRNM
+
+                // 공통 필드 수정 안된 레포트 때문에 셋팅
+                ReportViewer.AddData("PageFooter", "FXFIG_BRNM", "Caption", EtcInfo.brnm );
+
+// 				ReportViewer.AddDataForId("FXFIG_BKNM%","Caption",GDC.getItemValue("FXFIG_BKNM"));
+// 				ReportViewer.AddDataForId("FXFIG_BRNM%","Caption",GDC.getItemValue("FXFIG_BRNM"));
+// 				ReportViewer.AddDataForId("FXFIG_BRA1%","Caption",GDC.getItemValue("FXFIG_BRA1"));
+// 				ReportViewer.AddDataForId("FXFIG_BRA2%","Caption",GDC.getItemValue("FXFIG_BRA2"));
+// 				ReportViewer.AddDataForId("FXFIG_BRA3%","Caption",GDC.getItemValue("FXFIG_BRA3"));
+// 				ReportViewer.AddDataForId("FXFIG_BRTN%","Caption",GDC.getItemValue("FXFIG_BRTN"));
+// 				ReportViewer.AddDataForId("FXFIG_BRFN%","Caption",GDC.getItemValue("FXFIG_BRFN"));
+// 				ReportViewer.AddDataForId("FXFIG_SFCD%","Caption",GDC.getItemValue("FXFIG_SFCD"));
+// 				ReportViewer.AddDataForId("FXFIG_TLXN%","Caption",GDC.getItemValue("FXFIG_TLXN"));
+				
+            } catch(e) {
+                alert("InitReportData : "+e.message);
+            }
+        }
+
+        function NeedEquiParams(inputData, callOpt) {
+            for (let x in CDO) {
+                if (!['MenuData', 'MenuGrant'].includes(x)) {
+                    inputData[x] = JSON.parse(JSON.stringify(CDO[x]));
+                }
+            }
+            delete inputData.OvrdInfo; // 이 부분은 확인 필요
+
+            /*
+			var dsObj = this;
+            dsObj.commons = []; // clear Common data
+
+            for (var x in GDC.data) {
+                if (x != "MENUDATA" && x != "MAGRANTS") {
+                    dsObj.commons.push({"name":x,"rec":GDC.data[x]});
+                }
+            }
+            delete( dsObj.commons[0].rec[0]['FXFIG_OVGB'] );
+            */
+		}
+
+        function GetDepoID(aMngBr, aCodeKind, aCodeId, aCCY, callback) {
+            /*
+            var tStr = "";
+            tStr  =  "SELECT";
+            tStr += "   DEPO_ID";
+            tStr += " FROM";
+            tStr += "   ACOM_COMH_STLBANK";
+            tStr += " WHERE";
+            tStr += "   (MNG_BR   ='"+aMngBr+"') and ";
+            tStr += "   (CODE_KIND='"+aCodeKind+"') and ";
+            tStr += "   (CODE_ID  ='"+aCodeId+"') and ";
+            tStr += "   (CCY      ='"+aCCY+"')";
+
+            //alert(tStr);
+            ExSql.SQL = tStr;
+
+            var RS = ExSql.recordset;
+
+            if ( RS.recordcount > 0 ) {
+            RS.moveFirst();
+            tStr = RS.Fields("DEPO_ID").value+"";
+            } else {
+            tStr = "";
+            }
+            return tStr;
+            */
+
+            const inputData = {
+                dvCd: '15',
+                param1: aMngBr,
+                param2: aCodeKind,
+                param3: aCodeId,
+                param4: aCCY
+            };
+
+            libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                if (callback) {
+                    callback(output.output15?.depoId ?? '');
+                }
+            });
+        }
+
+        /*-------------------------------------------------------------------------*/
+        /* Currency Convert 호출  : Jin, DongJun                                   */
+        /*     Input  = 1. FrCCY     -  환산 원 CCY                                */
+        /*              2. FrAmt     -  환산 원 금액                               */
+        /*              3. AplRTKind - 적용기준환율코드                            */
+        /*              4. ToCCY     -  환산 대상 CCY                              */
+        /*                                                                         */
+        /*     Output = 1. DRet.Return  -  true, false                             */
+        /*              2. FrCCY                                                   */
+        /*              3. FrAmt                                                   */
+        /*              4. AplRTKind                                               */
+        /*              5. AplRate                                                 */
+        /*              6. ToCCY                                                   */
+        /*              7. ToAmt                                                   */
+        /*-------------------------------------------------------------------------*/
+        function DReturn() {
+            this.Return = true;
+            this.Args   = null;
+        }
+
+        /**
+         * (AS-IS) Returns data
+         * (TO-BE) Use callback function
+         */
+        function FXConverter(FrCCY, FrAmt, AplRTKind, ToCCY, ToAmt, CalMtd, callback) {
+            var DArg  = new DArgument();
+            DArg.Args = new Array(4);
+
+            var param = new Array(6);
+            var DRet  = new DReturn();
+            var ret   = null;
+
+            DArg.Args[0] = FrCCY;
+            DArg.Args[1] = FrAmt;
+            DArg.Args[2] = AplRTKind;
+            DArg.Args[3] = ToCCY;
+            DArg.Args[4] = ToAmt;
+            DArg.Args[5] = CalMtd;
+
+            openPopup(LIB().GetTransURL('/cm/CMCURCVT.html'), DArg, "status=no;resizable=no;scroll=no;center=yes;dialogHeight=352px;dialogWidth=412px", function(ret) {
+                if (ret != null) {
+                    DRet.Return = true;
+                    DRet.Args   = ret;
+                }
+                else {
+                    DRet.Return = false;
+                    DRet.Args   = -1;
+                }
+                if (callback) {
+                    callback(DRet);
+                }
+            });
+        }
+        
+    }
+
+    function GetCurrentMenuName() {
+        return top.MAIN.idMenuName.innerText;
+    }
+	
+    function GetValidInfo(pRefNo, pHisNo, callback) {
+        /*
+        var SQLStmt = "";
+        var Rec = null;
+        var sStr = "";
+
+        SQLStmt = "SELECT replace(LINE_TXT,CHR(10),'\\n') LINE_TXT FROM acom_com_valid_dtls WHERE ref_no = '" + pRefNo + "' AND HIS_NO = " + pHisNo + ";"
+
+        wasSQLDSO.SQL = SQLStmt;
+        Rec = wasSQLDSO.recordset;
+
+        try { Rec.MoveFirst(); } catch(e) { return ""; }
+        while (!Rec.EOF)
+        {
+        try
+        {
+            //alert("[" + Rec.Fields("LINE_TXT").value + "]");
+            sStr = sStr + Rec.Fields("LINE_TXT").value;
+        } catch(e) {
+            continue;
+        }
+        Rec.MoveNext();
+        }
+
+        if(sStr != "") sStr = sStr.replace(/\\n/gi,"\n");
+
+        return sStr;
+        */
+        
+        const inputData = {
+            dvCd: '40',
+            param1: pRefNo,
+            param2: pHisNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let sStr = output.output40?.str ?? '';
+                if(sStr != "") sStr = sStr.replace(/\\n/gi,"\n");
+                callback(sStr);
+            }
+        });
+    }
+
+    function ValidToStr(pStr) {
+        var sStr = "";
+        var isNeed = true;
+        var iSFlag = 0; //[ 몇번째인가
+        var iEFlag = 0; //] 몇번째인가
+
+        if(pStr == null) return sStr;
+        if(pStr.length == 0) return sStr;
+
+        for(var i=0;i<pStr.length-1;i++)
+        {
+            if(pStr.charAt(i) == '[')
+            {
+                if(iSFlag == 0)
+                {
+                    //[가 첫번째가 되면 옵션문의 시작을 의미한다..
+                    iSFlag = 1;
+                    iEFlag = 0;
+                    isNeed = false;
+                }
+                else if(iSFlag == 1)
+                {
+                    iSFlag = 2;
+                }
+            }
+            else if(pStr.charAt(i) == ']')
+            {
+                if(iEFlag == 0)
+                {
+                    iEFlag = 1;
+                }
+                else if(iEFlag == 1)
+                {
+                    //]가 두번째가 되면 옵션문의 종료를 의미한다.
+                    iEFlag = 2;
+                    iSFlag = 0;
+                    isNeed = true;
+                }
+            }
+
+            if(isNeed)
+            {
+                if((pStr.charAt(i) != '[') && (pStr.charAt(i) != ']'))
+                    sStr = sStr + pStr.charAt(i);
+            }
+        }
+
+        return sStr;
+    }
+
+    function GetDocID(pRefno, pHisNo, callback) {
+        /*
+        var SQLStmt = "";
+        var Rec = null;
+        var aScanDocId = new Array();
+        var idocIdx = 0;
+
+        SQLStmt = "select SCAN_DOC_ID from acom_scan_his WHERE ref_no = '" + pRefno + "' AND HIS_NO = " + pHisNo + ";"
+        wasSQLDSO.SQL = SQLStmt;
+        Rec = wasSQLDSO.recordset;
+
+        try { Rec.MoveFirst(); } catch(e) { return ""; }
+        while (!Rec.EOF)
+        {
+        try
+        {
+            aScanDocId[idocIdx] = Rec.Fields("SCAN_DOC_ID").value;
+            idocIdx++;
+        } catch(e) {
+            continue;
+        }
+        Rec.MoveNext();
+        }
+
+        return aScanDocId;
+        */
+
+        const inputData = {
+            dvCd: '41',
+            param1: pRefno,
+            param2: pHisNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let rtnArr = output.output41?.grid41 ?? [];
+                callback(rtnArr.map(elem => elem.scanDocId));
+            }
+        });
+    }
+
+    function GetDocID2(pRefno, pHisNo, pScanCd, callback) {
+        /*
+        var SQLStmt = "";
+        var Rec = null;
+        var aScanDocId = new Array();
+        var idocIdx = 0;
+
+        SQLStmt = "select SCAN_DOC_ID from acom_scan_his WHERE ref_no = '" + pRefno + "' AND HIS_NO = " + pHisNo + " and scan_cd = '"+pScanCd+"';"
+        wasSQLDSO.SQL = SQLStmt;
+        Rec = wasSQLDSO.recordset;
+
+        try { Rec.MoveFirst(); } catch(e) { return ""; }
+        while (!Rec.EOF)
+        {
+        try
+        {
+            aScanDocId[idocIdx] = Rec.Fields("SCAN_DOC_ID").value;
+            idocIdx++;
+        } catch(e) {
+            continue;
+        }
+        Rec.MoveNext();
+        }
+
+        return aScanDocId;
+        */
+
+        const inputData = {
+            dvCd: '42',
+            param1: pRefno,
+            param2: pHisNo,
+            param3: pScanCd
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let scanDocId = output.output42?.scanDocId ?? '';
+                callback(scanDocId ? [scanDocId] : []);
+            }
+        });
+    };
+
+    //20130924_Cho_1 Request for Internet bank registration (S)
+    function IS_EXIST_IN_EBANKING(pCifNo, callback) {
+        /*
+        var SQLStmt = " SELECT COUNT(*) AS CNT "
+            + " FROM   (SELECT A.CIX_NO  "
+            + "         ,      NVL(SUM(DECODE(B.ACCT_CCY, 'IDR', B.BS_JAN, B.BS_JAN*10000)), 0) AS AMT "
+            + "         FROM   ACOM_CONT_BASE A, ADST_DPB_BASE  B "
+            + "         WHERE  A.CIX_NO = '" + pCifNo + "'  "
+            + "         AND   SUBSTR(A.SUBJ_CD,1,1) = '1' "
+            + "         AND   A.STS = '0' "
+            + "         AND   B.ACCT_NO = A.REF_NO "
+            + "         GROUP BY A.CIX_NO "
+            + "        ) A  "
+            + " ,      ACOM_CIX_BASE B "
+            + " WHERE  B.CIX_NO = A.CIX_NO "
+            + " AND    A.AMT >= 2000000 "
+            + " AND    (   ( \n --INDIVIDUAL \n "
+            + "              B.ID_TP IN ('1','2','3','4') ) "
+            + "              AND "
+            + "              B.CIX_NO NOT IN (SELECT CIF_NO "
+            + "                               FROM   AEBK_ECH_BASE "
+            + "                               WHERE  BIZ_CD = 'T'  "
+            + "                               AND    STS   <> '9') "
+            + "            OR "
+            + "            ( \n --Customer management (Corporate) \n "
+            + "              B.ID_TP IN ('5','6') ) "
+            + "              AND "
+            + "              B.CIX_NO NOT IN (SELECT CIX_NO "
+            + "                               FROM   AEBK_ECH_CONT_BASE "
+            + "                               WHERE  BIZ_CD = 'C' "
+            + "                               AND    STS   <> '9')"
+            + "        ) ";
+
+        wasSQLDSO.SQL = SQLStmt;
+        if(wasSQLDSO.recordset.RecordCount == 0) return true;
+        if(wasSQLDSO.recordset.Fields("CNT").value > 0) return false;
+
+        return true;
+        */
+
+        const inputData = {
+            dvCd: '43',
+            param1: pCifNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                let bRtn = true;
+                const count = output.output43?.count ?? 0;
+                if (count > 0) {
+                    bRtn = false;
+                }
+                callback(bRtn);
+            }
+        });
+    }
+
+    /**
+     * (AS-IS) Returns data
+     * (TO-BE) Use callback function
+     */
+    function CALL_EBANKING_REQUEST_MESSAGE(pCifNo, callback) {
+        var sMsg_en = "This customer is internet banking target customer. \n"
+                    + "Please ask for internet bank registration.";
+
+        var sMsg_id = "Nasabah ini adalah calon nasabah untuk internet banking \n"
+                    + "Tanyakan pada nasabah untuk mendaftarkan diri pada layanan internet banking.";
+
+        var sCifNo = pCifNo;
+
+        if( sCifNo.length != 10 ) return;
+
+        IS_EXIST_IN_EBANKING(sCifNo, result => {
+            if (!result) {
+                if(CDO.SysInfo.sysLnggCd == "EN") {
+                    ShowInfoDialog(sMsg_en, callback);
+                } else {
+                    ShowInfoDialog(sMsg_id, callback);
+                }
+            } else {
+                if (callback) {
+                    callback();
+                }
+            }
+        });
+    }
+    //20130924_Cho_1 Request for Internet bank registration (E)
+
+    /*20171017_rIZKY  CALL FOR crs fatca*/
+    function CALL_CRS_REQUEST_MESSAGE(pCifNo, callback) {
+        var sMsg_en = "This customer not completing FATCA CRS form, please fill CH25";
+        var sMsg_id = "Nasabah belum melengkapi form FATCA CRS pada menu CH25.";
+        
+        /*
+        var SQLStmt = " SELECT COUNT(*) AS CNT "
+                    + " FROM   ACOM_CIX_QUEST "
+                    + "  WHERE FORM_TP IN ('4','5') "    // 20171017_rizky take out iq fatca
+                    + "   AND  CIX_NO = '" + pCifNo + "'  ";
+
+        wasSQLDSO.SQL = SQLStmt;
+        
+        if(wasSQLDSO.recordset.Fields("CNT").value == 0)
+        {
+            // if(HNDC.GetItemValue("FSYSINFO_LANG") == "EN")
+            if (CDO.SysInfo.sysLnggCd == 'EN')
+            {
+                ShowInfoDialog(sMsg_en, callback);
+            }
+            else
+            {
+                ShowInfoDialog(sMsg_id, callback);
+            }
+        }
+        */
+
+        const inputData = {
+            dvCd: '44',
+            param1: pCifNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (output.output44) {
+                const count = output.output44.count;
+                if (count == 0) {
+                    if (CDO.SysInfo.sysLnggCd == 'EN') {
+                        ShowInfoDialog(sMsg_en, callback);
+                    } else {
+                        ShowInfoDialog(sMsg_id, callback);
+                    }
+                }
+            }
+        });
+    }
+
+    /*==========================================================================================================*/
+    /* 20201202_Franky (S) - HQOPR-2020-OUT-674 - Alert Notification for Updating Mandatory Field Customer Data */
+    /*==========================================================================================================*/
+    function CHECK_CUST_MANDATORY(pCifNo, callback) {
+        var sMsg_id   = "Harap melakukan pengkinian data untuk nasabah ini";
+        var sMsg_en   = "Harap melakukan pengkinian data untuk nasabah ini";
+        var sSqlStmt  = "";
+        var sCixCd    = "";
+        var nFlagMsg  = 0;
+
+        /**************************************************************/
+        /***  Check Mandatory from acom_cix_base and acom_cix_lrpt  ***/
+        /**************************************************************/
+        // sSqlStmt  = " SELECT A.cix_no, A.id_tp, A.cust_hnm, A.id_no, A.sex_cd, A.birth_place, A.birth_dt, A.addr_hnm_1, A.post_no \n";
+        // sSqlStmt += "       ,A.ctry_cd, A.job_cd, A.end_id_dt, A.tel_no, A.email_addr, A.mobile_no, A.job_corres, A.job_place \n";
+        // sSqlStmt += "       ,A.job_plc_addr_1, A.job_post_no, A.main_tel_no, A.lob_cd, A.upjo_cd, A.dmcl_ctry_cd, A.cix_cd, A.sales_scale \n";
+        // sSqlStmt += "       ,A.profit_ex_tax, A.asset, A.capital, A.corp_tp, A.remarks1, A.mng_info \n";
+        // sSqlStmt += "       ,B.rt, B.rw, B.province_cd, B.dati_ii, B.city_nm, B.town_tp, B.vilage_tp, B.religion_cd, B.risk_value, B.pep_value \n";
+        // sSqlStmt += "       ,B.korean_yn, B.mother_nm, B.province_cd2, B.dati_ii2, B.city_nm2, B.town_tp2, B.vilage_tp2, B.dati_ii3 \n";
+        // sSqlStmt += "       ,B.income_cd, B.src_income_cd, B.prps_src_income_cd, B.citizen_cd, B.owner_grp_cd, B.rel_party_cd, B.grp_owner_lbu \n";
+        // sSqlStmt += "       ,B.cix_op_no, B.pbrm_no, B.bnfc_ownr, B.npwp, B.est_no, B.est_dt, B.est_nota, B.estb_plac, B.jtc_min_no, B.est_end_dt \n";
+        // sSqlStmt += "       ,B.cntct_prsn_nm, B.cntct_prsn_tel_no, B.siup_no, B.siup_exp_dt, B.go_pub_flg \n";
+        // sSqlStmt += "   FROM acom_cix_base A, acom_cix_lrpt B \n";
+        // sSqlStmt += "   WHERE A.cix_no = B.cix_no AND A.cix_no = '" + pCifNo + "'  ";
+
+        // wasSQLDSO.SQL = sSqlStmt;
+
+        const inputData = {
+            dvCd: '45',
+            param1: pCifNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            const rtnObj = output.output45;
+            if (rtnObj) {
+                sCixCd = rtnObj.cixCd;
+
+                if (sCixCd == 'I1') {
+                    /* Check Mandatory Data for Individual Customer (CH11) */
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.idTp            , nFlagMsg);          //Identity Data - Identity Type
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.custHnm         , nFlagMsg);          //Identity Data - Complete Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.idNo            , nFlagMsg);          //Identity Data - ID No
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.birthPlace      , nFlagMsg);          //Identity Data - Place of Birth
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.addrHnm1        , nFlagMsg);          //Identity Data - Alamat ID
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.provinceCd      , nFlagMsg);          //Identity Data - Provinsi
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.townTp          , nFlagMsg);          //Identity Data - Kelurahan
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.ctryCd          , nFlagMsg);          //Identity Data - Kewarganegaraan
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.religionCd      , nFlagMsg);          //Identity Data - Religion
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.sexCd           , nFlagMsg);          //Identity Data - Gender
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.birthDt         , nFlagMsg);          //Identity Data - Date of Birth
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.rt              , nFlagMsg);          //Identity Data - RT
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.rw              , nFlagMsg);          //Identity Data - RW
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.postNo          , nFlagMsg);          //Identity Data - Kode Pos
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.datiIi          , nFlagMsg);          //Identity Data - DATI II Code
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cityNm          , nFlagMsg);          //Identity Data - DATI II Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.vilageTp        , nFlagMsg);          //Identity Data - Kecamatan
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.jobCd           , nFlagMsg);          //Identity Data - Occupation
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.endIdDt         , nFlagMsg);          //Identity Data - ID Expiry Date
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.riskValue       , nFlagMsg);          //Identity Data - Risk Profile
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.pepValue        , nFlagMsg);          //Identity Data - PEP
+
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.telNo           , nFlagMsg);          //Personal Data - Phone Number
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.emailAddr       , nFlagMsg);          //Personal Data - E-Mail
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.koreanYn        , nFlagMsg);          //Personal Data - Korean Y/N
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.mobileNo        , nFlagMsg);          //Personal Data - Mobile Phone
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.motherNm        , nFlagMsg);          //Personal Data - Mother MDN Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.jobCorres       , nFlagMsg);          //Personal Data - Corresponding Addr
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.provinceCd2     , nFlagMsg);          //Personal Data - Provinsi
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.datiIi2         , nFlagMsg);          //Personal Data - DATI II Code
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cityNm2         , nFlagMsg);          //Personal Data - DATI II Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.townTp2         , nFlagMsg);          //Personal Data - Kelurahan
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.vilageTp2       , nFlagMsg);          //Personal Data - Kecamatan
+
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.jobPlace        , nFlagMsg);          //Employment Data - Company Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.jobPlcAddr1     , nFlagMsg);          //Employment Data - Company Address
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.datiIi3         , nFlagMsg);          //Employment Data - DATI II Code
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.jobPostNo       , nFlagMsg);          //Employment Data - Kode Pos
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.mainTelNo       , nFlagMsg);          //Employment Data - Phone No
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.lobCd           , nFlagMsg);          //Employment Data - Line of Business
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.upjoCd          , nFlagMsg);          //Employment Data - Detail of Line of Business
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.incomeCd        , nFlagMsg);          //Employment Data - Grs Incm/Slry per Year
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.srcIncomeCd     , nFlagMsg);          //Employment Data - Source of Income
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.prpsSrcIncomeCd , nFlagMsg);          //Employment Data - Purps Src of Income
+
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.citizenCd       , nFlagMsg);          //Fill Out By Bank - Type of Residence
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.dmclCtryCd      , nFlagMsg);          //Fill Out By Bank - Domicile Country
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.ownerGrpCd      , nFlagMsg);          //Fill Out By Bank - Grp Debtors SID
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.relPartyCd      , nFlagMsg);          //Fill Out By Bank - Related Party
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.grpOwnerLbu     , nFlagMsg);          //Fill Out By Bank - Type Debt LBU
+
+                    /* Check BO */
+                    if(rtnObj.mngInfo.substr(9,1) == "1"){
+                        nFlagMsg = IS_VALUE_NULL(rtnObj.bnfcOwnr    , nFlagMsg);          //Fill Out By Bank - Beneficial Owner CIX No
+                    }
+
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cixOpNo         , nFlagMsg);          //Relation Manager - Funding Account Officer
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.pbrmNo          , nFlagMsg);          //Relation Manager - Business Unit 1
+
+                    afterProc();
+                } else {
+                    /* Check Mandatory Data for Individual Customer (CH12) */
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.custHnm         , nFlagMsg);          //Identity Data - Complete Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.idTp            , nFlagMsg);          //Identity Data - Identity Type
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.idNo            , nFlagMsg);          //Identity Data - ID No
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cixCd           , nFlagMsg);          //Identity Data - Character Type
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.endIdDt         , nFlagMsg);          //Identity Data - End of date
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.upjoCd          , nFlagMsg);          //Identity Data - Line of Business
+                    // nFlagMsg = IS_VALUE_NULL(rtnObj.npwp, nFlagMsg);          //Identity Data - NPWP
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.riskValue       , nFlagMsg);          //Identity Data - Risk Profile
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.pepValue        , nFlagMsg);          //Identity Data - PEP
+                    
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.estNo           , nFlagMsg);          //Company Data - Deed of Estble No
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.estDt           , nFlagMsg);          //Company Data - Deed of Estble Date
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.estNota         , nFlagMsg);          //Company Data - Deed of Estble Nota
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.estbPlac        , nFlagMsg);          //Company Data - Deed of Estble Place
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.jtcMinNo        , nFlagMsg);          //Company Data - Dcr of Just Minist No
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.addrHnm1        , nFlagMsg);          //Company Data - Company Address
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.provinceCd      , nFlagMsg);          //Company Data - Provinsi
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.rt              , nFlagMsg);          //Company Data - RT
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.rw              , nFlagMsg);          //Company Data - RW
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.mainTelNo       , nFlagMsg);          //Company Data - Phone Number
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.postNo          , nFlagMsg);          //Company Data - Post Code
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cntctPrsnNm     , nFlagMsg);          //Company Data - Contact Person Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.estEndDt        , nFlagMsg);          //Company Data - BOD Term End Dt
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.datiIi          , nFlagMsg);          //Company Data - DATI II Code
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cityNm          , nFlagMsg);          //Company Data - DATI II Name
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.townTp          , nFlagMsg);          //Company Data - Kelurahan
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.vilageTp        , nFlagMsg);          //Company Data - Kecamatan
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.emailAddr       , nFlagMsg);          //Company Data - E-Mail
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cntctPrsnTelNo  , nFlagMsg);          //Company Data - Contact Person Phone No
+
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.siupNo          , nFlagMsg);          //Licensing Documents - No. SIUP
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.siupExpDt       , nFlagMsg);          //Licensing Documents - Expired Date of SIUP
+
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.salesScale      , nFlagMsg);          //Financial Data - Sales
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.profitExTax     , nFlagMsg);          //Financial Data - Net Profit After Tax
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.asset           , nFlagMsg);          //Financial Data - Total Asset
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.capital         , nFlagMsg);          //Financial Data - Capital
+                    
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.citizenCd       , nFlagMsg);          //Fill Out By Bank - Type of Residence
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.relPartyCd      , nFlagMsg);          //Fill Out By Bank - Related Party
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.corpTp          , nFlagMsg);          //Fill Out By Bank - Foreign Corp In Local
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.dmclCtryCd      , nFlagMsg);          //Fill Out By Bank - Domicle Country
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.goPubFlg        , nFlagMsg);          //Fill Out By Bank - Go Public
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.remarks1        , nFlagMsg);          //Fill Out By Bank - Note
+                    
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.cixOpNo         , nFlagMsg);          //Relation Manager - Funding Account Officer
+                    nFlagMsg = IS_VALUE_NULL(rtnObj.pbrmNo          , nFlagMsg);          //Relation Manager - Business Unit 1
+
+                    /****************************************************************************/
+                    /***  Check Mandatory from acom_cix_bod, acom_cix_shldr and acom_cix_pic  ***/
+                    /****************************************************************************/
+                    const inputData = {
+                        dvCd: '47',
+                        param1: pCifNo
+                    };
+
+                    libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+                        const rtnObj = output.output47 ?? {};
+                        if (rtnObj.countBod == 0
+                        || rtnObj.countShldr == 0
+                        || rtnObj.countPic == 0) {
+                            nFlagMsg = 1;
+                        }
+                        afterProc();
+                    });
+                }
+            }
+        });
+
+        function afterProc() {
+            if (nFlagMsg == 1) {
+                if (CDO.SysInfo.sysLnggCd == 'EN') {
+                    ShowInfoDialog(sMsg_en, callback);
+                } else {
+                    ShowInfoDialog(sMsg_id, callback);
+                }
+            }
+        }
+    }
+
+    function IS_VALUE_NULL(chkVal, cur_val) {
+        if(chkVal == ""){
+           return 1;
+        }
+        return cur_val;
+    }
+    /* 20201202_Franky (E) */
+
+    /*20220320  CALL FOR POA Registry*/
+    function CALL_POA_REQUEST_MESSAGE(pCifNo, callback) {
+        var sMsg_en = "This customer not completing POA form, please Registry POA CH31";
+        var sMsg_id ="Nasabah belum melengkapi form Register POA pada menu CH31.";
+        
+        // var sCifNo = pCifNo;
+
+        // var SQLStmt = " SELECT COUNT(*) AS CNT "
+        //             + " FROM   ACOM_POA_BASE "
+        //             + "  WHERE CIX_NO = '" + pCifNo + "'  ";
+
+
+        // wasSQLDSO.SQL = SQLStmt;
+        
+        // if(wasSQLDSO.recordset.Fields("CNT").value == 0)
+        // {
+        //     // if(HNDC.GetItemValue("FSYSINFO_LANG") == "EN")
+        //     if (CDO.SysInfo.sysLnggCd == 'EN')
+        //     {
+        //         ShowInfoDialog(sMsg_en, callback);
+        //     }
+        //     else
+        //     {
+        //         ShowInfoDialog(sMsg_id, callback);
+        //     }
+        // }
+
+        const inputData = {
+            dvCd: '46',
+            param1: pCifNo
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (output.output46) {
+                const count = output.output46.count;
+                if (count == 0) {
+                    if (CDO.SysInfo.sysLnggCd == 'EN') {
+                        ShowInfoDialog(sMsg_en, callback);
+                    } else {
+                        ShowInfoDialog(sMsg_id, callback);
+                    }
+                }
+            }
+        });
+    }
+
+    // 금액필드 문자열 형태로 변경 ( 리포트 AddData 시 사용 )
+    function NumConvert(num, cnt)
+    {
+        var arrDot  = new Array();
+        if (cnt == 0)
+        {
+            arrDot[0] = String(num);
+            arrDot[1] = "";
+        }
+        else
+        {
+            arrDot = String(num).split(".");
+
+            if (arrDot.length == 1)
+                arrDot[1] = ".00";
+            else
+                arrDot[1] = "." + arrDot[1].substring(0,2);
+        }
+        num = arrDot[0];
+        var numLen = num.length;
+        var newNum = '';
+
+        for(i=0; i < numLen; i++)
+        {
+            newNum += num.substring(i, i+1);
+            if(((numLen - i-1)%3) == 0 && (numLen-i-1) > 0 ) newNum += ',';
+        }
+        newNum = newNum + arrDot[1];
+        return newNum;
+    }
+
+    // SCREEN COMMON //
+    var _instUtil = function() {
+        var shortDateFormat = 'YYYY/MM/DD';
+        //var shortDateFormat = 'DD/MM/YYYY';
+        var longDateFormat = 'YYYY/MM/DD';
+        // 2016/11/22
+        var defDateFormat = 'YYYYMMDD';  // DB Date Format or Storage Date Format
+
+        this.LocalToDate = function(formDateStr) {
+            var rt = '';
+			var cy = '';
+			var cm = '';
+			var cd = '';
+
+			for (var i=0;i<formDateStr.length;i++) {
+				var fc = "";
+				
+				var format = shortDateFormat;
+				if(formDateStr.length == 8){
+					format = shortDateFormat.replace(/\//gi,"").replace(/-/gi,"");
+				}
+				
+				fc = (format[i]+'').toUpperCase();
+				
+				if (fc == 'Y') {
+					cy+=formDateStr[i];
+				} else if (fc == 'M') {
+					cm+=formDateStr[i];
+				} else if (fc == 'D') {
+					cd+=formDateStr[i];
+				}
+			}
+
+			rt = (shortDateFormat+'').toUpperCase();
+			rt = rt.replace(/YYYY/gi,cy);
+
+			if (cm.length == 1) cm = '0'+cm;
+			rt = rt.replace(/MM/gi,cm);
+
+			if (cd.length == 1) cd = '0'+cd;
+			rt = rt.replace(/DD/gi,cd);
+//             }
+            return rt;
+        };
+
+        this.DateToLocal = function(dateStr,dateForm,dateType) {
+            //console.log('lib.util.DateToLocal('+dateStr+','+dateForm+','+dateType+')');
+            var cy = '';
+            var cm = '';
+            var cd = '';
+
+            for (var i=0;i<dateStr.length;i++) {
+                var fc = (dateForm[i]+'').toUpperCase();
+                if (fc == 'Y') {
+                    cy+=dateStr[i];
+                } else
+                if (fc == 'M') {
+                    cm+=dateStr[i];
+                } else
+                if (fc == 'D') {
+                    cd+=dateStr[i];
+                }
+            }
+
+            //console.log(cy+' / '+cm+' / '+cd);
+
+
+            var rt = (dateType.trim().toUpperCase() == 'S') ? shortDateFormat : longDateFormat;
+            rt = rt.replace(/YYYY/gi,cy);
+
+            if (cm.length == 1) cm = '0'+cm;
+            rt = rt.replace(/MM/gi,cm);
+
+            if (cd.length == 1) cd = '0'+cd;
+            rt = rt.replace(/DD/gi,cd);
+
+            return rt;
+        };
+		
+		this.GetDateYMD = function(dateStr,dateForm,dateType) {
+            //console.log('lib.util.DateToLocal('+dateStr+','+dateForm+','+dateType+')');
+            var cy = '';
+            var cm = '';
+            var cd = '';
+
+            for (var i=0;i<dateStr.length;i++) {
+                var fc = (dateForm[i]+'').toUpperCase();
+                if (fc == 'Y') {
+                    cy+=dateStr[i];
+                } else
+                if (fc == 'M') {
+                    cm+=dateStr[i];
+                } else
+                if (fc == 'D') {
+                    cd+=dateStr[i];
+                }
+            }
+            
+            var rt = [];
+            rt[0] = cy;
+            rt[1] = cm;
+            rt[2] = cd;
+
+            return rt;
+        };
+
+        this.GetDateCurFormat = function(dateStr, sepStr = '/') {
+            if (dateStr) {
+                const arrYMD = LIB().Util.GetDateYMD(dateStr, `YYYY${sepStr}MM${sepStr}DD`);
+                let curDateFrmt = (CDO?.SysInfo?.dtFrmt ?? 'mmddyyyy').toUpperCase();
+                if (curDateFrmt.startsWith('YYYY')) {
+                    curDateFrmt = curDateFrmt.substring(0,4) + sepStr + curDateFrmt.substring(4,6) + sepStr + curDateFrmt.substring(6,8);
+                } else {
+                    curDateFrmt = curDateFrmt.substring(0,2) + sepStr + curDateFrmt.substring(2,4) + sepStr + curDateFrmt.substring(4,8);
+                }
+    
+                return curDateFrmt.replace('YYYY', arrYMD[0]).replace('MM', arrYMD[1]).replace('DD', arrYMD[2]);
+            } else {
+                return '';
+            }
+        }
+    };
+
+    // LIB().Util object
+    var Util = new _instUtil();
+
+    // Initialize //
+    $(document).ready(function(){
+        /**
+         * waiBrowser report port setting
+         * 13030 : REAL
+         * 23030 : DEV
+         */
+        console.log('[waiBrowser.enabled] ', waiBrowser.enabled);
+        if (waiBrowser.enabled) {
+            waiBrowser.modules.report.start('23030');
+            console.log('[waiBrowser_Report port] ', waiBrowser_Report.getPort());
+        }
+
+        InitDC();
+        //LibraryInited=true;
+
+        document.body['DoEvents'] = function(){
+            //console.log(arguments.callee.caller);
+            console.warn('LIB().document.body.DoEvents 함수 사용 안함 삭제 필요');
+        };
+		try {
+			waiRptVendor = new $waiReport.classes.reportVendor();
+			console.log('vendor : ',waiRptVendor);
+		} catch(E) {
+			console.log('rpt : ',E);
+		}
+    });
+
+    //======================================================//
+    // NHGBS : Base64 File Load Functions                   //
+    // Corebank Co.,Ltd.  2013-06-20 Hyunwoo,Hwang          //
+    //======================================================//
+    // 파일 업로드 관련 대체 개발 필요
+    // 아래 내용들은 사용 금지 우선 에러 방지를 위해 그냥 둠
+    // 20160726 : 황현우
+    {
+        var B64FileCount = 0;
+
+        function B64LoadFiles() {
+            try {
+                B64File.Clear();
+                B64FileCount = 0;
+                B64File.LoadMultiFiles();
+                B64FileCount = B64File.FileCount;
+                //alert(B64FileCount);
+            } catch(E) {
+                alert('B64LoadFiles Error : '+E.message);
+            }
+        }
+
+        function B64FileName(idx) {
+            try {
+                var RT = B64File.GetFileName(idx);
+                return RT;
+            } catch(E) {
+                alert('B64FileName Error : '+E.message);
+            }
+        }
+
+        function B64FilePath(idx) {
+            try {
+                var RT = B64File.GetFilePath(idx);
+                return RT;
+            } catch(E) {
+                alert('B64FilePath Error : '+E.message);
+            }
+        }
+
+        function B64FileData(idx) {
+            try {
+                var RT = B64File.GetFileData(idx);
+                return RT;
+            } catch(E) {
+                alert('B64FileData Error : '+E.message);
+            }
+        }
+
+        function B64FileClear() {
+            try {
+                B64File.Clear();
+                B64FileCount = 0;
+            } catch(E) {
+                alert('B64FileClear Error : '+E.message);
+            }
+        }
+
+        function B64onSelectFile() {
+            // B64 Loaded Files
+        }
+
+        function B64Send(SvcUrl,UpPath) {
+            var UploadPath = "/userdir/fxnywas/docs/NHGBS_SHR/allow";
+            var FNames = "";
+            if (UpPath != "") UploadPath = UpPath;
+
+            var RT = B64File.Send(SvcUrl,UploadPath);
+            if (RT != "") {
+                RT = RT.substr(0,RT.length-1);
+                //alert(RT);
+                FNames = RT.split(";");
+            }
+
+            return FNames;
+        }
+
+        function StopExecute(Wnd) {
+            Wnd.parent.StopExecute = true;
+        }
+    }
+    
+	var reportCallbackMap = new Map();
+    //------------------------------------------------------------------------------------------------------------------
+    // COMMON BIZ functions - 변환 작업 필요 구간 끝
+    //------------------------------------------------------------------------------------------------------------------
+	
+    //------------------------------------------------------------------------------------------------------------------
+    // waiReport functions
+    //
+    // ex) var rpt = [ {'form':'FA14.yrf', 'data':rptData1}, {'form':'voucher.yrf', 'data':rptData2} ];
+    //     LIB().execWaiReport( rpt );
+    //------------------------------------------------------------------------------------------------------------------
+    function execWaiReport( rptOpt, isPrint ,callback ) {
+        var defUrl  = `${RptURL()}/report/`;
+        var vendors = [];
+
+        if (!Array.isArray(rptOpt)) {
+            rptOpt = [rptOpt];
+        }
+
+        var buffer = new $waiReport.classes.buffer();
+        // buffer.genServerPrev = true;
+        // buffer.dataCompress  = true;
+
+        for (var i=0; i<rptOpt.length; i++) {
+            var v = new $waiReport.classes.reportVendor();
+            v.ReportUrl = defUrl+rptOpt[i]['form'];
+            if (rptOpt[i].detailData) {
+                v.JSON = rptOpt[i].detailData;
+            } else if (rptOpt[i]['data']) {
+                if (!Array.isArray(rptOpt[i]['data'])) {
+                    rptOpt[i]['data'] = [rptOpt[i]['data']];
+                }
+                v.JSON = rptOpt[i]['data'];
+            }
+            v.quality   = parseFloat("1.0");
+            v.addBuffer(buffer);
+
+            vendors.push(v);
+        }
+        var handler;
+        if (isPrint == true) {
+            handler = buffer.Show(false);
+        } else {
+            handler = buffer.Show();
+        }
+
+        if(callback != undefined){
+            reportCallbackMap.set(handler, callback);
+        }
+    }
+    function rptClose(targetWin){
+        var callback = reportCallbackMap.get(targetWin);
+        if (callback != undefined)  {
+            callback();
+            reportCallbackMap.delete(targetWin);
+        }
+    }
+    function getWaiReportBuffer() {
+        return new $waiReport.classes.buffer();
+    }
+
+    function getWaiReportVendor(rptOpt = {}) {
+        var defUrl  = `${RptURL()}/report/`;
+        var v = new $waiReport.classes.reportVendor();
+        if (rptOpt.form) {
+            v.ReportUrl = defUrl + rptOpt.form;
+        }
+        if (rptOpt.detailData) {
+            v.JSON = rptOpt.detailData;
+        } else if (rptOpt.data) {
+            if (!Array.isArray(rptOpt.data)) {
+                rptOpt.data = [rptOpt.data];
+            }
+            v.JSON = rptOpt.data;
+        }
+        v.quality = parseFloat("1.0");
+        return v;
+    }
+
+    function showReportAsync(buffer) {
+        return new Promise((resolve, reject) => {
+            try {
+                reportCallbackMap.set(buffer.Show(), () => {
+                    resolve();
+                });
+            } catch (e) {
+                console.log('e -> ', e);
+                reject();
+            }
+        });
+    }
+
+    /**
+     * (AS-IS) Use WVIrr function in WINMAN
+     * (TO-BE) Use IRR function in Library
+     * 
+     * ex) LIB().IRR([-1000, 300, 400, 500])
+     */
+    function IRR(arrVal, guess) {
+        // Credits: algorithm inspired by Apache OpenOffice
+        
+        var values = arrVal.map(value => Number(value));
+
+        // Calculates the resulting amount
+        var irrResult = function(values, dates, rate) {
+            var r = rate + 1;
+            var result = values[0];
+            for (var i = 1; i < values.length; i++) {
+            result += values[i] / Math.pow(r, (dates[i] - dates[0]) / 365);
+            }
+            return result;
+        }
+
+        // Calculates the first derivation
+        var irrResultDeriv = function(values, dates, rate) {
+            var r = rate + 1;
+            var result = 0;
+            for (var i = 1; i < values.length; i++) {
+            var frac = (dates[i] - dates[0]) / 365;
+            result -= frac * values[i] / Math.pow(r, frac + 1);
+            }
+            return result;
+        }
+
+        // Initialize dates and check that values contains at least one positive value and one negative value
+        var dates = [];
+        var positive = false;
+        var negative = false;
+        for (var i = 0; i < values.length; i++) {
+            dates[i] = (i === 0) ? 0 : dates[i - 1] + 365;
+            if (values[i] > 0) positive = true;
+            if (values[i] < 0) negative = true;
+        }
+        
+        // Return error if values does not contain at least one positive value and one negative value
+        if (!positive || !negative) return '#NUM!';
+
+        // Initialize guess and resultRate
+        var guess = (typeof guess === 'undefined') ? 0.1 : guess;
+        var resultRate = guess;
+        
+        // Set maximum epsilon for end of iteration
+        var epsMax = 1e-10;
+        
+        // Set maximum number of iterations
+        var iterMax = 50;
+
+        // Implement Newton's method
+        var newRate, epsRate, resultValue;
+        var iteration = 0;
+        var contLoop = true;
+        do {
+            resultValue = irrResult(values, dates, resultRate);
+            newRate = resultRate - resultValue / irrResultDeriv(values, dates, resultRate);
+            epsRate = Math.abs(newRate - resultRate);
+            resultRate = newRate;
+            contLoop = (epsRate > epsMax) && (Math.abs(resultValue) > epsMax);
+        } while(contLoop && (++iteration < iterMax));
+
+        if(contLoop) return '#NUM!';
+
+        // Return internal rate of return
+        return resultRate;
+    }
+
+	function libraryOnLoad() {
+	    //ivkEqui._evt_beforeCall = NeedEquiParams;
+	}
+
+    function GetCtryInfo(BIC, callback) {
+        /*
+        SqlString = "SELECT * FROM acom_com_ctry";
+        SqlString = SqlString + " WHERE CD = '" + BIC + "'";
+        wasSqlDso.SQL = SqlString;
+        */
+
+        const inputData = {
+            dvCd: '48',
+            param1: BIC
+        };
+
+        libCallService('/HANABANK/V1/COM/CM/COMCMOMAINI.SVC', inputData, output => {
+            if (callback) {
+                callback(output.output48 || null);
+            }
+        });
+    }
+	
+</script>
+</head>
+<body onload="libraryOnLoad()">
+    <!--
+    <dataservices>
+        <dataservice id="ivkEqui" map="/tis/HFO0300.xml" service="HFO0300" dso="prmDSOInEqui=SCR_INPUT;prmDSOOutEqui=SCR_OUTPUT" onsuccess="//alert('ok!');" onerror="//alert(ivkEqui.RawResult.xml);"></dataservice>
+    </dataservices>
+    -->
+</body>
+</html>

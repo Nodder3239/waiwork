@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEST-Error</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/Error.css">
+    <style>
+        INPUT[type="button"].blueBtn_outline, button.blueBtn_outline{
+            font-family: 'HanaL';
+            border-color:#008485 !important;
+            background-color: #008485 !important;
+            color: #ffffff !important;
+            font-size: 9pt !important;
+            font-weight: bold !important;
+            cursor: default;
+            letter-spacing: 0.8px;
+        }
+        INPUT[type="button"].blueBtn_outline:hover, button.blueBtn_outline:hover{
+            border-color:#008485 !important;
+            background-color: #008485 !important;
+            color: #ffffff !important;
+            cursor: pointer;
+        }
+        .mpBtns.blueBtn_outline.active, .mpBtns.blueBtn_outline.active:disabled {
+            border-color:#008485 !important;
+            background-color: #008485 !important;
+            color: #ffffff !important;
+            cursor: default;
+        }
+    </style>
+    <script type="text/javascript">
+        let bInsertHist = false;
+        let bShowStackTrace = false;
+
+        function bodyOnload() {
+            window.onerror = null;
+        }
+        function onLoadPage(isPopup) {
+            if (isPopup) {
+                DialogLoaded();
+            }
+        }
+        function DialogLoaded() {
+            //getDialogArguments();
+            var DlgArg = window.dialogArguments.Args;
+            if ( (DlgArg+"") != "undefined" ) {
+                // Gethering Arguments
+                var vTitle   = DlgArg.ED_Title;
+                var vMessage = DlgArg.ED_Message;
+                var vURL     = DlgArg.ED_URL;
+                var vLine    = DlgArg.ED_Line;
+                let vStack;
+                let vSvcErr;
+                let vErrInfo;
+                let msgData = [];
+
+                if (typeof DlgArg.ED_Message == 'object') {
+                    vMessage = DlgArg.ED_Message?.message ?? '';
+                    vStack = DlgArg.ED_Message?.stack;
+                    vSvcErr = DlgArg.ED_Message?.bSvcErr ?? false;
+                }
+                if (vSvcErr) {
+                    document.getElementById('text-box').style.overflow = 'auto';
+                    vErrInfo = DlgArg.ED_Message.errInfo;
+                    DlgIcon.src = "./images/serviceError.png";
+                    errTitle.innerText = "Service Error Message";
+                    
+                    // document.getElementById('StackInfo').style.display = '';
+                    // document.getElementById('MsgDisp').style.height = '100%';
+                    // StackDisp.innerText = vStack;
+
+                    if (vErrInfo.globId) {
+                        btnGlobId.style.display = '';
+                        btnGlobId.value = vErrInfo.globId;
+                    }
+
+                    if (vErrInfo.msg) {
+                        let sMsg = vErrInfo.msg.trim();
+                        if (sMsg.startsWith('[') && sMsg.endsWith(']')) {
+                            sMsg = sMsg.substring(1, sMsg.length-1);
+                        }
+                        tdMsg.innerText = sMsg;
+                    }
+                    tdSubMsg.innerText = vErrInfo.subMsg;
+                    tdGlobId.innerText = vErrInfo.globId;
+                    stackDisp.innerText = vErrInfo.stack;
+
+                    // if (_waiBrowser.getDevMode()) {
+                    //     trStack.style.display = '';
+                    //     stackDisp.innerText = vErrInfo.stack;
+                    // }
+
+                    if (topWindow().LIB.runType == 'PROD') {
+                        // DlgIcon.style.cursor = 'pointer';
+                        // DlgIcon.onclick = function() {
+                        //     if (trStack.style.display == 'none') {
+                        //         trStack.style.display = '';
+                        //     }
+                        //     if (!bShowStackTrace) {
+                        //         bShowStackTrace = true;
+                        //         DlgIcon.style.cursor = '';
+                        //     }
+                        // }
+                    } else {
+                        trStack.style.display = '';
+                        btnRegistLog.style.display = '';
+                        btnOk.style.left = 'calc(50% + 65px)';
+                    }
+
+                    gridInfo.style.display = '';
+                    // gridInfo.setData(msgData);
+                } else {
+                    errTitle.innerText = "Dialog Error Message";
+                    DlgIcon.src = "./images/error.png";
+                    if (vURL && vLine) {
+                        document.getElementById('AddInfo').style.display = '';
+                    } else {
+                        document.getElementById('MsgDisp').style.height = '100%';
+                    }
+                    if (vStack) {
+                        vMessage += '\n\n' + vStack;
+                    }
+
+                    // Processing Message
+                    var i = 0;
+                    var j = 0;
+                    var s = 0;
+                    var MsgArr   = vMessage.split("\n");
+                    // ServiceError check
+                    /*
+                    var IsServiceError = false;
+                    if (MsgArr.length >= 3) {
+                        var Tmp = MsgArr[0]+"";
+                        if ( Tmp.charAt(0) == "[" ) {
+                            for (i=1;i<=Tmp.length;i++) {
+                                if ( Tmp.charAt(i) == "]" ) {
+                                    j = (i+1);
+                                    break;
+                                }
+                            }
+                            if (j > 0) {
+                                if ( Tmp.substring(j,j+20) == "Service call failed." ) {
+                                    IsServiceError = true;
+                                }
+                            }
+                        }
+                    }
+                    // Display Processing   		      
+                    document.body.title = vTitle;
+                    MsgDisp.innerText = "";
+                    if (IsServiceError) {
+                        errTitle.innerText = "Service Error Message";
+                        DlgIcon.src = "./images/servieError.png";
+                        s = 2;
+                    }
+                    else {
+                        errTitle.innerText = "Dialog Error Message";
+                        DlgIcon.src = "./images/error.png";
+                    }
+                    */
+                    /*
+                    MsgDisp.innerHTML = "";
+                    */
+                    for (i=s;i<MsgArr.length;i++) {
+                        /*
+                        MsgDisp.innerHTML = MsgDisp.innerHTML + MsgArr[i] + "<br>\n";
+                        */
+                        var TmpMsg = MsgArr[i];
+                        TmpMsg = TmpMsg.replace(/&apos;/gi,"'");
+                        TmpMsg = TmpMsg.replace(/&lt;/gi,"<");
+                        TmpMsg = TmpMsg.replace(/&gt;/gi,">");
+                        TmpMsg = TmpMsg.replace(/&amp;/gi,"&");
+                        TmpMsg = TmpMsg.replace(/&quot;/gi,'"');
+                        MsgDisp.value = MsgDisp.value + TmpMsg + "\n";
+                    }
+                    URLDisp.innerText = vURL;
+                    LineDisp.innerText = vLine;
+                }
+            }
+        }
+        
+        // function showErrInfo() {
+        //     if (stackDisp.style.display == 'none') {
+        //         btnErrInfo.style.display = 'none';
+        //         stackDisp.style.display = '';
+        //         insertErrHist();
+        //     }
+        // }
+
+        function insertErrHist() {
+            const errInfo = window.dialogArguments.Args?.ED_Message?.errInfo;
+            if (errInfo) {
+                const globId = errInfo.globId;
+                // const svcUrl = errInfo.send?.callOpt?.url;
+                const sendData = errInfo.send?.data;
+                // const recvData = errInfo.recv?.data;
+                // if (globId && svcUrl && sendData && recvData) {
+                if (globId && sendData) {
+                    // console.log('globId, svcUrl, sendData, recvData -> ', globId, svcUrl, sendData, recvData);
+                    try {
+                        // const inputData = {
+                        //     globId,
+                        //     userId: sendData.SysInfo?.userId ?? ''
+                        //     // trscCd: sendData.SysInfo?.scrnId ?? '',
+                        //     // serviceInput: JSON.stringify(sendData.input ?? {}, null, '\t'),
+                        //     // systemInput: JSON.stringify({
+                        //     //     SysInfo: sendData.SysInfo ?? {},
+                        //     //     EtcInfo: sendData.EtcInfo ?? {}
+                        //     // }, null, '\t'),
+                        //     // serviceOutput: JSON.stringify(recvData.output ?? {}, null, '\t'),
+                        //     // systemOutput: JSON.stringify({
+                        //     //     SysInfo: (recvData.SysInfo ?? recvData.sysInfo) ?? {},
+                        //     //     EtcInfo: recvData.EtcInfo ?? {}
+                        //     // }, null, '\t'),
+                        //     // stackTrace: errInfo.stack ?? '',
+                        //     // serviceUrl: svcUrl
+                        // };
+
+                        var DArg = new DArgument();
+                        DArg.Args = {
+                            globId,
+                            userId: sendData.SysInfo?.userId ?? ''
+                        };
+                        
+                        openPopup("/frame/registErrorLog.html", DArg, "status=no;resizeable=no;scroll=no,center=yes;dialogHeight=212px;dialogWidth=560px", function(Ret) {
+                            if (Ret) {
+                                btnOk.focus();
+                                bInsertHist = true;
+                            } else {
+                                console.log('Insert log service error...');
+                                btnOk.focus();
+                            }
+                        });
+                        
+                        // callBasicServiceAsync('/HANABANK/V1/COM/CM/COMCMO9995A.SVC', inputData)
+                        //     .then(() => {
+                        //         try {
+                        //             showInfoDialog('Log registered successfully.');
+                        //             bInsertHist = true;
+                        //         } catch {}
+                        //     }).catch(() => {
+                        //         console.log('Insert log service error...');
+                        //     });
+                    } catch (e) {
+                        console.log('error...', e);
+                    }
+                }
+            }
+        }
+
+        function fnCopyGlobId() {
+            try {
+                waiBrowser.modules.clipboard.SetText(btnGlobId.value);
+            } catch {}
+        }
+
+        function fRegistLog() {
+            if (bInsertHist) {
+                showInfoDialog('Already registered.');
+            } else {
+                fnCopyGlobId();
+                insertErrHist();
+            }
+        }
+
+        function fclose() {
+            self.close();
+        }
+    </script>
+</head>
+<body onload="bodyOnload();" onkeydown="if ([13, 27].includes(event.keyCode)) fclose();">
+    <div id="container">
+        <div class="header">
+            <img id="DlgIcon" src="./images/error.png" alt="#">
+            <h1 id="errTitle"></h1>
+            <input id="btnGlobId" type="button" class="blueBtn_outline" style="display: none; width: 260px; height: 22px; margin-top: 12px; position: absolute; right: 0px; border-radius: 4px;" onclick="fnCopyGlobId();">
+        </div>
+        <div id="text-box" style="padding: 1px;">
+            <table id="gridInfo" style="display:none; font-size: 9pt; top: 0px; left: 0px; width: 100%; position: absolute;">
+                <tbody>
+                    <tr>
+                        <th style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; background-color: #e9f2f2; text-align: center; padding: 1px; color: #008485; width: 110px;">Type</th>
+                        <th style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; background-color: #e9f2f2; text-align: center; padding: 1px; color: #008485; width: calc(100% - 110px);">Content</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px;">MSG</td>
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px; word-break: break-all;" id="tdMsg"></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px">SUB_MSG</td>
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px; word-break: break-all;" id="tdSubMsg"></td>
+                    </tr>
+                    <tr style="display: none;">
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px">GLOBAL_ID</td>
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px; word-break: break-all;" id="tdGlobId"></td>
+                    </tr>
+                    <tr id="trStack" style="display: none;">
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px">STACK_TRACE</td>
+                        <td style="border: 1px solid rgb(175, 174, 175); font-family: arial, helvetica, sans-serif; padding: 3px 4px">
+                            <span id="stackDisp" style="font-family: arial, helvetica, sans-serif; word-break: break-all;"></span>
+                            <!-- <button id="btnErrInfo" class="btn" onclick="showErrInfo();" style="
+                                display: block;
+                                width: 114px;
+                                height: 22px;
+                                border: 1px solid #d9d9d9;
+                                border-radius: 4px;
+                                outline: none;
+                                box-shadow: 1px 1px 3px #c2c2c2;
+                                font-size: 14px;
+                                font-weight: 800;
+                                color: #646464;
+                                letter-spacing: 0px;
+                                margin-top: 2px;
+                                margin-bottom: 2px;
+                            ">Show Error Info</button> -->
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <textarea id="MsgDisp" readonly style="width: 100%; height: 175px; padding: 12px; border: none; outline: none;"></textarea>
+            <div class="err" id="AddInfo" style="display: none;">
+                <p>Error Page:  
+            <span id="URLDisp"></span>
+                </p>
+                <p>Error Line: 
+            <span id="LineDisp"></span>
+                </p>
+            </div>
+            <!-- <div class="err" id="StackInfo" style="display: none;">
+                <p>
+                    <span id="StackDisp" style="left: 0px; display: none;"></span>
+                </p>
+                <button id="btnErrInfo" class="btn" onclick="showErrInfo();" style="
+                    display: block;
+                    /* position: absolute; */
+                    top: 25%;
+                    width: 135px;
+                    height: 26px;
+                    border: 1px solid #d9d9d9;
+                    border-radius: 5px;
+                    outline: none;
+                    box-shadow: 1px 1px 3px #c2c2c2;
+                    font-size: 14px;
+                    font-weight: 800;
+                    color: #646464;
+                    letter-spacing: 1px;
+                ">Show Error Info</button>
+            </div> -->
+        </div>
+        <div id="divBtn">
+            <button id="btnRegistLog" class="btn" onclick="fRegistLog();" style="display: none;">REGIST LOG</button>
+            <button id="btnOk" class="btn" onclick="fclose();">OK</button>
+        </div>
+    </div>
+</body>
+</html>

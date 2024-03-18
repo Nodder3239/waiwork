@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html style="width: 1280px; height: 3000px;">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="/wai/wai.js"></script>
+    <link href="/wai/default.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <edit id="edit1" type="mask" mask="AAA999" style="position: absolute; left: 176px; top: 24px; width: 128px; height: 16px;"></edit>
+    <edit id="edit2" type="currency" value="0.00" placeholder="0.00" style="position: absolute; left: 176px; top: 64px; width: 128px; height: 16px;"></edit>
+    <edit id="edit3" type="date" dateOrder="yyyymmdd" dateSeparator="/" style="position: absolute; left: 176px; top: 104px; width: 128px; height: 16px;"></edit>
+    <edit id="edit4" type="datetime" style="position: absolute; left: 176px; top: 144px; width: 128px; height: 16px;"></edit>
+    <edit id="edit5" type="regex" style="position: absolute; left: 176px; top: 184px; width: 128px; height: 16px;"></edit>
+    <edit id="edit6" type="decimal" style="position: absolute; left: 176px; top: 224px; width: 128px; height: 16px;"></edit>
+    <edit id="edit7" type="integer" style="position: absolute; left: 176px; top: 264px; width: 128px; height: 16px;"></edit>
+    <label id="label5" style="position: absolute; left: 40px; top: 184px; width: 128px; height: 16px; text-align: left; font-size: 12px; border-width: 0px; border-style: solid;">Edit (Regex)</label>
+    <label id="label6" style="position: absolute; left: 40px; top: 224px; width: 128px; height: 16px; text-align: left; font-size: 12px; border-width: 0px; border-style: solid;">Edit (Decimal)</label>
+    <label id="label7" style="position: absolute; left: 40px; top: 264px; width: 128px; height: 16px; text-align: left; font-size: 12px; border-width: 0px; border-style: solid;">Edit (Integer)</label>
+    <label id="label1" style="position: absolute; left: 40px; top: 24px; width: 128px; height: 16px; text-align: left; font-size: 12px; border-width: 0px; border-style: solid;">Edit (Mask)</label>
+    <label id="label2" style="position: absolute; left: 40px; top: 64px; width: 128px; height: 16px; text-align: left; font-size: 12px; border-width: 0px; border-style: solid;">Edit (Currency)</label>
+    <label id="label3" style="position: absolute; left: 40px; top: 104px; width: 128px; height: 16px; text-align: left; font-size: 12px; border-width: 0px; border-style: solid;">Edit (Date)</label>
+    <label id="label4" style="position: absolute; left: 40px; top: 144px; width: 128px; height: 16px; text-align: left; font-size: 12px; border-width: 0px; border-style: solid;">Edit (DateTime)</label>
+    <dateedit id="dateedit1" dateOrder="yyyymmdd" style="position: absolute; left: 176px; top: 304px; width: 128px; height: 16px;"></dateedit>
+    <label id="label8" style="position: absolute; left: 40px; top: 304px; width: 128px; height: 16px; border-style: solid; border-width: 0px;">DateEdit</label>
+    <tabControl id="tabControl1" index="0" style="position: absolute; left: 328px; top: 104px; width: 216px; height: 232px;">
+        <tabPage id="tabPage1" title="11111" style="width: 100%; height: 100%; display: block;">
+            <calendar id="calendar2" value="20240312" onSelect="calendar2Select(event);" style="position: absolute; left: 24px; top: 48px; width: 168px; height: 176px;"></calendar>
+        </tabPage>
+        <tabPage id="tabPage2" title="22222" style="width: 100%; height: 100%; display: none;">
+            <edit id="edit8" type="mask" mask="9999" style="position: absolute; left: 16px; top: 72px; width: 160px; height: 40px;"></edit>
+        </tabPage>
+    </tabControl>
+    <bProgress id="bProgress1" value="55" style="position: absolute; left: 56px; top: 344px; width: 472px; height: 40px;"></bProgress>
+    <cProgress id="cProgress1" value="45" duration="4800" style="position: absolute; left: 568px; top: 248px; width: 150px; height: 150px;"></cProgress>
+    <button id="button1" onclick="button1Click(event);" style="position: absolute; left: 328px; top: 24px; width: 96px; height: 24px;">SET</button>
+    <button onclick="button2Click(event);" id="button2" style="position: absolute; left: 432px; top: 24px; width: 96px; height: 24px;">GET</button>
+    <button id="button3" onclick="button3Click(event);" style="position: absolute; left: 56px; top: 392px; width: 96px; height: 32px;">Random</button>
+    <codecombo id="codecombo1" labelStyle="margin-left: 2px; width: 100px; height: 100%; vertical-align: top; font-size: 12px; padding-top: 1px; padding-bottom: 1px; box-sizing: border-box;" labelWidth="100px" idField="CD" textField="CD_NM" cbDisplayTextField="false" style="position: absolute; left: 56px; top: 440px; width: 216px; height: 24px;">
+        "columns":[{"field":"CD","title":"CODE","sortable":true,"align":"center","width":40},{"field":"CD_NM","title":"CODE_NAME","sortable":true,"width":118}],
+        "data":[]
+    </codecombo>
+    <button id="button4" onclick="button4Click(event);" style="position:absolute;left:64px;top:480px;width:104px;height:24px;">button
+</button>
+    <button id="button5" onclick="button5Click(event);" style="position: absolute; left: 176px; top: 480px; width: 104px; height: 24px;">method
+</button>
+    <chart id="chart1" style="position: absolute; left: 24px; top: 536px; width: 440px; height: 192px;">
+        "data" : {
+          "labels":["January","February","March","April","May","June","July"]
+          ,"datasets" : [
+            {"label":"Dataset 1","backgroundColor":"rgba(255, 0, 0, 0.25)","borderColor":"rgba(220, 0, 0, 0.2)","borderWidth":1,"hoverBackgroundColor":"rgba(220, 0, 0, 0.5)","hoverBorderColor":"rgba(220,0, 0, 0.5)","hoverBorderWidth":1,"data":[80,59,90,81,56,75,30]}
+            ,{"label":"Dataset 2","backgroundColor":"rgba(151,187,205,0.5)","borderColor":"rgba(151,187,205,0.8)","borderWidth":1,"hoverBackgroundColor":"rgba(151,187,205,0.8)","hoverBorderColor":"rgba(151,187,205,1)","hoverBorderWidth":1,"data":[100,50,70,51,60,75,40]}
+          ]
+        },
+        "option" : {
+          "responsive":false
+          ,"title":{"display":false,"position":"top"}
+          ,"legend":{"display":true,"reverse":false,"position":"bottom","labels":{"usePointStyle":false}}
+          ,"scales" : {
+            "xAxes":[{"display":true,"gridLines":{"display":true,"offsetGridLines":true},"ticks":{"display":true,"autoSkip":true},"scaleLabel":{"display":true,"labelString":"Month"}}]
+            ,"yAxes":[{"display":true,"gridLines":{"display":true},"ticks":{"beginAtZero":false,"display":true,"autoSkip":true,"fontSize":"10","min":0,"max":200},"scaleLabel":{"display":true,"labelString":"Value"}}]
+          }
+          ,"tooltips":{"enabled":true,"mode":"index","intersect":false,"displayColors":true}
+          ,"animation":{"animateScale":false}
+        }
+    </chart>
+    <chart id="chart2" type="line" style="position: absolute; left: 472px; top: 496px; width: 416px; height: 240px;">
+        "data" : {
+          "labels":["January","February","March","April","May","June","July"]
+          ,"datasets":[{"label":"My First dataset","backgroundColor":"rgb(255, 99, 132)","borderColor":"rgb(255, 99, 132)","data":[-34,-70,-65,16,65,-57,-73],"fill":false},{"label":"My Second dataset","fill":false,"backgroundColor":"rgb(54, 162, 235)","borderColor":"rgb(54, 162, 235)","data":[-77,54,81,24,-20,-91,-60]}]
+        },
+        "option" : {
+          "responsive":false
+          ,"title":{"display":true,"text":"Y[wai] Line Chart","position":"top"}
+          ,"tooltips":{"mode":"index","intersect":false}
+          ,"hover":{"mode":"nearest","intersect":true}
+          ,"scales":{"xAxes":[{"display":true,"scaleLabel":{"display":true,"labelString":"Month"}}],"yAxes":[{"display":true,"scaleLabel":{"display":true,"labelString":"Value"}}]}
+          ,"legend":{}
+        }
+    </chart>
+    <chart id="chart3" type="radar" style="position: absolute; left: 24px; top: 752px; width: 440px; height: 216px;">
+        "data" : {
+          "labels":[["Eating","Dinner"],["Drinking","Water"],"Sleeping",["Designing","Graphics"],"Coding","Cycling","Running"]
+          ,"datasets" : [
+            {"label":"My First dataset","backgroundColor":"rgba(255, 99, 132, 0.1)","borderColor":"rgba(255, 99, 132, 0.5)","pointBackgroundColor":"rgba(255, 99, 132, 0.1)","data":[65,59,null,81,56,55,40],"fill":false}
+            ,{"label":"My Second dataset","backgroundColor":"rgba(54, 162, 235, 0.1)","borderColor":"rgba(54, 162, 235, 0.5)","pointBackgroundColor":"rgba(54, 162, 235, 0.1)","data":[28,48,40,19,96,27,100]}
+          ]
+        },
+        "option":{"legend":{},"responsive":false}
+    </chart>
+    <chart id="chart4" type="polarArea" style="position: absolute; left: 472px; top: 744px; width: 416px; height: 208px;">
+        "data" : {
+          "datasets" : [
+            {"label":"My dataset"
+              ,"data":[50,35,20,95,15]
+              ,"backgroundColor":["rgba(255, 99, 132, 0.5)","rgba(255, 159, 64, 0.5)","rgba(255, 205, 86, 0.5)","rgba(75, 192, 192, 0.5)","rgba(54, 162, 235, 0.5)"]
+              ,"hoverBackgroundColor":["rgba(255, 99, 132, 1)","rgba(255, 159, 64, 1)","rgba(255, 205, 86, 1)","rgba(75, 192, 192, 1)","rgba(54, 162, 235, 1)"]
+            }
+          ]
+          ,"labels":["Red","Orange","Yellow","Green","Blue"]
+        },
+        "option":{"legend":{},"responsive":false}
+    </chart>
+    <chart id="chart5" type="pie" style="position: absolute; left: 32px; top: 968px; width: 440px; height: 224px;">
+        "data" : {
+          "datasets" : [
+            {"label":"Dataset 1"
+              ,"data":[50,35,20,95,15]
+              ,"backgroundColor":["rgba(255, 99, 132, 0.5)","rgba(255, 159, 64, 0.5)","rgba(255, 205, 86, 0.5)","rgba(75, 192, 192, 0.5)","rgba(54, 162, 235, 0.5)"]
+              ,"hoverBackgroundColor":["rgba(255, 99, 132, 1)","rgba(255, 159, 64, 1)","rgba(255, 205, 86, 1)","rgba(75, 192, 192, 1)","rgba(54, 162, 235, 1)"]
+            }
+          ]
+          ,"labels":["Red","Orange","Yellow","Green","Blue"]
+        },
+        "option":{"tooltips":{"enabled":false},"showPieceLabel":{"enabled":true,"mode":"label","fontSize":18,"fontStyle":"bold","fontColor":"#666","fontFamily":"'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"},"responsive":false,"legend":{}}
+    </chart>
+    <chart id="chart6" type="doughnut" style="position: absolute; left: 472px; top: 984px; width: 416px; height: 216px;">
+        "data":{"datasets":[{"data":[50,35,20,95,15],"backgroundColor":["rgba(255, 99, 132, 0.5)","rgba(255, 159, 64, 0.5)","rgba(255, 205, 86, 0.5)","rgba(75, 192, 192, 0.5)","rgba(54, 162, 235, 0.5)"],"label":"Dataset 1"}],"labels":["Red","Orange","Yellow","Green","Blue"]},
+        "option":{"tooltips":{"enabled":false},"showValue":true,"showPieceLabel":{"enabled":true},"responsive":false,"legend":{}}
+    </chart>
+    <treeview id="treeview1" style="position: absolute; left: 72px; top: 1232px; width: 280px; height: 248px;">
+        "data":""
+    </treeview>
+    <button id="button6" onclick="button6Click(event);" style="position: absolute; left: 72px; top: 1496px; width: 136px; height: 48px;">setTreeviewData</button>
+    <button id="button7" onclick="button7Click(event);" style="position: absolute; left: 216px; top: 1496px; width: 136px; height: 48px;">getData<br>
+getSelectedData</button>
+    <grid id="grid1" style="position: absolute; left: 64px; top: 1640px; width: 592px; height: 296px;">
+        "options" : {
+          "editable":false
+          ,"columnHeight":20
+          ,"cellHeight":20
+          ,"fixColumn":0
+          ,"aggregate":""
+          ,"appendmode":false
+          ,"autohiddencols":false
+          ,"autofit":false
+          ,"contextmenu":true
+          ,"indicator":{"show":true,"width":30}
+          ,"selector":{"show":true,"width":20,"checked":"none","type":"check"}
+          ,"group":[]
+          ,"columns" : [
+            {"text":"Name","alignment":"center","width":167,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"center","equalBlank":""},"style":"","filter":"","field":"name"}
+            ,{"text":"Gender"
+              ,"alignment":"center"
+              ,"width":200
+              ,"type":"column"
+              ,"height":20
+              ,"editable":"true"
+              ,"visible":"true"
+              ,"sortable":"true"
+              ,"sortType":"string"
+              ,"field":"gender"
+              ,"style":""
+              ,"filter":""
+              ,"editor":{"type":"LookupComboBox","codeName":"gen","alignment":"center","keyfieldnames":"CODE","dropdownwidth":"200px","dropdownheight":"100px","dispField":"CODE_NM","droplist":"","equalBlank":""}
+            }
+            ,{"text":"Moblie","alignment":"center","width":184,"type":"column","height":20,"editable":"false","visible":"true","sortable":"true","sortType":"string","editor":{"type":"text","alignment":"left","equalBlank":""},"style":"","filter":"","field":"mobile"}
+          ]
+          ,"style":{}
+          ,"effect":{"columnHighlight":true}
+          ,"size":{"vertScrollWidth":19}
+          ,"footer":{"show":true,"height":24}
+          ,"conditionalstyle":[]
+        }
+    </grid>
+    <button id="button8" onclick="button8Click(event);" style="position: absolute; left: 672px; top: 1640px; width: 136px; height: 40px;">Grid<br>
+setData
+</button>
+    <button id="button9" onclick="button9Click(event);" style="position:absolute;left:672px;top:1696px;width:136px;height:40px;">getSelection</button>
+    <button id="button10" onclick="button10Click(event);" style="position:absolute;left:672px;top:1752px;width:136px;height:40px;">getCheckedRows</button>
+</body>
+</html>

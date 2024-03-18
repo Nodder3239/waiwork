@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOTICE Message Window for Speed Remittace</title>
+    <script type="text/javascript" src="/wai/wai.js?autoCallJS=N"></script>
+    <script type="text/javascript" src="/js/GBS.js"></script>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="css/noticeMessage.css">
+    <script type="text/javascript">
+        var gOpNo;
+        var gApplyIl;
+
+        function onLoadPage(isPopup) {
+
+            if (isPopup) {
+                var tStr;
+                var tStr1;
+                var tStr2;
+
+                if (!window.dialogArguments) return;
+
+                const arrData = window.dialogArguments.Args[0];
+
+                var tAplIlFrom;
+                var tAplIlTo;
+                var tUpmuBuseo;
+                var tUpmuGe;
+                var tTelNo;
+                var tMsgm1;
+                var tMsgm2;
+                var tMsgm3;
+                var tMsgm4;
+                var tMsgm5;
+                
+                tStr1 = "";
+                for (var i=0; i<arrData.length; i++) {
+                    tAplIlFrom = arrData[i].aplDtFrom;
+                    tAplIlTo   = arrData[i].aplDtTo;
+                    tUpmuBuseo = arrData[i].upmuBuseo;
+                    tUpmuGe    = arrData[i].upmuGe;
+                    tTelNo     = arrData[i].opNo;
+                    tMsgm1     = arrData[i].msgm1;
+                    tMsgm2     = arrData[i].msgm2;
+                    tMsgm3     = arrData[i].msgm3;
+                    tMsgm4     = arrData[i].msgm4;
+                    tMsgm5     = arrData[i].msgm5;
+
+                    tStr = "[" + tAplIlFrom + "]";
+                    tStr += "&nbsp;&nbsp;&nbsp;" + "Notice Division[" + tUpmuBuseo + "-" + tUpmuGe + "]";
+                    tStr += "&nbsp;&nbsp;&nbsp;" + "Notice Op No[" + tTelNo + "]<BR>" ;
+                    if (tMsgm1.length > 0) {
+                        tStr += tMsgm1 + "<BR>";
+                    }
+                    if (tMsgm2.length > 0) {
+                        tStr += tMsgm2 + "<BR>";
+                    }
+                    if (tMsgm3.length > 0) {
+                        tStr += tMsgm3 + "<BR>";
+                    }
+                    if (tMsgm4.length > 0) {
+                        tStr += tMsgm4 + "<BR>";
+                    }
+                    if (tMsgm5.length > 0) {
+                        tStr += tMsgm5 + "<BR>";
+                    }
+                    tStr += "<BR>";
+
+                    tStr1 += tStr;
+                }
+
+                container.innerHTML = tStr1;
+            }
+        }
+
+        function fn_close() {
+            window.close();
+        }
+    </script>
+</head>
+<body style="overflow: hidden;">
+    <h1> <img src="./images/noticeMsg.png" alt="#">NOTICE Message.</h1>
+    <div id="container">
+    </div>
+    <div id="btn">
+        <button class="cancel" onclick="fn_close()">Close</button>
+    </div>
+</body>
+</html>
